@@ -14,20 +14,46 @@ namespace devsko.LayoutAnalyzer
         public TokenizedString TypeName { get; private init; }
         public Field[]? Children { get; private init; }
 
-        public Field(FieldInfo info)
+        internal Field(FieldInfo info, Analyzer analyzer)
         {
             Name = info.Name;
             IsPublic = info.IsPublic;
             Type type = info.FieldType;
-            (TypeName, Size) = FieldType.GetNameAndSize(type, GetNativeIntegerData(info));
+            (TypeName, Size) = analyzer.GetNameAndSize(type, GetNativeIntegerData(info));
             Offset = GetOffset(info);
             if (type.IsValueType && !type.IsPrimitive)
             {
-                Children = GetFields(type);
+                Children = analyzer.GetFields(type);
             }
         }
 
+        [JsonConstructor]
+        public Field(int offset, int size, string name, bool isPublic, TokenizedString typeName, Field[]? children)
+        {
+            Offset = offset;
+            Size = size;
+            Name = name;
+            IsPublic = isPublic;
+            TypeName = typeName;
+            Children = children;
+        }
+
         private static readonly bool[] s_defaultNativeIntegerFlags = new[] { true };
+
+        private unsafe static int GetOffset(FieldInfo info)
+        {
+            int dword =
+                Unsafe.Add(
+                    ref Unsafe.As<IntPtr, int>(
+                        ref Unsafe.Add(
+                            ref Unsafe.AsRef<IntPtr>(
+                                info.FieldHandle.Value.ToPointer()),
+                            1)
+                        ),
+                    1);
+
+            return dword & ((1 << 27) - 1);
+        }
 
         private static bool[]? GetNativeIntegerData(FieldInfo info)
         {
@@ -49,45 +75,5 @@ namespace devsko.LayoutAnalyzer
                 .Select(arg => (bool)arg.Value)
                 .ToArray();
         }
-
-        [JsonConstructor]
-        public Field(int offset, int size, string name, bool isPublic, TokenizedString typeName, Field[]? children)
-        {
-            Offset = offset;
-            Size = size;
-            Name = name;
-            IsPublic = isPublic;
-            TypeName = typeName;
-            Children = children;
-        }
-
-        private int UnpaddedSize
-            => Children is null ? Size : GetUnpaddedSize(Children);
-
-        internal static int GetUnpaddedSize(Field[] fields)
-            => fields.Sum(field => field.UnpaddedSize);
-
-        internal static Field[] GetFields(Type type)
-            => type
-                .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                .Select(info => new Field(info))
-                .OrderBy(t => t.Offset)
-                .ToArray();
-
-        private unsafe static int GetOffset(FieldInfo info)
-        {
-            int dword =
-                Unsafe.Add(
-                    ref Unsafe.As<IntPtr, int>(
-                        ref Unsafe.Add(
-                            ref Unsafe.AsRef<IntPtr>(
-                                info.FieldHandle.Value.ToPointer()),
-                            1)
-                        ),
-                    1);
-
-            return dword & ((1 << 27) - 1);
-        }
-
     }
 }

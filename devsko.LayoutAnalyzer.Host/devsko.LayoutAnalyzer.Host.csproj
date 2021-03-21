@@ -13,6 +13,12 @@
   <ItemGroup>
     <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
   </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <ProjectReference Include="..\Downlevel\Downlevel.csproj" PrivateAssets="All">
+      <SetTargetFramework>TargetFramework=netstandard2.0</SetTargetFramework>
+    </ProjectReference>
+  </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="System.IO.Pipelines" Version="5.0.*" />

@@ -8,11 +8,13 @@ namespace devsko.LayoutAnalyzer
     {
         private SpanBuilder<char> _chars;
         private SpanBuilder<TokenSpan> _tokens;
+        private readonly Analyzer _analyzer;
 
-        public TokenizedStringBuilder(Span<char> chars, Span<TokenSpan> tokens)
+        public TokenizedStringBuilder(Span<char> chars, Span<TokenSpan> tokens, Analyzer analyzer)
         {
             _chars = new SpanBuilder<char>(chars);
             _tokens = new SpanBuilder<TokenSpan>(tokens);
+            _analyzer = analyzer;
         }
 
         public TokenizedString ToTokenizedString()
@@ -24,13 +26,18 @@ namespace devsko.LayoutAnalyzer
         {
             //field.Type switch
             //{
+            //    { IsNested: true } => AppendNested(field),
             //    { IsPointer: true } => AppendPointer(field),
             //    { IsArray: true } => AppendArray(field),
             //    { IsGenericType: true } => AppendGeneric(field),
             //    _ => AppendPrimitive(field)
             //};
 
-            if (field.Type.IsPointer)
+            if (field.Type.IsNested)
+            {
+                AppendNested(field);
+            }
+            else if (field.Type.IsPointer)
             {
                 AppendPointer(field);
             }
@@ -62,24 +69,23 @@ namespace devsko.LayoutAnalyzer
 
         private void AppendPrimitive(FieldType field)
         {
-            if (FieldType.Cache.TryGetValue(field.Type, out (TokenizedString Name, int Size) value))
+            if (_analyzer.TryGetName(field.Type, out TokenizedString? name))
             {
-                _chars.Append(value.Name.Value.AsSpan());
-                _tokens.Append(value.Name.Tokens.AsSpan());
+                _chars.Append(name.Value.AsSpan());
+                _tokens.Append(name.Tokens.AsSpan());
             }
             else
             {
                 AppendPlain(field);
             }
-
-            //nested type
         }
 
-        private void AppendPlain(FieldType field, bool sliceApostrophe = false)
+        private void AppendPlain(FieldType field, bool sliceApostrophe = false, bool omitNamespace = false)
         {
             ReadOnlySpan<char> ns = field.Type.Namespace.AsSpan();
 
             if (
+                !omitNamespace &&
                 ns.Length > 0 && (
                     !ns.StartsWith("System".AsSpan()) || (
                         ns.Length >= 18 &&
@@ -91,11 +97,12 @@ namespace devsko.LayoutAnalyzer
                 {
                     _tokens.Append(new TokenSpan(Token.Namespace, pos));
                     _tokens.Append(new TokenSpan(Token.Symbol, 1));
-                    ns = ns.Slice(pos + 1);
+                    ns = ns[(pos + 1)..];
                 }
                 _tokens.Append(new TokenSpan(Token.Namespace, ns.Length));
                 Append('.', Token.Symbol);
             }
+
             ReadOnlySpan<char> name = field.Type.Name.AsSpan();
             Token token = field.Type.IsValueType ? Token.StructRef : Token.ClassRef;
             if (sliceApostrophe)
@@ -113,6 +120,13 @@ namespace devsko.LayoutAnalyzer
                     Append(name,  token);
                 }
             }
+        }
+
+        private void AppendNested(FieldType field)
+        {
+            Append(new FieldType(field.Type.DeclaringType, field.TransformFlags));
+            Append('.', Token.Symbol);
+            AppendPlain(field, omitNamespace: true);
         }
 
         private void AppendPointer(FieldType field)
@@ -148,10 +162,9 @@ namespace devsko.LayoutAnalyzer
                     AppendArrayRank(rank);
                 }
             }
-
         }
 
-        private void AppendArrayRank(int rank)
+        void AppendArrayRank(int rank)
         {
             _chars.Append('[');
             _chars.Append(',', rank - 1);

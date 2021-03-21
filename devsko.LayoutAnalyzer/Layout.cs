@@ -17,12 +17,16 @@ namespace devsko.LayoutAnalyzer
         public int AttributeSize { get; private init; }
         public int AttributePack { get; private init; }
 
-        private Layout(Type type)
+        internal Layout(Type type, Analyzer analyzer)
         {
-            Fields = Field.GetFields(type);
-            (Name, TotalSize) = GetNameAndSize(type);
-            TotalPadding = TotalSize - Field.GetUnpaddedSize(Fields);
+            Fields = analyzer.GetFields(type);
+            (Name, TotalSize) = analyzer.GetNameAndSize(type);
+            TotalPadding = TotalSize - analyzer.GetUnpaddedSize(Fields);
             IsValueType = type.IsValueType;
+            var layoutAttr = type.StructLayoutAttribute;
+            AttributeKind = layoutAttr.Value;
+            AttributeSize = layoutAttr.Size;
+            AttributePack = layoutAttr.Pack;
         }
 
         [JsonConstructor]
@@ -41,39 +45,5 @@ namespace devsko.LayoutAnalyzer
         [JsonIgnore]
         public IEnumerable<(FieldBase Field, int TotalOffset, int Level)> FieldsWithPaddings
             => Padding.EnumerateWithPaddings(Fields, TotalSize, 0, 1);
-
-        public static Layout? Analyze(Type type)
-        {
-            var layoutAttr = type.StructLayoutAttribute;
-            if (layoutAttr is null)
-            {
-                return null;
-            }
-
-            return new Layout(type)
-            {
-                AttributeKind = layoutAttr.Value,
-                AttributeSize = layoutAttr.Size,
-                AttributePack = layoutAttr.Pack,
-            };
-        }
-
-        private unsafe static (TokenizedString Name, int Size) GetNameAndSize(Type type)
-        {
-            (TokenizedString name, int size) = FieldType.GetNameAndSize(type, null);
-
-            if (!type.IsValueType)
-            {
-                int dword =
-                    Unsafe.Add(
-                        ref Unsafe.AsRef<int>(
-                            type.TypeHandle.Value.ToPointer()),
-                        1);
-
-                size = dword - 2 * sizeof(IntPtr);
-            }
-
-            return (name, size);
-        }
     }
 }

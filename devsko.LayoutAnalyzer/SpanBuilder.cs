@@ -93,7 +93,7 @@ namespace devsko.LayoutAnalyzer
             => _value.Slice(0, _pos);
 
         public ReadOnlySpan<T> AsSpan(int start) 
-            => _value.Slice(start, _pos - start);
+            => _value[start.._pos];
 
         public ReadOnlySpan<T> AsSpan(int start, int length) 
             => _value.Slice(start, length);
@@ -136,7 +136,7 @@ namespace devsko.LayoutAnalyzer
                 Grow(value.Length);
             }
 
-            value.CopyTo(_value.Slice(_pos));
+            value.CopyTo(_value[_pos..]);
             _pos += value.Length;
         }
 

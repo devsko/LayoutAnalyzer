@@ -21,11 +21,14 @@ namespace devsko.LayoutAnalyzer.Host
             { Token.Symbol, ConsoleColor.White },
         };
 
+        private static readonly Analyzer s_analyzer = new();
+
         public static async Task Main()
         {
             Console.WriteLine($"{RuntimeInformation.FrameworkDescription} ({RuntimeInformation.ProcessArchitecture})");
             Console.WriteLine();
 
+            Inspect(await GetLayoutAsync(typeof(G1<Comp>)).ConfigureAwait(false));
             Inspect(await GetLayoutAsync(typeof(System.IO.Pipelines.Pipe)).ConfigureAwait(false));
             Inspect(await GetLayoutAsync(typeof(G1<D1>)).ConfigureAwait(false));
             Inspect(await GetLayoutAsync(typeof(G1<S1>)).ConfigureAwait(false));
@@ -33,7 +36,7 @@ namespace devsko.LayoutAnalyzer.Host
 
         private static async Task<Layout> GetLayoutAsync(Type type)
         {
-            Layout? layout = Layout.Analyze(type);
+            Layout? layout = s_analyzer.Analyze(type);
 
             if (layout is null)
             {
@@ -98,8 +101,8 @@ namespace devsko.LayoutAnalyzer.Host
                 string indent = "";
                 foreach (var fieldOrPadding in fieldsAndPaddings)
                 {
-                    //Console.ForegroundColor = ConsoleColor.DarkGreen; ;
-                    //Console.Write($"{spaces.Substring(0, fieldOrPadding.Level * 4)}{fieldOrPadding.Field.Offset:X3} : {fieldOrPadding.Field.Size,-3}    ");
+                    Console.ForegroundColor = ConsoleColor.DarkGreen;
+                    Console.Write($"{fieldOrPadding.Field.Offset:X3} : {fieldOrPadding.Field.Size,-3}    ");
 
                     Console.ForegroundColor = ConsoleColor.White;
                     while (level < fieldOrPadding.Level)
@@ -144,7 +147,7 @@ namespace devsko.LayoutAnalyzer.Host
                 {
                     Console.ForegroundColor = s_colorMap[span.Token];
                     Console.Write(chars.Slice(0, span.Length).ToString());
-                    chars = chars.Slice(span.Length);
+                    chars = chars[span.Length..];
                 }
                 Console.ForegroundColor = ConsoleColor.White;
             }
@@ -154,6 +157,21 @@ namespace devsko.LayoutAnalyzer.Host
 #if NET5_0_OR_GREATER
 #pragma warning disable CA2211 // Non-constant fields should not be visible
 #endif
+
+    public struct Comp
+    {
+        public IEnumerable<Comp> Children;
+    }
+
+    public struct Declaring
+    {
+        public struct Nested
+        { 
+            public struct NestedNested
+            { }
+        }
+    }
+
     public struct EmptyStruct
     { }
 
@@ -229,8 +247,9 @@ namespace devsko.LayoutAnalyzer.Host
         public C1 C1 = default!;
     }
 
-    public class G1<T>
+    public unsafe class G1<T>
     {
+        public Declaring.Nested.NestedNested*[] N = null!;
         public int I;
         public long L;
         public T T1 = default!;
