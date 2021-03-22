@@ -30,7 +30,7 @@ namespace System
         {
             if (value < 0)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(value));
             }
 
             if (fromEnd)
@@ -58,7 +58,7 @@ namespace System
         {
             if (value < 0)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(value));
             }
 
             return new Index(value);
@@ -71,7 +71,7 @@ namespace System
         {
             if (value < 0)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(value));
             }
 
             return new Index(~value);

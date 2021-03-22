@@ -9,7 +9,7 @@
     <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
   </ItemGroup>
 
-  <!-- Temporary: Ensure LayoutAnalyzer.Test is up to date -->
+  <!-- Temporary: Ensure unreferenced LayoutAnalyzer.Test is up to date -->
   <ItemGroup>
     <ProjectReference Include="..\devsko.LayoutAnalyzer.Test\devsko.LayoutAnalyzer.Test.csproj" 
                       ReferenceOutputAssembly="false" />
