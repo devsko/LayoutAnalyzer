@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace devsko.LayoutAnalyzer
 {
-    public class TokenizedString
+    public readonly struct TokenizedString
     {
         public string Value { get; private init; }
         public TokenSpan[] Tokens { get; private init; }

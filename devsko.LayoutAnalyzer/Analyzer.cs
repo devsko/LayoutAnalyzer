@@ -8,7 +8,7 @@ using System.Text;
 
 namespace devsko.LayoutAnalyzer
 {
-    public class Analyzer
+    public sealed class Analyzer
     {
         private static readonly MethodInfo s_unsafeSizeOfT = typeof(Unsafe).GetMethod("SizeOf")!;
 

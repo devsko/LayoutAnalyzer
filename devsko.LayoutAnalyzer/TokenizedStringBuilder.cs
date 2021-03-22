@@ -69,7 +69,7 @@ namespace devsko.LayoutAnalyzer
 
         private void AppendPrimitive(FieldType field)
         {
-            if (_analyzer.TryGetName(field.Type, out TokenizedString? name))
+            if (_analyzer.TryGetName(field.Type, out TokenizedString name))
             {
                 _chars.Append(name.Value.AsSpan());
                 _tokens.Append(name.Tokens.AsSpan());
