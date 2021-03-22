@@ -28,17 +28,18 @@ namespace devsko.LayoutAnalyzer.Host
             Console.WriteLine($"{RuntimeInformation.FrameworkDescription} ({RuntimeInformation.ProcessArchitecture})");
             Console.WriteLine();
 
-            using (Session session = new("C:\\Users\\stefa\\source\\repos\\LayoutAnalyzer\\devsko.LayoutAnalyzer.Test\\bin\\Debug\\net5.0\\devsko.LayoutAnalyzer.Test.dll"))
+            Stream consoleOut = Console.OpenStandardOutput();
+
+            using (Session session = new(consoleOut, "C:\\Users\\stefa\\source\\repos\\LayoutAnalyzer\\devsko.LayoutAnalyzer.Test\\bin\\Debug\\net5.0\\devsko.LayoutAnalyzer.Test.dll"))
             {
-                session.SendAnalysis("devsko.LayoutAnalyzer.Test.TestClass, devsko.LayoutAnalyzer.Test");
-                session.SendAnalysis("System.IO.Pipelines.Pipe, System.IO.Pipelines");
+                var a1= session.SendAnalysisAsync("devsko.LayoutAnalyzer.Test.TestClass, devsko.LayoutAnalyzer.Test");
+                var a2= session.SendAnalysisAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines");
+                var a3 = session.SendAnalysisAsync("System.IO.FileStream, System.Runtime");
+                await Task.WhenAll(a1, a2, a3).ConfigureAwait(false);
             }
 
 
-            Console.ReadLine();
-
-
-                Inspect(await GetLayoutAsync(typeof(string)).ConfigureAwait(false));
+            Inspect(await GetLayoutAsync(typeof(string)).ConfigureAwait(false));
 
             //Inspect(await GetLayoutAsync(typeof(G1<Comp>)).ConfigureAwait(false));
             //Inspect(await GetLayoutAsync(typeof(G1<D1>)).ConfigureAwait(false));

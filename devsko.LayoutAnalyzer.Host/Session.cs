@@ -9,6 +9,7 @@ using System.Runtime.Loader;
 #endif
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace devsko.LayoutAnalyzer.Host
 {
@@ -27,23 +28,29 @@ namespace devsko.LayoutAnalyzer.Host
 
             protected override Assembly? Load(AssemblyName assemblyName)
             {
+                Assembly? assembly = null;
                 string? path = _resolver.ResolveAssemblyToPath(assemblyName);
-                return path == null ? null : LoadFromAssemblyPath(path);
+                if (path is not null)
+                {
+                    assembly = LoadFromAssemblyPath(path);
+                }
+                Console.Error.WriteLine($"loading assembly '{assemblyName.Name} ({assemblyName.Version})' {(assembly is null ? "in default load context" : $"from '{path}'")}");
+
+                return assembly;
             }
         }
 #endif
 
+        private Analyzer _analyzer;
+        private JsonSerializerOptions _jsonOptions;
+        private Stream _outStream;
+        private SemaphoreSlim _semaphore;
 #if NETCOREAPP3_1_OR_GREATER
         private LoadContext _loadContext;
 #endif
-        private Analyzer _analyzer;
-        private JsonSerializerOptions _jsonOptions;
 
-        public Session(string assemblyPath)
+        public Session(Stream outStream, string assemblyPath)
         {
-#if NETCOREAPP3_1_OR_GREATER
-            _loadContext = new LoadContext(assemblyPath);
-#endif
             _analyzer = new Analyzer();
             _jsonOptions = new JsonSerializerOptions
             {
@@ -51,23 +58,38 @@ namespace devsko.LayoutAnalyzer.Host
                 WriteIndented = true,
 #endif
             };
+            _outStream = outStream;
+            _semaphore = new SemaphoreSlim(1);
+#if NETCOREAPP3_1_OR_GREATER
+            _loadContext = new LoadContext(assemblyPath);
+#endif
         }
 
-        public void SendAnalysis(string typeName)
+        public async Task SendAnalysisAsync(string typeName, CancellationToken cancellationToken = default)
         {
-#if NETCOREAPP3_1_OR_GREATER
-            int comma = typeName.IndexOf(',');
-            var assembly = _loadContext.LoadFromAssemblyName(new AssemblyName(typeName.Substring(comma + 1)));
-            Type? type = assembly.GetType(typeName.Substring(0, comma));
-            if (type is not null)
+            await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
             {
-                Layout? layout = _analyzer.Analyze(type);
-                if (layout is not null)
+                Type? type = null;
+#if NETCOREAPP3_1_OR_GREATER
+                int comma = typeName.IndexOf(',');
+                var assembly = _loadContext.LoadFromAssemblyName(new AssemblyName(typeName.Substring(comma + 1)));
+                type = assembly.GetType(typeName.Substring(0, comma));
+#endif
+                if (type is not null)
                 {
-                    Console.WriteLine(JsonSerializer.Serialize(layout, _jsonOptions));
+                    Layout? layout = _analyzer.Analyze(type);
+                    if (layout is not null)
+                    {
+                        await JsonSerializer.SerializeAsync(_outStream, layout, _jsonOptions, cancellationToken).ConfigureAwait(false);
+                        await _outStream.FlushAsync(cancellationToken).ConfigureAwait(false);
+                    }
                 }
             }
-#endif
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         public void Dispose()
@@ -82,31 +104,30 @@ namespace devsko.LayoutAnalyzer.Host
             {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
+                GC.Collect();
 
                 if (!weakRef.IsAlive)
                 {
-                    Console.WriteLine("LoadContext collected");
+                    Console.Error.WriteLine("LoadContext collected");
                     break;
                 }
-                Console.WriteLine("Waiting for GC " + i);
+                Console.Error.WriteLine("Waiting for GC " + i);
             }
-#endif
-        }
 
-#if NETCOREAPP3_1_OR_GREATER
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private WeakReference UnloadContext()
-        {
-            try
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            WeakReference UnloadContext()
             {
-                return new WeakReference(_loadContext);
+                try
+                {
+                    return new WeakReference(_loadContext);
+                }
+                finally
+                {
+                    _loadContext?.Unload();
+                    _loadContext = null!;
+                }
             }
-            finally
-            {
-                _loadContext?.Unload();
-                _loadContext = null!;
-            }
-        }
 #endif
+        }
     }
 }
