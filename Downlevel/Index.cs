@@ -15,7 +15,7 @@ namespace System
     /// int lastElement = someArray[^1]; // lastElement = 5
     /// </code>
     /// </remarks>
-    public readonly struct Index : IEquatable<Index>
+    internal readonly struct Index : IEquatable<Index>
     {
         private readonly int _value;
 
@@ -140,7 +140,7 @@ namespace System
 
         private string ToStringFromEnd()
         {
-#if !NETSTANDARD2_0
+#if !NETSTANDARD2_0 && !NET40_OR_GREATER
             Span<char> span = stackalloc char[11]; // 1 for ^ and 10 for longest possible uint value
             bool formatted = ((uint)Value).TryFormat(span.Slice(1), out int charsWritten);
             Debug.Assert(formatted);

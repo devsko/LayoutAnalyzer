@@ -16,7 +16,7 @@ namespace System
     /// int[] subArray2 = someArray[1..^0]; // { 2, 3, 4, 5 }
     /// </code>
     /// </remarks>
-    public readonly struct Range : IEquatable<Range>
+    internal readonly struct Range : IEquatable<Range>
     {
         /// <summary>Represent the inclusive start index of the Range.</summary>
         public Index Start { get; }
@@ -47,7 +47,7 @@ namespace System
         /// <summary>Returns the hash code for this instance.</summary>
         public override int GetHashCode()
         {
-#if !NETSTANDARD2_0
+#if !NETSTANDARD2_0 && !NET40_OR_GREATER
             return HashCode.Combine(Start.GetHashCode(), End.GetHashCode());
 #else
             return Start.GetHashCode() * 31 + End.GetHashCode();
@@ -57,7 +57,7 @@ namespace System
         /// <summary>Converts the value of the current Range object to its equivalent string representation.</summary>
         public override string ToString()
         {
-#if !NETSTANDARD2_0
+#if !NETSTANDARD2_0 && !NET40_OR_GREATER
             Span<char> span = stackalloc char[2 + (2 * 11)]; // 2 for "..", then for each index 1 for '^' and 10 for longest possible uint
             int pos = 0;
 

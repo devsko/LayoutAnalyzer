@@ -5,10 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Condition="'$(NeedsDownlevel)'=='true' and ($(TargetFramework.StartsWith('net4')) or '$(TargetFramework)'=='netstandard2.0')"
-                      Include="..\Downlevel\Downlevel.csproj"
-                      PrivateAssets="All"
-                      SetTargetFramework="TargetFramework=netstandard2.0" />
+    <Compile Condition="'$(NeedsDownlevel)'=='true' and ($(TargetFramework.StartsWith('net4')) or '$(TargetFramework)'=='netstandard2.0')"
+             Include="..\Downlevel\*.cs" 
+             Visible="false" />
   </ItemGroup>
 
 </Project>
