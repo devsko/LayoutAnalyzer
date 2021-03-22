@@ -28,10 +28,21 @@ namespace devsko.LayoutAnalyzer.Host
             Console.WriteLine($"{RuntimeInformation.FrameworkDescription} ({RuntimeInformation.ProcessArchitecture})");
             Console.WriteLine();
 
-            Inspect(await GetLayoutAsync(typeof(G1<Comp>)).ConfigureAwait(false));
-            Inspect(await GetLayoutAsync(typeof(System.IO.Pipelines.Pipe)).ConfigureAwait(false));
-            Inspect(await GetLayoutAsync(typeof(G1<D1>)).ConfigureAwait(false));
-            Inspect(await GetLayoutAsync(typeof(G1<S1>)).ConfigureAwait(false));
+            using (Session session = new("C:\\Users\\stefa\\source\\repos\\LayoutAnalyzer\\devsko.LayoutAnalyzer.Test\\bin\\Debug\\net5.0\\devsko.LayoutAnalyzer.Test.dll"))
+            {
+                session.SendAnalysis("devsko.LayoutAnalyzer.Test.TestClass, devsko.LayoutAnalyzer.Test");
+                session.SendAnalysis("System.IO.Pipelines.Pipe, System.IO.Pipelines");
+            }
+
+
+            Console.ReadLine();
+
+
+                Inspect(await GetLayoutAsync(typeof(string)).ConfigureAwait(false));
+
+            //Inspect(await GetLayoutAsync(typeof(G1<Comp>)).ConfigureAwait(false));
+            //Inspect(await GetLayoutAsync(typeof(G1<D1>)).ConfigureAwait(false));
+            //Inspect(await GetLayoutAsync(typeof(G1<S1>)).ConfigureAwait(false));
         }
 
         private static async Task<Layout> GetLayoutAsync(Type type)
