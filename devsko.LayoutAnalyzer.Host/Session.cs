@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 #if NETCOREAPP3_1_OR_GREATER
 using System.Runtime.Loader;
 #endif
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,12 +53,7 @@ namespace devsko.LayoutAnalyzer.Host
         public Session(Stream outStream, string assemblyPath)
         {
             _analyzer = new Analyzer();
-            _jsonOptions = new JsonSerializerOptions
-            {
-#if DEBUG
-                WriteIndented = true,
-#endif
-            };
+            _jsonOptions = new JsonSerializerOptions();
             _outStream = outStream;
             _semaphore = new SemaphoreSlim(1);
 #if NETCOREAPP3_1_OR_GREATER
@@ -82,6 +78,7 @@ namespace devsko.LayoutAnalyzer.Host
                     if (layout is not null)
                     {
                         await JsonSerializer.SerializeAsync(_outStream, layout, _jsonOptions, cancellationToken).ConfigureAwait(false);
+                        _outStream.WriteByte((byte)'\n');
                         await _outStream.FlushAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
