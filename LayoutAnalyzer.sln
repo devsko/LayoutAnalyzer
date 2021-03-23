@@ -19,10 +19,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "devsko.LayoutAnalyzer.Test"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Downlevel", "Downlevel", "{8C113324-A5A1-4AA5-A0BF-2EA9AC3B3B8C}"
 	ProjectSection(SolutionItems) = preProject
-		Downlevel\Index.cs = Downlevel\Index.cs
-		Downlevel\IsExternalInit.cs = Downlevel\IsExternalInit.cs
-		Downlevel\NullableAttributes.cs = Downlevel\NullableAttributes.cs
-		Downlevel\Range.cs = Downlevel\Range.cs
+		Downlevel\Index.netstandard.cs = Downlevel\Index.netstandard.cs
+		Downlevel\IsExternalInit.netstandard.cs = Downlevel\IsExternalInit.netstandard.cs
+		Downlevel\NullableAttributes.netcoreapp.cs = Downlevel\NullableAttributes.netcoreapp.cs
+		Downlevel\NullableAttributes.netstandard.cs = Downlevel\NullableAttributes.netstandard.cs
+		Downlevel\Range.netstandard.cs = Downlevel\Range.netstandard.cs
 	EndProjectSection
 EndProject
 Global

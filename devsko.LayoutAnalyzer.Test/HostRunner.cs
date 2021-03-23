@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
@@ -23,10 +24,11 @@ namespace devsko.LayoutAnalyzer.Test
 
     public sealed class HostRunner : IDisposable
     {
-        private Process _process;
-        private EofDetectingStream _outStream;
         private JsonSerializerOptions _jsonOptions;
         private SemaphoreSlim _semaphore;
+        private ProcessStartInfo _startInfo;
+        private Process? _process;
+        private EofDetectingStream? _outStream;
 
         public HostRunner(TargetFramework framework, Platform platform, bool waitForDebugger)
         {
@@ -78,7 +80,7 @@ namespace devsko.LayoutAnalyzer.Test
             }
 #endif
 
-            ProcessStartInfo start = new()
+            _startInfo = new()
             {
                 FileName = exePath,
                 Arguments = arguments,
@@ -91,21 +93,13 @@ namespace devsko.LayoutAnalyzer.Test
                 WorkingDirectory = Path.GetDirectoryName(hostAssemblyPath)!,
             };
 
-            Process? process = Process.Start(start);
-            if (process is null)
-            {
-                throw new InvalidOperationException("could not start new host");
-            }
-
-            _process = process;
-            _outStream = new EofDetectingStream(_process.StandardOutput.BaseStream);
-            _process.ErrorDataReceived += (sender, e) => Console.WriteLine(e.Data);
-            _process.BeginErrorReadLine();
+            StartProcess();
         }
 
         public async Task<Layout?> SendAsync(string command, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            EnsureRunningProcess();
             try
             {
                 _process.StandardInput.WriteLine(command);
@@ -126,9 +120,38 @@ namespace devsko.LayoutAnalyzer.Test
 
         public void Dispose()
         {
-            _outStream.Dispose();
-            _process.Kill();
-            _process.Dispose();
+            _outStream?.Dispose();
+            _process?.Kill();
+            _process?.Dispose();
+        }
+
+        [MemberNotNull(nameof(_process), nameof(_outStream))]
+        private void EnsureRunningProcess()
+        {
+            if (_process is null || _process.HasExited || _outStream is null)
+            {
+                Console.WriteLine("Host process terminated unexpectedly");
+                _outStream?.Dispose();
+                _process?.Dispose();
+                StartProcess();
+            }
+        }
+
+        [MemberNotNull(nameof(_process), nameof(_outStream))]
+        private void StartProcess()
+        {
+            Process? process = Process.Start(_startInfo);
+            if (process is null)
+            {
+                throw new InvalidOperationException("Could not start new host");
+            }
+
+            _process = process;
+            _outStream = new EofDetectingStream(_process.StandardOutput.BaseStream);
+            _process.ErrorDataReceived += (sender, e) => Console.WriteLine(e.Data);
+            _process.BeginErrorReadLine();
+
+            Console.WriteLine("Host process started");
         }
     }
 }

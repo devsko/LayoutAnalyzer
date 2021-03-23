@@ -1,12 +1,16 @@
 <Project>
 
   <PropertyGroup>
-    <NeedsDownlevel Condition="'$(NeedsDownlevel)'==''">true</NeedsDownlevel>
+    <NeedsDownlevel Condition="'$(NeedsDownlevel)' == ''">true</NeedsDownlevel>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Condition="'$(NeedsDownlevel)'=='true' and ($(TargetFramework.StartsWith('net4')) or '$(TargetFramework)'=='netstandard2.0')"
-             Include="..\Downlevel\*.cs" 
+    <Compile Condition="'$(NeedsDownlevel)' != 'false' and ($(TargetFramework.StartsWith('net4')) or '$(TargetFramework)' == 'netstandard2.0')"
+             Include="..\Downlevel\*.netstandard.cs" 
+             Visible="false" />
+
+    <Compile Condition="'$(NeedsDownlevel)' != 'false' and ($(TargetFramework.StartsWith('netcoreapp')))"
+             Include="..\Downlevel\NullableAttributes.netcoreapp.cs"
              Visible="false" />
   </ItemGroup>
 

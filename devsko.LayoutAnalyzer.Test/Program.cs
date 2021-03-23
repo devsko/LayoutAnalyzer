@@ -21,7 +21,7 @@ namespace devsko.LayoutAnalyzer.Test
         {
             const string projectAssembly = "C:\\Users\\stefa\\source\\repos\\LayoutAnalyzer\\devsko.LayoutAnalyzer.Test\\bin\\Debug\\net5.0\\devsko.LayoutAnalyzer.Test.dll";
 
-            using (HostRunner runner = new(TargetFramework.Net, Platform.x64, true))
+            using (HostRunner runner = new(TargetFramework.Net, Platform.x64, false))
             {
                 //await AnalyzeAndPrintAsync("").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc").ConfigureAwait(false);
