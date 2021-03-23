@@ -30,7 +30,9 @@ namespace devsko.LayoutAnalyzer.Host
 
             while (true)
             {
+                ShutdownTimer.Start(TimeSpan.FromSeconds(60));
                 string command = Console.ReadLine() ?? "";
+                ShutdownTimer.Stop();
 
                 using (var consoleAccess = await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
                 {

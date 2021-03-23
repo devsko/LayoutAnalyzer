@@ -115,8 +115,6 @@ namespace devsko.LayoutAnalyzer
                 UseShellExecute = false,
                 WorkingDirectory = Path.GetDirectoryName(hostAssemblyPath)!,
             };
-
-            StartProcess();
         }
 
         public async Task<Layout?> AnalyzeAsync(string command, CancellationToken cancellationToken = default)
@@ -143,7 +141,15 @@ namespace devsko.LayoutAnalyzer
 
         public void Dispose()
         {
-            _process?.Kill();
+            if (_process?.HasExited == false)
+            {
+                try
+                {
+                    _process?.Kill();
+                }
+                catch (InvalidOperationException)
+                { }
+            }
             _process?.Dispose();
             _outStream?.Dispose();
         }
@@ -153,7 +159,6 @@ namespace devsko.LayoutAnalyzer
         {
             if (_process is null || _process.HasExited || _outStream is null)
             {
-                Console.WriteLine("Host process exited unexpectedly");
                 Dispose();
                 StartProcess();
             }

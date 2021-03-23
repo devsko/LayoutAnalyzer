@@ -22,7 +22,7 @@ namespace devsko.LayoutAnalyzer.Test
         {
             try
             {
-                HostRunner runner = HostRunner.GetHostRunner(TargetFramework.NetCore, Platform.x86, debug: false, waitForDebugger: false);
+                HostRunner runner = HostRunner.GetHostRunner(TargetFramework.Net, Platform.x64, debug: false, waitForDebugger: false);
 
                 string projectAssembly = typeof(Program).Assembly.Location;
                 string frameworkDirectory = "\\" + runner.TargetFramework switch
