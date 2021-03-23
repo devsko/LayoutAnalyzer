@@ -20,8 +20,10 @@ namespace devsko.LayoutAnalyzer.Test
 
         public static async Task Main()
         {
-            using (HostRunner runner = new(TargetFramework.Net, Platform.x64, debug: false, waitForDebugger: false))
+            try
             {
+                HostRunner runner = HostRunner.GetHostRunner(TargetFramework.NetCore, Platform.x86, debug: false, waitForDebugger: false);
+
                 string projectAssembly = typeof(Program).Assembly.Location;
                 string frameworkDirectory = "\\" + runner.TargetFramework switch
                 {
@@ -48,12 +50,16 @@ namespace devsko.LayoutAnalyzer.Test
 
                 async Task AnalyzeAndPrintAsync(string typeName)
                 {
-                    var layout = await runner.SendAsync(projectAssembly + '|' + typeName).ConfigureAwait(false);
+                    var layout = await runner.AnalyzeAsync(projectAssembly + '|' + typeName).ConfigureAwait(false);
                     if (layout is not null)
                     {
                         Print(layout);
                     }
                 }
+            }
+            finally
+            {
+                HostRunner.DisposeAll();
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -7,7 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace devsko.LayoutAnalyzer.Test
+namespace devsko.LayoutAnalyzer
 {
     public enum TargetFramework
     {
@@ -33,7 +34,22 @@ namespace devsko.LayoutAnalyzer.Test
         private Process? _process;
         private EofDetectingStream? _outStream;
 
-        public HostRunner(TargetFramework framework, Platform platform, bool debug = false, bool waitForDebugger = false)
+        private static readonly ConcurrentDictionary<(TargetFramework, Platform), HostRunner> s_cache = new();
+
+        public static HostRunner GetHostRunner(TargetFramework framework, Platform platform, bool debug = false, bool waitForDebugger = false)
+        {
+            return s_cache.GetOrAdd((framework, platform), _ => new HostRunner(framework, platform, debug, waitForDebugger));
+        }
+
+        public static void DisposeAll()
+        {
+            foreach (HostRunner runner in s_cache.Values)
+            {
+                runner.Dispose();
+            }
+        }
+
+        private HostRunner(TargetFramework framework, Platform platform, bool debug, bool waitForDebugger)
         {
             TargetFramework = framework;
             Platform = platform;
@@ -103,7 +119,7 @@ namespace devsko.LayoutAnalyzer.Test
             StartProcess();
         }
 
-        public async Task<Layout?> SendAsync(string command, CancellationToken cancellationToken = default)
+        public async Task<Layout?> AnalyzeAsync(string command, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             EnsureRunningProcess();
@@ -127,9 +143,9 @@ namespace devsko.LayoutAnalyzer.Test
 
         public void Dispose()
         {
-            _outStream?.Dispose();
             _process?.Kill();
             _process?.Dispose();
+            _outStream?.Dispose();
         }
 
         [MemberNotNull(nameof(_process), nameof(_outStream))]
@@ -138,8 +154,7 @@ namespace devsko.LayoutAnalyzer.Test
             if (_process is null || _process.HasExited || _outStream is null)
             {
                 Console.WriteLine("Host process exited unexpectedly");
-                _outStream?.Dispose();
-                _process?.Dispose();
+                Dispose();
                 StartProcess();
             }
         }
@@ -158,7 +173,7 @@ namespace devsko.LayoutAnalyzer.Test
             _process.ErrorDataReceived += (sender, e) => Console.WriteLine(e.Data);
             _process.BeginErrorReadLine();
 
-            Console.WriteLine("Host process started");
+            Console.WriteLine($"Host process started PID={process.Id}");
         }
     }
 }
