@@ -3,11 +3,17 @@
   <PropertyGroup>
     <TargetFrameworks>net5.0;netcoreapp3.1;net472</TargetFrameworks>
     <OutputType>Exe</OutputType>
-    <Platforms>x64;x86</Platforms>
+    <Platforms>x64;x86;AnyCPU</Platforms>
+    <RuntimeIdentifiers>win10-x64;win10-x86;win7-x64;win7-x86</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
   </ItemGroup>
 
+  <Target Name="_IsValid" BeforeTargets="Build">
+    <Error Condition="'$(Platform)' == 'AnyCPU'"
+           Text="Build LayoutAnalyzer.Test instead" />
+  </Target>
+  
 </Project>

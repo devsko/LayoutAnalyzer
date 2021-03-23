@@ -24,14 +24,22 @@ namespace devsko.LayoutAnalyzer.Test
 
     public sealed class HostRunner : IDisposable
     {
+        public TargetFramework TargetFramework { get; private init; }
+        public Platform Platform { get; private init; }
+
         private JsonSerializerOptions _jsonOptions;
         private SemaphoreSlim _semaphore;
         private ProcessStartInfo _startInfo;
         private Process? _process;
         private EofDetectingStream? _outStream;
 
-        public HostRunner(TargetFramework framework, Platform platform, bool waitForDebugger)
+        public HostRunner(TargetFramework framework, Platform platform, bool debug = false, bool waitForDebugger = false)
         {
+            TargetFramework = framework;
+            Platform = platform;
+
+            debug |= waitForDebugger;
+
             _jsonOptions = new JsonSerializerOptions();
             _semaphore = new SemaphoreSlim(1);
 
@@ -50,13 +58,12 @@ namespace devsko.LayoutAnalyzer.Test
             };
 
             string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
-#if DEBUG
+
+            // TODO This is for development. How are files layout in VS package?
             string hostAssemblyPath = Path.GetFullPath(Path.Combine(
                 Path.GetDirectoryName(thisAssemblyPath)!,
-                "..", "..", "..", "..", "devsko.LayoutAnalyzer.Host", "bin", platformDirectory, "Debug", frameworkDirectory, Path.ChangeExtension("devsko.LayoutAnalyzer.Host.", fileExtension)));
-#else
-            throw new NotImplementedException();
-#endif
+                "..", "..", "..", "..", "devsko.LayoutAnalyzer.Host", "bin", platformDirectory, debug ? "Debug" : "Release", frameworkDirectory, Path.ChangeExtension("devsko.LayoutAnalyzer.Host.", fileExtension)));
+
             string exePath;
             string arguments;
             if (Path.GetExtension(hostAssemblyPath) == ".exe")
@@ -130,7 +137,7 @@ namespace devsko.LayoutAnalyzer.Test
         {
             if (_process is null || _process.HasExited || _outStream is null)
             {
-                Console.WriteLine("Host process terminated unexpectedly");
+                Console.WriteLine("Host process exited unexpectedly");
                 _outStream?.Dispose();
                 _process?.Dispose();
                 StartProcess();

@@ -10,7 +10,7 @@
              Visible="false" />
 
     <Compile Condition="'$(NeedsDownlevel)' != 'false' and ($(TargetFramework.StartsWith('netcoreapp')))"
-             Include="..\Downlevel\NullableAttributes.netcoreapp.cs"
+             Include="..\Downlevel\*.netcoreapp.cs"
              Visible="false" />
   </ItemGroup>
 

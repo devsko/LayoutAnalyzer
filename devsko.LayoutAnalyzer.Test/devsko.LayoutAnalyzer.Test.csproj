@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net5.0;netcoreapp3.1;net472</TargetFrameworks>
@@ -9,17 +9,36 @@
     <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
   </ItemGroup>
 
-  <!-- ensure unreferenced LayoutAnalyzer.Host is up to date -->
-  <ItemGroup>
-    <ProjectReference Include="..\devsko.LayoutAnalyzer.Host\devsko.LayoutAnalyzer.Host.csproj"
-                      ReferenceOutputAssembly="false" />
-  </ItemGroup>
-
-
-
-
   <ItemGroup>
     <PackageReference Include="System.IO.Pipelines" Version="5.0.*" />
   </ItemGroup>
+
+  <Target Name="BuildHost" AfterTargets="Build">
+
+    <ItemGroup>
+      <BatchProjects Include="..\devsko.LayoutAnalyzer.Host\devsko.LayoutAnalyzer.Host.csproj" />
+      <BatchConfigurations Include="Debug;Release" />
+      <BatchPlatforms Include="x64;x86" />
+
+      <Batch_ProjConf Include="@(BatchProjects)">
+        <Configuration>%(BatchConfigurations.Identity)</Configuration>
+      </Batch_ProjConf>
+      <Batch_ProjConfPltf Include="@(Batch_ProjConf)">
+        <Platform>%(BatchPlatforms.Identity)</Platform>
+      </Batch_ProjConfPltf>
+      <BatchToBuild Include="@(Batch_ProjConfPltf)">
+        <AdditionalProperties>Platform=%(Batch_ProjConfPltf.Platform);Configuration=%(Batch_ProjConfPltf.Configuration)</AdditionalProperties>
+      </BatchToBuild>
+    </ItemGroup>
+
+    <Message Importance="high"
+             Condition="'$(TargetFramework)' != ''"
+             Text="Building host %(BatchToBuild.Filename) ($(TargetFramework)|%(BatchToBuild.Configuration)|%(BatchToBuild.Platform))" />
+
+    <MSBuild Projects="@(BatchToBuild)"
+             Condition="'$(TargetFramework)' != ''"
+             BuildInParallel="true" />
+
+  </Target>
 
 </Project>

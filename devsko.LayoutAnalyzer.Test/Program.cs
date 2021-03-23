@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -19,15 +20,29 @@ namespace devsko.LayoutAnalyzer.Test
 
         public static async Task Main()
         {
-            const string projectAssembly = "C:\\Users\\stefa\\source\\repos\\LayoutAnalyzer\\devsko.LayoutAnalyzer.Test\\bin\\Debug\\net5.0\\devsko.LayoutAnalyzer.Test.dll";
-
-            using (HostRunner runner = new(TargetFramework.Net, Platform.x64, false))
+            using (HostRunner runner = new(TargetFramework.Net, Platform.x64, debug: false, waitForDebugger: false))
             {
+                string projectAssembly = typeof(Program).Assembly.Location;
+                string frameworkDirectory = "\\" + runner.TargetFramework switch
+                {
+                    TargetFramework.NetFramework => "net472",
+                    TargetFramework.NetCore => "netcoreapp3.1",
+                    TargetFramework.Net => "net5.0",
+                    _ => throw new ArgumentException("")
+                } + "\\";
+                projectAssembly = projectAssembly.Replace("\\net472\\", frameworkDirectory);
+                projectAssembly = projectAssembly.Replace("\\netcoreapp3.1\\", frameworkDirectory);
+                projectAssembly = projectAssembly.Replace("\\net5.0\\", frameworkDirectory);
+                if (runner.TargetFramework != TargetFramework.NetFramework)
+                {
+                    projectAssembly = Path.ChangeExtension(projectAssembly, ".dll");
+                }
+
                 //await AnalyzeAndPrintAsync("").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc,").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc,def").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.Test").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.Test").ConfigureAwait(false);
                 await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.Test.TestClass, devsko.LayoutAnalyzer.Test").ConfigureAwait(false);
                 await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
 
