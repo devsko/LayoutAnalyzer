@@ -3,12 +3,20 @@
   <PropertyGroup>
     <TargetFrameworks>net5.0;netcoreapp3.1;net472</TargetFrameworks>
     <OutputType>Exe</OutputType>
-    <StartupObject>devsko.LayoutAnalyzer.Test.HostRunner</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
   </ItemGroup>
+
+  <!-- ensure unreferenced LayoutAnalyzer.Host is up to date -->
+  <ItemGroup>
+    <ProjectReference Include="..\devsko.LayoutAnalyzer.Host\devsko.LayoutAnalyzer.Host.csproj"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+
+
 
   <ItemGroup>
     <PackageReference Include="System.IO.Pipelines" Version="5.0.*" />

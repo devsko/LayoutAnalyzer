@@ -61,26 +61,29 @@ namespace devsko.LayoutAnalyzer.Host
 #endif
         }
 
-        public async Task SendAnalysisAsync(string typeName, CancellationToken cancellationToken = default)
+        public async Task AnalyzeAsync(string typeName, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 Type? type = null;
 #if NETCOREAPP3_1_OR_GREATER
-                int comma = typeName.IndexOf(',');
-                var assembly = _loadContext.LoadFromAssemblyName(new AssemblyName(typeName.Substring(comma + 1)));
-                type = assembly.GetType(typeName.Substring(0, comma));
-#endif
-                if (type is not null)
+                int index = typeName.IndexOf(',');
+                if (index < 0 || index >= typeName.Length - 1)
                 {
-                    Layout? layout = _analyzer.Analyze(type);
-                    if (layout is not null)
-                    {
-                        await JsonSerializer.SerializeAsync(_outStream, layout, _jsonOptions, cancellationToken).ConfigureAwait(false);
-                        _outStream.WriteByte((byte)'\n');
-                        await _outStream.FlushAsync(cancellationToken).ConfigureAwait(false);
-                    }
+                    throw new InvalidOperationException($"Wrong type name format '{typeName}'");
+                }
+                var assembly = _loadContext.LoadFromAssemblyName(new AssemblyName(typeName.Substring(index + 1)));
+                type = assembly.GetType(typeName.Substring(0, index));
+#endif
+                if (type is null)
+                {
+                    throw new InvalidOperationException($"Type not found {typeName}");
+                }
+                Layout? layout = _analyzer.Analyze(type);
+                if (layout is not null)
+                {
+                    await JsonSerializer.SerializeAsync(_outStream, layout, _jsonOptions, cancellationToken).ConfigureAwait(false);
                 }
             }
             finally
