@@ -19,12 +19,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "devsko.LayoutAnalyzer.Test"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Downlevel", "Downlevel", "{8C113324-A5A1-4AA5-A0BF-2EA9AC3B3B8C}"
 	ProjectSection(SolutionItems) = preProject
-		Downlevel\Index.netstandard.cs = Downlevel\Index.netstandard.cs
-		Downlevel\IsExternalInit.netcoreapp.cs = Downlevel\IsExternalInit.netcoreapp.cs
-		Downlevel\IsExternalInit.netstandard.cs = Downlevel\IsExternalInit.netstandard.cs
-		Downlevel\NullableAttributes.netcoreapp.cs = Downlevel\NullableAttributes.netcoreapp.cs
-		Downlevel\NullableAttributes.netstandard.cs = Downlevel\NullableAttributes.netstandard.cs
-		Downlevel\Range.netstandard.cs = Downlevel\Range.netstandard.cs
+		Downlevel\Index.net4.cs = Downlevel\Index.net4.cs
+		Downlevel\IsExternalInit.netcore.cs = Downlevel\IsExternalInit.netcore.cs
+		Downlevel\IsExternalInit.net4.cs = Downlevel\IsExternalInit.net4.cs
+		Downlevel\NullableAttributes.netcore.cs = Downlevel\NullableAttributes.netcore.cs
+		Downlevel\NullableAttributes.net4.cs = Downlevel\NullableAttributes.net4.cs
+		Downlevel\Range.net4.cs = Downlevel\Range.net4.cs
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "devsko.LayoutAnalyzer.TestProject", "devsko.LayoutAnalyzer.TestProject\devsko.LayoutAnalyzer.TestProject.csproj", "{B051DB04-63DF-485B-9DE2-4C94C611D0AF}"

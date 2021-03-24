@@ -23,7 +23,7 @@ namespace devsko.LayoutAnalyzer.Test
         {
             try
             {
-                HostRunner runner = HostRunner.GetHostRunner(TargetFramework.Net, Platform.x64, debug: false, waitForDebugger: true);
+                HostRunner runner = HostRunner.GetHostRunner(TargetFramework.Net, Platform.x64, debug: false, waitForDebugger: false);
 
                 // Find the 'TestProject' bins
 

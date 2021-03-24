@@ -5,12 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Condition="'$(NeedsDownlevel)' != 'false' and ($(TargetFramework.StartsWith('net4')) or '$(TargetFramework)' == 'netstandard2.0')"
-             Include="..\Downlevel\*.netstandard.cs" 
+    <Compile Condition="'$(NeedsDownlevel)' != 'false' and $(TargetFramework.StartsWith('net4'))"
+             Include="..\Downlevel\*.net4.cs" 
              Visible="false" />
 
-    <Compile Condition="'$(NeedsDownlevel)' != 'false' and ($(TargetFramework.StartsWith('netcoreapp')))"
-             Include="..\Downlevel\*.netcoreapp.cs"
+    <Compile Condition="'$(NeedsDownlevel)' != 'false' and ($(TargetFramework.StartsWith('netcore')))"
+             Include="..\Downlevel\*.netcore.cs"
              Visible="false" />
   </ItemGroup>
 
