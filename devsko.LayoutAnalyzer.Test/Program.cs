@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -22,35 +23,35 @@ namespace devsko.LayoutAnalyzer.Test
         {
             try
             {
-                HostRunner runner = HostRunner.GetHostRunner(TargetFramework.Net, Platform.x64, debug: false, waitForDebugger: false);
+                HostRunner runner = HostRunner.GetHostRunner(TargetFramework.Net, Platform.x64, debug: false, waitForDebugger: true);
 
-                string projectAssembly = typeof(Program).Assembly.Location;
-                string frameworkDirectory = "\\" + runner.TargetFramework switch
+                // Find the 'TestProject' bins
+
+                string frameworkDirectory = runner.TargetFramework switch
                 {
                     TargetFramework.NetFramework => "net472",
                     TargetFramework.NetCore => "netcoreapp3.1",
                     TargetFramework.Net => "net5.0",
                     _ => throw new ArgumentException("")
-                } + "\\";
-                projectAssembly = projectAssembly.Replace("\\net472\\", frameworkDirectory);
-                projectAssembly = projectAssembly.Replace("\\netcoreapp3.1\\", frameworkDirectory);
-                projectAssembly = projectAssembly.Replace("\\net5.0\\", frameworkDirectory);
-                if (runner.TargetFramework != TargetFramework.NetFramework)
-                {
-                    projectAssembly = Path.ChangeExtension(projectAssembly, ".dll");
-                }
+                };
+
+                string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
+
+                string projectAssemblyPath = Path.GetFullPath(Path.Combine(
+                    Path.GetDirectoryName(thisAssemblyPath)!,
+                    "..", "..", "..", "..", "devsko.LayoutAnalyzer.TestProject", "bin", "Debug", frameworkDirectory, "devsko.LayoutAnalyzer.TestProject.dll"));
 
                 //await AnalyzeAndPrintAsync("").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc,").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc,def").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.Test").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.Test.TestClass, devsko.LayoutAnalyzer.Test").ConfigureAwait(false);
+                await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.TestClass, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
 
                 async Task AnalyzeAndPrintAsync(string typeName)
                 {
-                    var layout = await runner.AnalyzeAsync(projectAssembly + '|' + typeName).ConfigureAwait(false);
+                    var layout = await runner.AnalyzeAsync(projectAssemblyPath + '|' + typeName).ConfigureAwait(false);
                     if (layout is not null)
                     {
                         Print(layout);

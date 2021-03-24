@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,18 +20,41 @@ namespace devsko.LayoutAnalyzer
             _eofDetected = false;
         }
 
-        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public override async
+#if NETCOREAPP3_1_OR_GREATER
+            ValueTask
+#else
+            Task
+#endif
+            <int>
+            ReadAsync(
+#if NETCOREAPP3_1_OR_GREATER
+            Memory<byte> buffer,
+#else
+            byte[] buffer, int offset, int count,
+#endif
+            CancellationToken cancellationToken)
         {
             if (_eofDetected)
             {
                 return 0;
             }
-            int result = await _stream.ReadAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+            int result = await _stream.ReadAsync(buffer,
+#if !NETCOREAPP3_1_OR_GREATER
+                offset, count,
+#endif
+                cancellationToken).ConfigureAwait(false);
             if (result == 0)
             {
                 return 0;
             }
-            _eofDetected |= buffer[offset + result - 1] == 0x27;
+            _eofDetected |=
+#if NETCOREAPP3_1_OR_GREATER
+                buffer.Span[result - 1]
+#else
+                buffer[offset + result - 1]
+#endif
+                == 0x27;
 
             return _eofDetected ? result - 1 : result;
         }

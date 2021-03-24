@@ -124,14 +124,14 @@ namespace devsko.LayoutAnalyzer
 
         private void AppendNested(FieldType field)
         {
-            Append(new FieldType(field.Type.DeclaringType, field.TransformFlags));
+            Append(new FieldType(field.Type.DeclaringType!, field.TransformFlags));
             Append('.', Token.Symbol);
             AppendPlain(field, omitNamespace: true);
         }
 
         private void AppendPointer(FieldType field)
         {
-            Append(new FieldType(field.Type.GetElementType(), field.TransformFlags));
+            Append(new FieldType(field.Type.GetElementType()!, field.TransformFlags));
             Append('*', Token.Symbol);
         }
 
@@ -143,7 +143,7 @@ namespace devsko.LayoutAnalyzer
 
             while (true)
             {
-                type = type.GetElementType();
+                type = type.GetElementType()!;
                 if (!type.IsArray)
                 {
                     break;

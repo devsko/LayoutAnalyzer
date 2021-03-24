@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace devsko.LayoutAnalyzer.Test
+namespace devsko.LayoutAnalyzer.TestProject
 {
 #if NET5_0_OR_GREATER
 #pragma warning disable CA2211 // Non-constant fields should not be visible
@@ -9,8 +9,6 @@ namespace devsko.LayoutAnalyzer.Test
 
     public unsafe class TestClass
     {
-        public System.IO.Pipelines.Pipe? Pipe;
-
         public void**[,,,][][,]? Ptr;
         public Dictionary<IEnumerable<Dictionary<nint, IntPtr[]>>, nuint?*[]>? XXX;
         public nuint NI;

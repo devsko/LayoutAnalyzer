@@ -12,11 +12,11 @@ namespace devsko.LayoutAnalyzer
     {
         private static readonly MethodInfo s_unsafeSizeOfT = typeof(Unsafe).GetMethod("SizeOf")!;
 
-        public Dictionary<Type, (TokenizedString Name, int Size)> Cache { get; }
+        private readonly Dictionary<Type, (TokenizedString Name, int Size)> _cache;
 
         public Analyzer()
         {
-            Cache = EnumeratePrimitiveTypes()
+            _cache = EnumeratePrimitiveTypes()
                 .ToDictionary(t => t.Type, t => (new TokenizedString(t.Name, t.Token), t.Size));
         }
 
@@ -57,9 +57,9 @@ namespace devsko.LayoutAnalyzer
                 return (GetName(), sizeof(IntPtr));
             }
 
-            if (!Cache.TryGetValue(type, out (TokenizedString Name, int Size) entry))
+            if (!_cache.TryGetValue(type, out (TokenizedString Name, int Size) entry))
             {
-                Cache.Add(type, entry = (GetName(), GetSize()));
+                _cache.Add(type, entry = (GetName(), GetSize()));
             }
 
             return entry;
@@ -85,7 +85,7 @@ namespace devsko.LayoutAnalyzer
 
         public bool TryGetName(Type type, [MaybeNullWhen(false)] out TokenizedString name)
         {
-            if (Cache.TryGetValue(type, out (TokenizedString Name, int _) value))
+            if (_cache.TryGetValue(type, out (TokenizedString Name, int _) value))
             {
                 name = value.Name;
                 return true;

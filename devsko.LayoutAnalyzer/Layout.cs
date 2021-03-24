@@ -6,16 +6,67 @@ using System.Text.Json.Serialization;
 
 namespace devsko.LayoutAnalyzer
 {
+#if NET40_OR_GREATER
+    [Serializable]
+#endif
     public sealed class Layout
     {
-        public Field[] Fields { get; private init; }
-        public int TotalSize { get; private init; }
-        public int TotalPadding { get; private init; }
-        public TokenizedString Name { get; private init; }
-        public bool IsValueType { get; private init; }
-        public LayoutKind AttributeKind { get; private init; }
-        public int AttributeSize { get; private init; }
-        public int AttributePack { get; private init; }
+        public Field[] Fields { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+        public int TotalSize { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+        public int TotalPadding { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+        public TokenizedString Name { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+        public bool IsValueType { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+        public LayoutKind AttributeKind { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+        public int AttributeSize { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+        public int AttributePack { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
 
         internal Layout(Type type, Analyzer analyzer)
         {
@@ -23,7 +74,7 @@ namespace devsko.LayoutAnalyzer
             (Name, TotalSize) = analyzer.GetNameAndSize(type);
             TotalPadding = TotalSize - analyzer.GetUnpaddedSize(Fields);
             IsValueType = type.IsValueType;
-            var layoutAttr = type.StructLayoutAttribute;
+            StructLayoutAttribute? layoutAttr = type.StructLayoutAttribute!;
             AttributeKind = layoutAttr.Value;
             AttributeSize = layoutAttr.Size;
             AttributePack = layoutAttr.Pack;

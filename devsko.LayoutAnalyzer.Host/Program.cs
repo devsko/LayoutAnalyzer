@@ -20,23 +20,34 @@ namespace devsko.LayoutAnalyzer.Host
             {
 #if DEBUG
                 Console.Error.WriteLine("Waiting for debugger...");
-                while (!Debugger.IsAttached)
-                {
-                    Thread.Sleep(TimeSpan.FromSeconds(1));
-                }
+
+                using (ShutdownTimer.Start(TimeSpan.FromMinutes(1)))
+                    while (!Debugger.IsAttached)
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(1));
+                    }
+
                 Console.Error.WriteLine("Debugger attached");
 #endif
             }
 
             while (true)
             {
-                ShutdownTimer.Start(TimeSpan.FromSeconds(60));
-                string command = Console.ReadLine() ?? "";
-                ShutdownTimer.Stop();
+                string command;
+                using (ShutdownTimer.Start(TimeSpan.FromMinutes(1)))
+                {
+                    string? line = Console.ReadLine();
+                    command = line ?? "";
+                }
+
+                if (command == "")
+                {
+                    break;
+                }
 
                 using (var consoleAccess = await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
                 {
-                    Console.Error.WriteLine(command);
+                    Console.Error.WriteLine("ANALYZE " + command);
 
                     try
                     {
@@ -54,7 +65,7 @@ namespace devsko.LayoutAnalyzer.Host
                     }
                     catch (Exception e)
                     {
-                        Console.Error.WriteLine("Error: " + e.Message);
+                        Console.Error.WriteLine("HOST Error " + e.ToString());
                     }
                 }
             }

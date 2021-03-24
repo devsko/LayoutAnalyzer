@@ -9,8 +9,10 @@
     <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
   </ItemGroup>
 
+  <!-- ensure unreferenced LayoutAnalyzer.TestProject is up to date -->
   <ItemGroup>
-    <PackageReference Include="System.IO.Pipelines" Version="5.0.*" />
+    <ProjectReference Include="..\devsko.LayoutAnalyzer.TestProject\devsko.LayoutAnalyzer.TestProject.csproj"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <Target Name="BuildHost" AfterTargets="Build">

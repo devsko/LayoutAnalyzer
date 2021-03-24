@@ -7,12 +7,39 @@ using System.Text.Json.Serialization;
 
 namespace devsko.LayoutAnalyzer
 {
+#if NET40_OR_GREATER
+    [Serializable]
+#endif
     public sealed class Field : FieldBase
     {
-        public string Name { get; private init; }
-        public bool IsPublic { get; private init; }
-        public TokenizedString TypeName { get; private init; }
-        public Field[]? Children { get; private init; }
+        public string Name { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+        public bool IsPublic { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+        public TokenizedString TypeName { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+        public Field[]? Children { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
 
         internal Field(FieldInfo info, Analyzer analyzer)
         {
@@ -66,13 +93,13 @@ namespace devsko.LayoutAnalyzer
             {
                 return null;
             }
-            if (data.ConstructorArguments.Count < 1)
+            if (data.ConstructorArguments.Count < 1 || data.ConstructorArguments[0].Value is null)
             {
                 return s_defaultNativeIntegerFlags;
             }
 
-            return ((IReadOnlyCollection<CustomAttributeTypedArgument>)data.ConstructorArguments[0].Value)
-                .Select(arg => (bool)arg.Value)
+            return ((IReadOnlyCollection<CustomAttributeTypedArgument>)data.ConstructorArguments[0].Value!)
+                .Select(arg => (bool)arg.Value!)
                 .ToArray();
         }
     }

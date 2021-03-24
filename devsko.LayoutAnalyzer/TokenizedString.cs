@@ -5,10 +5,30 @@ using System.Text.Json.Serialization;
 
 namespace devsko.LayoutAnalyzer
 {
-    public readonly struct TokenizedString
+#if NET40_OR_GREATER
+    [Serializable]
+#endif
+    public
+#if NETCOREAPP3_1_OR_GREATER
+        readonly
+#endif
+        struct TokenizedString
     {
-        public string Value { get; private init; }
-        public TokenSpan[] Tokens { get; private init; }
+        public string Value { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+        public TokenSpan[] Tokens { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+
 
         [JsonConstructor]
         public TokenizedString(string value, TokenSpan[] tokens)

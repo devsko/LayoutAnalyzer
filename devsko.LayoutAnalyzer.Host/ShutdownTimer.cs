@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -11,16 +7,42 @@ namespace devsko.LayoutAnalyzer.Host
 {
     public static class ShutdownTimer
     {
+        public struct ShutdownTimerToken : IDisposable
+        {
+            public void Dispose()
+            {
+                ShutdownTimer.Stop();
+            }
+        }
+
         private static CancellationTokenSource? _cts;
 
-        public static void Start(TimeSpan interval)
+        public static ShutdownTimerToken Start(TimeSpan interval)
         {
             _cts = new CancellationTokenSource();
-            Task.Run(async () =>
+            _ = RunAsync();
+
+            return default;
+
+            async Task RunAsync()
             {
-                await Task.Delay(interval, _cts.Token).ConfigureAwait(false);
-                Process.GetCurrentProcess().Kill();
-            });
+                try
+                {
+                    await Task.Run(async () =>
+                    {
+                        if (_cts is not null)
+                        {
+                            await Task.Delay(interval, _cts.Token).ConfigureAwait(false);
+                            if (!Debugger.IsAttached)
+                            {
+                                Process.GetCurrentProcess().Kill();
+                            }
+                        }
+                    }).ConfigureAwait(false);
+                }
+                catch
+                { }
+            }
         }
 
         public static void Stop()

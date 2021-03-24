@@ -14,4 +14,14 @@
              Visible="false" />
   </ItemGroup>
 
+  <ItemGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <None Include="*.net4.cs" />
+    <Compile Remove="*.net4.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <None Include="*.netcore.cs" />
+    <Compile Remove="*.netcore.cs" />
+  </ItemGroup>
+
 </Project>

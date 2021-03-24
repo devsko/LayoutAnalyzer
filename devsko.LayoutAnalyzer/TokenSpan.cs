@@ -1,10 +1,22 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace devsko.LayoutAnalyzer
 {
-    public readonly struct TokenSpan
+#if NET40_OR_GREATER
+    [Serializable]
+#endif
+    public
+#if NETCOREAPP3_1_OR_GREATER
+        readonly
+#endif
+        struct TokenSpan
     {
-        private readonly ushort _value;
+        private
+#if NETCOREAPP3_1_OR_GREATER
+        readonly
+#endif
+            ushort _value;
 
         [JsonConstructor]
         public TokenSpan(Token token, int length)
