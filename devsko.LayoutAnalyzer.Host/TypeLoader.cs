@@ -1,56 +1,63 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace devsko.LayoutAnalyzer.Host
 {
     public sealed partial class TypeLoader : IDisposable
     {
-        private readonly TempDirectory _directory = new TempDirectory();
+        public string AssemblyPath { get; private init; }
 
-        public string AppDirectoryPath
-            => _directory.Path;
+        private AppDirectory _appDirectory;
+        private readonly FileSystemWatcher _watcher;
 
-        partial void DisposeInternal();
+        public event Action? AssemblyDirectoryChanged;
+
+        public TypeLoader(string assemblyPath)
+        {
+            AssemblyPath = assemblyPath;
+            _appDirectory = new AppDirectory();
+            CopyFiles(Path.GetDirectoryName(assemblyPath)!);
+
+            _watcher = new FileSystemWatcher(Path.GetDirectoryName(assemblyPath)!);
+            _watcher.Changed += (sender, e) =>
+            {
+                Console.Error.WriteLine($"{DateTime.Now:mm:ss,fffffff} {e.ChangeType}");
+
+                _watcher.EnableRaisingEvents = false;
+                AssemblyDirectoryChanged?.Invoke();
+            };
+            _watcher.EnableRaisingEvents = true;
+
+            Console.Error.WriteLine("Watching " + _watcher.Path);
+
+            InitializeCore();
+
+            Console.Error.WriteLine("TypeLoader initialized");
+        }
+
+        partial void InitializeCore();
+
+        partial void DisposeCore();
 
         public void Dispose()
         {
-            DisposeInternal();
-            _directory.Dispose();
+            DisposeCore();
+
+            _watcher.Dispose();
+            _appDirectory.Dispose();
+
+            Console.Error.WriteLine("TypeLoader disposed");
         }
 
-        private void CopyFiles(string sourceDirectory, string searchPattern, string destinationDirectory)
-        {
-            // Seems to be the only way to copy files that are locked (e.g. by VisualStudio)
-
-            ProcessStartInfo startInfo = new()
-            {
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                FileName = "cmd.exe",
-                Arguments = $"/C copy \"{sourceDirectory}\\{searchPattern}\" \"{destinationDirectory}\"",
-            };
-            Process? process = Process.Start(startInfo);
-            if (process is not null)
-            {
-                process.WaitForExit();
-                string output = process.StandardOutput.ReadToEnd();
-            }
-
-            //foreach (string file in Directory.EnumerateFiles(sourceDirectory, searchPattern, SearchOption.TopDirectoryOnly))
-            //{
-            //    try
-            //    {
-            //        File.Copy(file, Path.Combine(destinationDirectory, file));
-            //    }
-            //    catch (IOException)
-            //    { }
-            //}
-        }
+        private void CopyFiles(string directory, string searchPattern = "*.*")
+            => _appDirectory.CopyFiles(directory, searchPattern);
     }
 }

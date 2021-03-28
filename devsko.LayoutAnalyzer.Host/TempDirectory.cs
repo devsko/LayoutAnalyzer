@@ -51,8 +51,10 @@ namespace devsko.LayoutAnalyzer.Host
             {
                 Directory.Delete(Path, recursive: true);
             }
-            catch
-            { /* Ignore exceptions on disposal paths */ }
+            catch (IOException ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+            }
         }
 
         /// <summary>

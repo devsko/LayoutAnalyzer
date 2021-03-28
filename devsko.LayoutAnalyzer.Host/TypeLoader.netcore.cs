@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
@@ -25,19 +27,20 @@ namespace devsko.LayoutAnalyzer.Host
                 {
                     assembly = LoadFromAssemblyPath(path);
                 }
-                //Console.Error.WriteLine($"loading assembly '{assemblyName.Name} ({assemblyName.Version})' {(assembly is null ? "in default load context" : $"from '{path}'")}");
 
                 return assembly;
             }
         }
 
-        private Analyzer _analyzer;
         private LoadContext _loadContext;
+        private Analyzer _analyzer;
 
-        public TypeLoader(string path)
+        [MemberNotNull(nameof(_loadContext))]
+        [MemberNotNull(nameof(_analyzer))]
+        partial void InitializeCore()
         {
+            _loadContext = new LoadContext(Path.Combine(_appDirectory.Path, Path.GetFileName(AssemblyPath)));
             _analyzer = new Analyzer();
-            _loadContext = new LoadContext(path);
         }
 
         public Layout? LoadAndAnalyze(AssemblyName assemblyName, string typeName)
@@ -53,7 +56,7 @@ namespace devsko.LayoutAnalyzer.Host
             return _analyzer.Analyze(type);
         }
 
-        partial void DisposeInternal()
+        partial void DisposeCore()
         {
             _analyzer = null!;
 

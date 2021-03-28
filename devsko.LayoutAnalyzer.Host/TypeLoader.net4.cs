@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,35 +12,34 @@ namespace devsko.LayoutAnalyzer.Host
     partial class TypeLoader
     {
         private AppDomain _appDomain;
-        private MarshaledTypeLoader _typeLoader;
+        private MarshaledTypeLoader _marshaledTypeLoader;
 
-        public TypeLoader(string projectAssemblyPath)
+        [MemberNotNull(nameof(_appDomain))]
+        [MemberNotNull(nameof(_marshaledTypeLoader))]
+        partial void InitializeCore()
         {
-            string projectDirectoryPath = Path.GetDirectoryName(projectAssemblyPath);
-            CopyFiles(projectDirectoryPath, "*.*", AppDirectoryPath);
-
             string hostAssemblyDirectoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            CopyFiles(hostAssemblyDirectoryPath, "devsko.LayoutAnalyzer.???", AppDirectoryPath);
-            CopyFiles(hostAssemblyDirectoryPath, "devsko.LayoutAnalyzer.Host.net4.???", AppDirectoryPath);
-            CopyFiles(hostAssemblyDirectoryPath, "System.Runtime.CompilerServices.Unsafe.???", AppDirectoryPath);
-            CopyFiles(hostAssemblyDirectoryPath, "System.Memory.???", AppDirectoryPath);
-            CopyFiles(hostAssemblyDirectoryPath, "System.Buffers.???", AppDirectoryPath);
-            CopyFiles(hostAssemblyDirectoryPath, "System.Numerics.Vectors.???", AppDirectoryPath);
+            CopyFiles(hostAssemblyDirectoryPath, "devsko.LayoutAnalyzer.???");
+            CopyFiles(hostAssemblyDirectoryPath, "devsko.LayoutAnalyzer.Host.net4.???");
+            CopyFiles(hostAssemblyDirectoryPath, "System.Runtime.CompilerServices.Unsafe.???");
+            CopyFiles(hostAssemblyDirectoryPath, "System.Memory.???");
+            CopyFiles(hostAssemblyDirectoryPath, "System.Buffers.???");
+            CopyFiles(hostAssemblyDirectoryPath, "System.Numerics.Vectors.???");
 
             AppDomainSetup setup = new()
             {
-                ApplicationBase = AppDirectoryPath,
+                ApplicationBase = _appDirectory.Path,
             };
             _appDomain = AppDomain.CreateDomain("LayoutAnalyzer", null, setup);
-            _typeLoader = (MarshaledTypeLoader)_appDomain.CreateInstanceAndUnwrap(
+            _marshaledTypeLoader = (MarshaledTypeLoader)_appDomain.CreateInstanceAndUnwrap(
                 typeof(MarshaledTypeLoader).Assembly.FullName,
                 typeof(MarshaledTypeLoader).FullName);
         }
 
         public Layout? LoadAndAnalyze(AssemblyName assemblyName, string typeName)
-            => _typeLoader.LoadAndAnalyze(assemblyName, typeName);
+            => _marshaledTypeLoader.LoadAndAnalyze(assemblyName, typeName);
 
-        partial void DisposeInternal()
+        partial void DisposeCore()
         {
             AppDomain.Unload(_appDomain);
         }

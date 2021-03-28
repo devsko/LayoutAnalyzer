@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
@@ -9,6 +10,34 @@ namespace devsko.LayoutAnalyzer.Host
 {
     public sealed class Session : IDisposable
     {
+        private static Dictionary<string, Session> s_allSessions = new(StringComparer.OrdinalIgnoreCase);
+        private static object s_sync = new object();
+
+        public static Session GetOrCreate(Stream outStream, string assemblyName)
+        {
+            lock (s_sync)
+            {
+                if (!s_allSessions.TryGetValue(assemblyName, out Session? session))
+                {
+                    s_allSessions.Add(assemblyName, session = new Session(outStream, assemblyName));
+                }
+
+                return session;
+            }
+        }
+
+        public static void DisposeAll()
+        {
+            lock (s_sync)
+            {
+                foreach (Session session in s_allSessions.Values)
+                {
+                    session.Dispose();
+                }
+                s_allSessions.Clear();
+            }
+        }
+
         private JsonSerializerOptions _jsonOptions;
         private Stream _outStream;
         private SemaphoreSlim _semaphore;
@@ -20,6 +49,10 @@ namespace devsko.LayoutAnalyzer.Host
             _outStream = outStream;
             _semaphore = new SemaphoreSlim(1);
             _typeLoader = new TypeLoader(assemblyPath);
+            _typeLoader.AssemblyDirectoryChanged += () =>
+            {
+                Dispose();
+            };
         }
 
         public async Task AnalyzeAsync(string typeName, CancellationToken cancellationToken = default)
@@ -52,6 +85,12 @@ namespace devsko.LayoutAnalyzer.Host
         {
             _jsonOptions = null!;
             _typeLoader.Dispose();
+            lock (s_sync)
+            {
+                s_allSessions.Remove(_typeLoader.AssemblyPath);
+            }
+
+            Console.Error.WriteLine("Session disposed");
         }
     }
 }

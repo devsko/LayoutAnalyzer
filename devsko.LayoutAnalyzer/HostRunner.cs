@@ -25,15 +25,6 @@ namespace devsko.LayoutAnalyzer
 
     public sealed class HostRunner : IDisposable
     {
-        public TargetFramework TargetFramework { get; private init; }
-        public Platform Platform { get; private init; }
-
-        private JsonSerializerOptions _jsonOptions;
-        private SemaphoreSlim _semaphore;
-        private ProcessStartInfo _startInfo;
-        private Process? _process;
-        private EofDetectingStream? _outStream;
-
         private static readonly ConcurrentDictionary<(TargetFramework, Platform), HostRunner> s_cache = new();
 
         public static HostRunner GetHostRunner(TargetFramework framework, Platform platform, bool debug = false, bool waitForDebugger = false)
@@ -48,6 +39,17 @@ namespace devsko.LayoutAnalyzer
                 runner.Dispose();
             }
         }
+
+        public Action<string>? MessageReceived;
+
+        public TargetFramework TargetFramework { get; private init; }
+        public Platform Platform { get; private init; }
+
+        private JsonSerializerOptions _jsonOptions;
+        private SemaphoreSlim _semaphore;
+        private ProcessStartInfo _startInfo;
+        private Process? _process;
+        private EofDetectingStream? _outStream;
 
         private HostRunner(TargetFramework framework, Platform platform, bool debug, bool waitForDebugger)
         {
@@ -125,12 +127,7 @@ namespace devsko.LayoutAnalyzer
             {
                 _process.StandardInput.WriteLine(command);
 
-                return await JsonSerializer.DeserializeAsync<Layout?>(_outStream, _jsonOptions, cancellationToken).ConfigureAwait(false);
-            }
-            catch (JsonException e)
-            {
-                Console.WriteLine(e.Message);
-                return null;
+                return await JsonSerializer.DeserializeAsync<Layout>(_outStream, _jsonOptions, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -175,7 +172,10 @@ namespace devsko.LayoutAnalyzer
 
             _process = process;
             _outStream = new EofDetectingStream(_process.StandardOutput.BaseStream);
-            _process.ErrorDataReceived += (sender, e) => Console.WriteLine(e.Data);
+            _process.ErrorDataReceived += (sender, e) =>
+            {
+                MessageReceived?.Invoke(e.Data ?? string.Empty);
+            };
             _process.BeginErrorReadLine();
 
             Console.WriteLine($"Host process started PID={process.Id}");

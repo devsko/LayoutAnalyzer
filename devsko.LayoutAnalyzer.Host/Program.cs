@@ -12,6 +12,8 @@ namespace devsko.LayoutAnalyzer.Host
 {
     static class Program
     {
+        private static readonly TimeSpan s_shutdownTimerInterval = TimeSpan.FromMinutes(1);
+
         public static async Task Main(string[] args)
         {
             Console.Error.WriteLine($"{RuntimeInformation.FrameworkDescription} ({RuntimeInformation.ProcessArchitecture})");
@@ -34,7 +36,7 @@ namespace devsko.LayoutAnalyzer.Host
             while (true)
             {
                 string command;
-                using (ShutdownTimer.Start(TimeSpan.FromMinutes(1)))
+                using (ShutdownTimer.Start(s_shutdownTimerInterval))
                 {
                     string? line = Console.ReadLine();
                     command = line ?? "";
@@ -45,7 +47,7 @@ namespace devsko.LayoutAnalyzer.Host
                     break;
                 }
 
-                using (var consoleAccess = await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
+                using (var consoleAccess = await ConsoleOutAccessor.WaitAsync().ConfigureAwait(false))
                 {
                     Console.Error.WriteLine("ANALYZE " + command);
 
@@ -56,19 +58,20 @@ namespace devsko.LayoutAnalyzer.Host
                         {
                             throw new InvalidOperationException($"Wrong command format '{command}'");
                         }
-                        string projectAssembly = command.Substring(0, index);
+                        string assemblyName = command.Substring(0, index);
                         string typeName = command.Substring(index + 1);
-                        using (Session session = new(consoleAccess.StdOut, projectAssembly))
-                        {
-                            await session.AnalyzeAsync(typeName).ConfigureAwait(false);
-                        }
+                        await Session
+                            .GetOrCreate(consoleAccess.StdOut, assemblyName)
+                            .AnalyzeAsync(typeName)
+                            .ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
-                        Console.Error.WriteLine("HOST Error " + e.ToString());
+                        Console.Error.WriteLine("HOST Error " + e.ToStringDemystified());
                     }
                 }
             }
+            Session.DisposeAll();
         }
     }
 }

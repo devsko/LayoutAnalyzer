@@ -23,7 +23,28 @@ namespace devsko.LayoutAnalyzer.Test
         {
             try
             {
-                HostRunner runner = HostRunner.GetHostRunner(TargetFramework.Net, Platform.x64, debug: false, waitForDebugger: false);
+                HostRunner runner = HostRunner.GetHostRunner(TargetFramework.Net, Platform.x64,
+#if DEBUG
+                    debug: true, waitForDebugger: false
+#else
+                    debug: false, waitForDebugger: false
+#endif
+                    );
+                runner.MessageReceived += message =>
+                {
+                    ConsoleAccessor.WaitAsync()
+                        .ContinueWith(task =>
+                            {
+                                if (task.Status == TaskStatus.RanToCompletion)
+                                {
+                                    using (task.Result)
+                                    {
+                                        Console.WriteLine(message);
+                                    }
+                                }
+                            },
+                            TaskScheduler.Default);
+                };
 
                 // Find the 'TestProject' bins
 
@@ -41,25 +62,43 @@ namespace devsko.LayoutAnalyzer.Test
                     Path.GetDirectoryName(thisAssemblyPath)!,
                     "..", "..", "..", "..", "devsko.LayoutAnalyzer.TestProject", "bin", "Debug", frameworkDirectory, "devsko.LayoutAnalyzer.TestProject.dll"));
 
-                //await AnalyzeAndPrintAsync("").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("abc").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("abc,").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("abc,def").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.Test").ConfigureAwait(false);
+                await AnalyzeAndPrintAsync("").ConfigureAwait(false);
+                await AnalyzeAndPrintAsync("abc").ConfigureAwait(false);
+                await AnalyzeAndPrintAsync("abc,").ConfigureAwait(false);
+                await AnalyzeAndPrintAsync("abc,def").ConfigureAwait(false);
+                await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.TestClass, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+
+                Console.ReadLine();
+
                 await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
 
                 async Task AnalyzeAndPrintAsync(string typeName)
                 {
-                    var layout = await runner.AnalyzeAsync(projectAssemblyPath + '|' + typeName).ConfigureAwait(false);
-                    if (layout is not null)
+                    try
                     {
-                        Print(layout);
+                        Layout? layout = await runner.AnalyzeAsync(projectAssemblyPath + '|' + typeName).ConfigureAwait(false);
+                        if (layout is not null)
+                        {
+                            using (await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
+                            {
+                                Print(layout);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        using (await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine(ex.Message);
+                        }
                     }
                 }
             }
             finally
             {
+                Console.ReadLine();
                 HostRunner.DisposeAll();
             }
         }
@@ -92,8 +131,6 @@ namespace devsko.LayoutAnalyzer.Test
 
             WriteFields(layout.FieldsWithPaddings);
 
-            Console.WriteLine();
-            Console.BackgroundColor = ConsoleColor.Black;
             Console.WriteLine();
 
             static void WriteFields(IEnumerable<(FieldBase Field, int TotalOffset, int Level)> fieldsAndPaddings)
