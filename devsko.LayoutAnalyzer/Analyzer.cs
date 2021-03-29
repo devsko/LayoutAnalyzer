@@ -37,11 +37,17 @@ namespace devsko.LayoutAnalyzer
 
             if (!type.IsValueType)
             {
+                // For class types we need the actual heap size, not just the size of a pointer.
+                // TypeHandle points to a MethodTable structure (https://github.com/dotnet/runtime/blob/102d1e856c7e0e553abeec937783da5debed73ad/src/coreclr/vm/methodtable.h#L610)
+                // The size on the heap is found in m_BaseSize (https://github.com/dotnet/runtime/blob/102d1e856c7e0e553abeec937783da5debed73ad/src/coreclr/vm/methodtable.h#L3743)
+
                 int dword =
                     Unsafe.Add(
                         ref Unsafe.AsRef<int>(
                             type.TypeHandle.Value.ToPointer()),
                         1);
+
+                // Subtract the size of the object header and method table pointer
 
                 size = dword - 2 * sizeof(IntPtr);
             }

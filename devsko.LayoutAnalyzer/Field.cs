@@ -69,6 +69,9 @@ namespace devsko.LayoutAnalyzer
 
         private unsafe static int GetOffset(FieldInfo info)
         {
+            // FieldHandle points to a FieldDesc structure defined in (https://github.com/dotnet/runtime/blob/102d1e856c7e0e553abeec937783da5debed73ad/src/coreclr/vm/field.h#L34)
+            // The offset of the field is found in m_dwOffset (https://github.com/dotnet/runtime/blob/102d1e856c7e0e553abeec937783da5debed73ad/src/coreclr/vm/field.h#L74)
+
             int dword =
                 Unsafe.Add(
                     ref Unsafe.As<IntPtr, int>(
