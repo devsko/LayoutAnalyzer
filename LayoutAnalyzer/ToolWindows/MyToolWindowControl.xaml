@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="LayoutAnalyzer.MyToolWindowControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
+             xmlns:theming="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Imaging"
+             xmlns:util="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Utilities"
+             xmlns:catalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
+             xmlns:local="clr-namespace:LayoutAnalyzer"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300"
+             Name="MyToolWindow">
+    <UserControl.Resources>
+
+        <Style x:Key="PropertyLabelStyle" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static local:MyToolWindowControl.ForegroundKey}}"/>
+            <Setter Property="Padding" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static local:MyToolWindowControl.TreeViewItemInactiveSelectedBackgroundKey}}" />
+        </Style>
+        <Style x:Key="PropertyLabelValueStyle" TargetType="{x:Type Label}" BasedOn="{StaticResource PropertyLabelStyle}">
+            <Setter Property="FontWeight" Value="Normal" />
+        </Style>
+
+        <SolidColorBrush x:Key="IdentifierForeground" Color="{DynamicResource {x:Static local:MyToolWindowControl.ForegroundColorKey}}" />
+        <SolidColorBrush x:Key="PunctuationForeground" Color="{DynamicResource {x:Static local:MyToolWindowControl.PunctuationColorKey}}" />
+        <SolidColorBrush x:Key="OperatorForeground" Color="{DynamicResource {x:Static local:MyToolWindowControl.OperatorColorKey}}" />
+
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <!-- MOCK -->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Label Grid.Column="0" Grid.Row="0" Style="{StaticResource ResourceKey=PropertyLabelStyle}" Content="Runtime" BorderThickness="0,0,1,1" />
+            <Label Grid.Column="1" Grid.Row="0" Style="{StaticResource ResourceKey=PropertyLabelValueStyle}" Content=".NET 5.0.3 (X64)" BorderThickness="0,0,0,1" />
+            <Label Grid.Column="0" Grid.Row="1" Style="{StaticResource ResourceKey=PropertyLabelStyle}" Content="Type" BorderThickness="0,0,1,1"/>
+            <Label Grid.Column="1" Grid.Row="1" Style="{StaticResource ResourceKey=PropertyLabelValueStyle}" BorderThickness="0,0,0,1">
+                <TextBlock x:Name="typeBlock" />
+            </Label>
+            <Label Grid.Column="0" Grid.Row="2" Style="{StaticResource ResourceKey=PropertyLabelStyle}" Content="Assembly" BorderThickness="0,0,1,1" />
+            <Label Grid.Column="1" Grid.Row="2" Style="{StaticResource ResourceKey=PropertyLabelValueStyle}" Content="C:\Users\stefa\source\repos\LayoutAnalyzer\devsko.LayoutAnalyzer.TestProject\bin\Debug\net5.0\devsko.LayoutAnalyzer.TestProject.dll" BorderThickness="0,0,0,1" />
+            <Label Grid.Column="0" Grid.Row="3" Style="{StaticResource ResourceKey=PropertyLabelStyle}" Content="Total size" BorderThickness="0,0,1,1" />
+            <Label Grid.Column="1" Grid.Row="3" Style="{StaticResource ResourceKey=PropertyLabelValueStyle}" BorderThickness="0,0,0,1">
+                <TextBlock>368 bytes</TextBlock>
+            </Label>
+            <Label Grid.Column="0" Grid.Row="4" Style="{StaticResource ResourceKey=PropertyLabelStyle}" Content="Total padding" BorderThickness="0,0,1,1" />
+            <Label Grid.Column="1" Grid.Row="4" Style="{StaticResource ResourceKey=PropertyLabelValueStyle}" Content="27 bytes" BorderThickness="0,0,0,1" />
+        </Grid>
+    </Grid>
+</UserControl>

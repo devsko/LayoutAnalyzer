@@ -11,12 +11,12 @@ namespace devsko.LayoutAnalyzer.Test
     {
         private static readonly Dictionary<Token, ConsoleColor> s_colorMap = new()
         {
-            { Token.Namespace, ConsoleColor.Gray },
-            { Token.StructRef, ConsoleColor.Green },
-            { Token.ClassRef, ConsoleColor.DarkBlue },
+            { Token.Identifier, ConsoleColor.Gray },
+            { Token.Struct, ConsoleColor.Green },
+            { Token.Class, ConsoleColor.DarkBlue },
             { Token.Keyword, ConsoleColor.Cyan },
-            { Token.Identifier, ConsoleColor.DarkYellow },
-            { Token.Symbol, ConsoleColor.White },
+            { Token.Operator, ConsoleColor.DarkYellow },
+            { Token.Punctuation, ConsoleColor.White },
         };
 
         public static async Task Main()
@@ -62,15 +62,13 @@ namespace devsko.LayoutAnalyzer.Test
                     Path.GetDirectoryName(thisAssemblyPath)!,
                     "..", "..", "..", "..", "devsko.LayoutAnalyzer.TestProject", "bin", "Debug", frameworkDirectory, "devsko.LayoutAnalyzer.TestProject.dll"));
 
-                await AnalyzeAndPrintAsync("").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("abc").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("abc,").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("abc,def").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("abc").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("abc,").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("abc,def").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.TestClass, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-
-                Console.ReadLine();
-
+                await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.S1, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
 
                 async Task AnalyzeAndPrintAsync(string typeName)
@@ -98,7 +96,6 @@ namespace devsko.LayoutAnalyzer.Test
             }
             finally
             {
-                Console.ReadLine();
                 HostRunner.DisposeAll();
             }
         }
@@ -124,62 +121,36 @@ namespace devsko.LayoutAnalyzer.Test
             }
             Console.WriteLine();
 
-            Console.Write("             ");
-            Console.Write(layout.IsValueType ? "struct " : "class ");
-            Write(layout.Name);
+            WriteHeader(0, layout.TotalSize, 0);
+            WriteName(layout.Name);
             Console.WriteLine();
 
-            WriteFields(layout.FieldsWithPaddings);
-
-            Console.WriteLine();
-
-            static void WriteFields(IEnumerable<(FieldBase Field, int TotalOffset, int Level)> fieldsAndPaddings)
+            foreach (var fieldOrPadding in layout.FieldsWithPaddings)
             {
-                int level = 0;
-                string indent = "";
-                foreach (var fieldOrPadding in fieldsAndPaddings)
+                WriteHeader(fieldOrPadding.Field.Offset, fieldOrPadding.Field.Size, fieldOrPadding.Level);
+
+                if (fieldOrPadding.Field is Field field)
                 {
-                    Console.ForegroundColor = ConsoleColor.White;
-                    while (level < fieldOrPadding.Level)
-                    {
-                        Console.WriteLine($"{indent}             {{");
-                        level++;
-                        indent = new string(' ', level * 4);
-                    }
-                    while (level > fieldOrPadding.Level)
-                    {
-                        level--;
-                        indent = new string(' ', level * 4);
-                        Console.WriteLine($"{indent}             }}");
-                    }
-
-                    Console.ForegroundColor = ConsoleColor.Black;
-                    Console.Write($"{fieldOrPadding.Field.Offset:X3} : {fieldOrPadding.Field.Size,-3}    ");
-
-                    if (fieldOrPadding.Field is Field field)
-                    {
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.Write($"{indent}{(field.IsPublic ? "public" : "private")} ");
-                        Write(field.TypeName);
-                        Console.Write(' ');
-                        Console.WriteLine(field.Name);
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine($"{indent}=== PADDING ({fieldOrPadding.Field.Size} bytes) ===");
-                    }
+                    WriteName(field.TypeName);
+                    Console.Write(' ');
+                    Console.WriteLine(field.Name);
                 }
-                Console.ForegroundColor = ConsoleColor.White;
-                while (level > 0)
+                else
                 {
-                    level--;
-                    indent = new string(' ', level * 4);
-                    Console.WriteLine($"{indent}             }}");
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"=== PADDING ({fieldOrPadding.Field.Size} bytes) ===");
                 }
             }
 
-            static void Write(TokenizedString value)
+            Console.WriteLine();
+
+            static void WriteHeader(int offset, int size, int level)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                Console.Write($"{new string(' ', level * 12)}0x{offset:X3} : {size,-3} ");
+            }
+
+            static void WriteName(TokenizedString value)
             {
                 ReadOnlySpan<char> chars = value.Value.AsSpan();
                 foreach (TokenSpan span in value.Tokens)

@@ -95,16 +95,22 @@ namespace devsko.LayoutAnalyzer
                 int pos;
                 while ((pos = ns.IndexOf('.')) >= 0)
                 {
-                    _tokens.Append(new TokenSpan(Token.Namespace, pos));
-                    _tokens.Append(new TokenSpan(Token.Symbol, 1));
+                    _tokens.Append(new TokenSpan(Token.Identifier, pos));
+                    _tokens.Append(new TokenSpan(Token.Operator, 1));
                     ns = ns[(pos + 1)..];
                 }
-                _tokens.Append(new TokenSpan(Token.Namespace, ns.Length));
-                Append('.', Token.Symbol);
+                _tokens.Append(new TokenSpan(Token.Identifier, ns.Length));
+                Append('.', Token.Operator);
             }
 
             ReadOnlySpan<char> name = field.Type.Name.AsSpan();
-            Token token = field.Type.IsValueType ? Token.StructRef : Token.ClassRef;
+            Token token = field.Type switch
+            {
+                { IsInterface: true } => Token.Interface,
+                { IsValueType: true } => Token.Struct,
+                { IsClass: true } => Token.Class,
+                _ => throw new InvalidOperationException("unknown type of field type.")
+            };
             if (sliceApostrophe)
             {
                 Append(name.Slice(0, name.IndexOf('`')), token);
@@ -125,14 +131,14 @@ namespace devsko.LayoutAnalyzer
         private void AppendNested(FieldType field)
         {
             Append(new FieldType(field.Type.DeclaringType!, field.TransformFlags));
-            Append('.', Token.Symbol);
+            Append('.', Token.Operator);
             AppendPlain(field, omitNamespace: true);
         }
 
         private void AppendPointer(FieldType field)
         {
             Append(new FieldType(field.Type.GetElementType()!, field.TransformFlags));
-            Append('*', Token.Symbol);
+            Append('*', Token.Operator);
         }
 
         private void AppendArray(FieldType field)
@@ -169,7 +175,7 @@ namespace devsko.LayoutAnalyzer
             _chars.Append('[');
             _chars.Append(',', rank - 1);
             _chars.Append(']');
-            _tokens.Append(new TokenSpan(Token.Symbol, rank - 1 + 2));
+            _tokens.Append(new TokenSpan(Token.Punctuation, rank - 1 + 2));
         }
 
         private void AppendGeneric(FieldType field)
@@ -181,12 +187,12 @@ namespace devsko.LayoutAnalyzer
             if (genericType == typeof(Nullable<>))
             {
                 Append(new FieldType(arguments[0], field.TransformFlags));
-                Append('?', Token.Symbol);
+                Append('?', Token.Operator);
             }
             else
             {
                 AppendPlain(new FieldType(genericType, field.TransformFlags), true);
-                Append('<', Token.Symbol);
+                Append('<', Token.Punctuation);
 
                 for (int i = 0; i < arguments.Length; i++)
                 {
@@ -194,12 +200,12 @@ namespace devsko.LayoutAnalyzer
                     {
                         _chars.Append(',');
                         _chars.Append(' ');
-                        _tokens.Append(new TokenSpan(Token.Symbol, 2));
+                        _tokens.Append(new TokenSpan(Token.Punctuation, 2));
                     }
                     Append(new FieldType(arguments[i], field.TransformFlags));
                 }
 
-                Append('>', Token.Symbol);
+                Append('>', Token.Punctuation);
             }
         }
     }

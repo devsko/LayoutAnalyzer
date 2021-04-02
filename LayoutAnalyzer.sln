@@ -20,16 +20,18 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Downlevel", "Downlevel", "{8C113324-A5A1-4AA5-A0BF-2EA9AC3B3B8C}"
 	ProjectSection(SolutionItems) = preProject
 		Downlevel\Index.net4.cs = Downlevel\Index.net4.cs
-		Downlevel\IsExternalInit.netcore.cs = Downlevel\IsExternalInit.netcore.cs
 		Downlevel\IsExternalInit.net4.cs = Downlevel\IsExternalInit.net4.cs
-		Downlevel\NullableAttributes.netcore.cs = Downlevel\NullableAttributes.netcore.cs
+		Downlevel\IsExternalInit.netcore.cs = Downlevel\IsExternalInit.netcore.cs
 		Downlevel\NullableAttributes.net4.cs = Downlevel\NullableAttributes.net4.cs
+		Downlevel\NullableAttributes.netcore.cs = Downlevel\NullableAttributes.netcore.cs
 		Downlevel\Range.net4.cs = Downlevel\Range.net4.cs
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "devsko.LayoutAnalyzer.TestProject", "devsko.LayoutAnalyzer.TestProject\devsko.LayoutAnalyzer.TestProject.csproj", "{B051DB04-63DF-485B-9DE2-4C94C611D0AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "devsko.LayoutAnalyzer.TestProject", "devsko.LayoutAnalyzer.TestProject\devsko.LayoutAnalyzer.TestProject.csproj", "{B051DB04-63DF-485B-9DE2-4C94C611D0AF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "devsko.LayoutAnalyzer.Host.net4", "devsko.LayoutAnalyzer.Host.net4\devsko.LayoutAnalyzer.Host.net4.csproj", "{010BDA7B-663E-42C8-86ED-280E6EFBC736}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "devsko.LayoutAnalyzer.Host.net4", "devsko.LayoutAnalyzer.Host.net4\devsko.LayoutAnalyzer.Host.net4.csproj", "{010BDA7B-663E-42C8-86ED-280E6EFBC736}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LayoutAnalyzer", "LayoutAnalyzer\LayoutAnalyzer.csproj", "{899E2A85-2C41-441D-8624-E4B1C8F97BBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +57,10 @@ Global
 		{010BDA7B-663E-42C8-86ED-280E6EFBC736}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{010BDA7B-663E-42C8-86ED-280E6EFBC736}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{010BDA7B-663E-42C8-86ED-280E6EFBC736}.Release|Any CPU.Build.0 = Release|Any CPU
+		{899E2A85-2C41-441D-8624-E4B1C8F97BBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{899E2A85-2C41-441D-8624-E4B1C8F97BBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{899E2A85-2C41-441D-8624-E4B1C8F97BBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{899E2A85-2C41-441D-8624-E4B1C8F97BBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

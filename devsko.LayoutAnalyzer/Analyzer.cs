@@ -128,7 +128,7 @@ namespace devsko.LayoutAnalyzer
             yield return (typeof(float), "float", Token.Keyword, sizeof(float));
             yield return (typeof(double), "double", Token.Keyword, sizeof(double));
             yield return (typeof(decimal), "decimal", Token.Keyword, sizeof(decimal));
-            yield return (typeof(DateTime), nameof(DateTime), Token.StructRef, Unsafe.SizeOf<DateTime>());
+            yield return (typeof(DateTime), nameof(DateTime), Token.Struct, Unsafe.SizeOf<DateTime>());
             yield return (typeof(string), "string", Token.Keyword, ptrSize);
             yield return (typeof(object), "object", Token.Keyword, ptrSize);
         }

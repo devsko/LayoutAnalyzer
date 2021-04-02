@@ -7,11 +7,12 @@ namespace devsko.LayoutAnalyzer
 {
     public enum Token : ushort
     {
-        Namespace = 0,
-        StructRef = 1,
-        ClassRef = 2,
-        Keyword = 3,
-        Identifier = 4,
-        Symbol = 5,
+        Identifier,
+        Struct,
+        Class,
+        Interface,
+        Keyword,
+        Punctuation,
+        Operator,
     }
 }
