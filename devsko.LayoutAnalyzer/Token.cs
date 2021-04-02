@@ -8,8 +8,9 @@ namespace devsko.LayoutAnalyzer
     public enum Token : ushort
     {
         Identifier,
-        Struct,
         Class,
+        Struct,
+        Enum,
         Interface,
         Keyword,
         Punctuation,

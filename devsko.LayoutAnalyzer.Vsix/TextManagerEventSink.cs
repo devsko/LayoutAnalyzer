@@ -8,6 +8,8 @@ namespace LayoutAnalyzer
 {
     public sealed class TextManagerEventSink : IVsTextManagerEvents, IDisposable
     {
+        public event EventHandler ColorsChanged;
+
         private IConnectionPoint _connectionPoint;
         private uint _cookie;
 
@@ -15,14 +17,9 @@ namespace LayoutAnalyzer
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            var textManager = (IConnectionPointContainer)await package.GetServiceAsync(typeof(SVsTextManager));
-            if (textManager is null)
-            {
-                return null;
-            }
             var eventGuid = typeof(IVsTextManagerEvents).GUID;
             TextManagerEventSink instance = new TextManagerEventSink();
-            textManager.FindConnectionPoint(ref eventGuid, out instance._connectionPoint);
+            ((IConnectionPointContainer)package.TextManager).FindConnectionPoint(ref eventGuid, out instance._connectionPoint);
             instance._connectionPoint.Advise(instance, out instance._cookie);
 
             return instance;
@@ -35,11 +32,8 @@ namespace LayoutAnalyzer
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            if (_connectionPoint is not null)
-            {
-                _connectionPoint.Unadvise(_cookie);
-                _connectionPoint = null;
-            }
+            _connectionPoint?.Unadvise(_cookie);
+            _connectionPoint = null;
         }
 
         public void OnRegisterMarkerType(int iMarkerType)
@@ -54,7 +48,7 @@ namespace LayoutAnalyzer
 
             if (pColorPrefs is not null && pColorPrefs.Length > 0)
             {
-                ((MyToolWindowControl)MyToolWindow.Instance.Content).ResetColors();
+                ColorsChanged?.Invoke(this, EventArgs.Empty);
             }
         }
     }

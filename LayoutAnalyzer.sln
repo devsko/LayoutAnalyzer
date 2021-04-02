@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "devsko.LayoutAnalyzer.TestP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "devsko.LayoutAnalyzer.Host.net4", "devsko.LayoutAnalyzer.Host.net4\devsko.LayoutAnalyzer.Host.net4.csproj", "{010BDA7B-663E-42C8-86ED-280E6EFBC736}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LayoutAnalyzer", "LayoutAnalyzer\LayoutAnalyzer.csproj", "{899E2A85-2C41-441D-8624-E4B1C8F97BBC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "devsko.LayoutAnalyzer.Vsix", "devsko.LayoutAnalyzer.Vsix\devsko.LayoutAnalyzer.Vsix.csproj", "{899E2A85-2C41-441D-8624-E4B1C8F97BBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

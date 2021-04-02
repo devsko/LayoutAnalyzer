@@ -21,7 +21,7 @@ namespace LayoutAnalyzer
                 {
                     await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                     ToolWindowPane window = await package.ShowToolWindowAsync(
-                        typeof(MyToolWindow),
+                        typeof(LayoutWindow),
                         0,
                         create: true,
                         cancellationToken: package.DisposalToken);

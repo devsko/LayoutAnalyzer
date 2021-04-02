@@ -13,6 +13,7 @@ namespace devsko.LayoutAnalyzer.Test
         {
             { Token.Identifier, ConsoleColor.Gray },
             { Token.Struct, ConsoleColor.Green },
+            { Token.Enum, ConsoleColor.Green },
             { Token.Class, ConsoleColor.DarkBlue },
             { Token.Keyword, ConsoleColor.Cyan },
             { Token.Operator, ConsoleColor.DarkYellow },

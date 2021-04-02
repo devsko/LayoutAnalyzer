@@ -106,9 +106,10 @@ namespace devsko.LayoutAnalyzer
             ReadOnlySpan<char> name = field.Type.Name.AsSpan();
             Token token = field.Type switch
             {
-                { IsInterface: true } => Token.Interface,
-                { IsValueType: true } => Token.Struct,
                 { IsClass: true } => Token.Class,
+                { IsEnum: true } => Token.Enum,
+                { IsValueType: true } => Token.Struct,
+                { IsInterface: true } => Token.Interface,
                 _ => throw new InvalidOperationException("unknown type of field type.")
             };
             if (sliceApostrophe)

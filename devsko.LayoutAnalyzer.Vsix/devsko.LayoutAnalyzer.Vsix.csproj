@@ -52,7 +52,7 @@
     <Compile Include="Commands\MyToolWindowCommand.cs" />
     <Compile Include="LayoutAnalyzerPackage.cs" />
     <Compile Include="TextManagerEventSink.cs" />
-    <Compile Include="ToolWindows\MyToolWindowControl.xaml.Constants.cs" />
+    <Compile Include="ToolWindows\LayoutControl.xaml.Constants.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="source.extension.vsixmanifest">
@@ -69,13 +69,13 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ToolWindows\MyToolWindow.cs" />
-    <Page Include="ToolWindows\MyToolWindowControl.xaml">
+    <Compile Include="ToolWindows\LayoutWindow.cs" />
+    <Page Include="ToolWindows\LayoutControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Compile Include="ToolWindows\MyToolWindowControl.xaml.cs">
-      <DependentUpon>MyToolWindowControl.xaml</DependentUpon>
+    <Compile Include="ToolWindows\LayoutControl.xaml.cs">
+      <DependentUpon>LayoutControl.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

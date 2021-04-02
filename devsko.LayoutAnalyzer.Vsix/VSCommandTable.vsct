@@ -13,8 +13,8 @@
         <Icon guid="ImageCatalogGuid" id="StatusInformation" />
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
-          <ButtonText>My Tool Window</ButtonText>
-          <LocCanonicalName>.View.MyToolWindow</LocCanonicalName>
+          <ButtonText>Layout Window</ButtonText>
+          <LocCanonicalName>.View.LayoutWindow</LocCanonicalName>
         </Strings>
       </Button>
     </Buttons>
