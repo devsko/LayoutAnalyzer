@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 
-namespace LayoutAnalyzer
+namespace devsko.LayoutAnalyzer
 {
     partial class LayoutControl
     {
@@ -16,6 +16,9 @@ namespace LayoutAnalyzer
         public static readonly object ForegroundKey = VsBrushes.WindowTextKey;
         public static readonly object ForegroundColorKey = VsColors.WindowTextKey;
 
+        public static readonly object BackgroundKey = VsBrushes.ToolWindowBackgroundKey;
+        public static readonly object BackgroundColorKey = VsColors.ToolWindowBackgroundKey;
+
         public static readonly ThemeResourceKey IdentifierForegroundColorKey = new(MefItemsCategory, "Plain Text", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey ClassForegroundColorKey = new(MefItemsCategory, "class name", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey EnumForegroundColorKey = new(MefItemsCategory, "enum name", ThemeResourceKeyType.ForegroundColor);
@@ -24,6 +27,7 @@ namespace LayoutAnalyzer
         public static readonly ThemeResourceKey KeywordForegroundColorKey = new(MefItemsCategory, "Keyword", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey OperatorForegroundColorKey = new(MefItemsCategory, "Operator", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey PunctuationForegroundColorKey = new(MefItemsCategory, "punctuation", ThemeResourceKeyType.ForegroundColor);
+        public static readonly ThemeResourceKey CommentForegroundColorKey = new(MefItemsCategory, "Comment", ThemeResourceKeyType.ForegroundColor);
 
         public static readonly ThemeResourceKey IdentifierBackgroundColorKey = new(MefItemsCategory, "Plain Text", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey ClassBackgroundColorKey = new(MefItemsCategory, "class name", ThemeResourceKeyType.BackgroundColor);
@@ -33,6 +37,7 @@ namespace LayoutAnalyzer
         public static readonly ThemeResourceKey KeywordBackgroundColorKey = new(MefItemsCategory, "Keyword", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey OperatorBackgroundColorKey = new(MefItemsCategory, "Operator", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey PunctuationBackgroundColorKey = new(MefItemsCategory, "punctuation", ThemeResourceKeyType.BackgroundColor);
+        public static readonly ThemeResourceKey CommentBackgroundColorKey = new(MefItemsCategory, "Comment", ThemeResourceKeyType.BackgroundColor);
 
         public static readonly object TreeViewItemInactiveSelectedBackgroundKey = new ThemeResourceKey(TreeViewCategory, "SelectedItemInactive", ThemeResourceKeyType.BackgroundBrush);
     }

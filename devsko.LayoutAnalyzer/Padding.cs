@@ -11,8 +11,13 @@ namespace devsko.LayoutAnalyzer
         private Padding()
         { }
 
-        internal static IEnumerable<(FieldBase Field, int TotalOffset, int Level)> EnumerateWithPaddings(Field[] fields, int size, int startOffset, int level)
+        internal static IEnumerable<(FieldBase Field, int TotalOffset, int Level)> EnumerateWithPaddings(Field[]? fields, int size, int startOffset, int level, bool recursive)
         {
+            if (fields is null)
+            {
+                yield break;
+            }
+
             int offset = startOffset;
             int padding;
             foreach (Field field in fields)
@@ -26,9 +31,9 @@ namespace devsko.LayoutAnalyzer
 
                 yield return (field, offset, level);
 
-                if (field.Children is not null)
+                if (recursive && field.Children is not null)
                 {
-                    foreach ((FieldBase, int, int) child in EnumerateWithPaddings(field.Children, field.Size, offset, level + 1))
+                    foreach ((FieldBase, int, int) child in EnumerateWithPaddings(field.Children, field.Size, offset, level + 1, true))
                     {
                         yield return child;
                     }

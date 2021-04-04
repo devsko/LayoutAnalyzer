@@ -126,7 +126,7 @@ namespace devsko.LayoutAnalyzer.Test
             WriteName(layout.Name);
             Console.WriteLine();
 
-            foreach (var fieldOrPadding in layout.FieldsWithPaddings)
+            foreach (var fieldOrPadding in layout.AllFieldsAndPaddings)
             {
                 WriteHeader(fieldOrPadding.Field.Offset, fieldOrPadding.Field.Size, fieldOrPadding.Level);
 

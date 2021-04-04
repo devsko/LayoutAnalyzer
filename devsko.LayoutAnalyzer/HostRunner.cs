@@ -44,6 +44,7 @@ namespace devsko.LayoutAnalyzer
 
         public TargetFramework TargetFramework { get; private init; }
         public Platform Platform { get; private init; }
+        public bool IsDebug { get; private init; }
 
         private JsonSerializerOptions _jsonOptions;
         private SemaphoreSlim _semaphore;
@@ -53,10 +54,11 @@ namespace devsko.LayoutAnalyzer
 
         private HostRunner(TargetFramework framework, Platform platform, bool debug, bool waitForDebugger)
         {
+            debug |= waitForDebugger;
+
             TargetFramework = framework;
             Platform = platform;
-
-            debug |= waitForDebugger;
+            IsDebug = debug;
 
             _jsonOptions = new JsonSerializerOptions();
             _semaphore = new SemaphoreSlim(1);
@@ -78,9 +80,13 @@ namespace devsko.LayoutAnalyzer
             string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
 
             // TODO This is for development. How are files layout in VS package?
+            //string hostAssemblyPath = Path.GetFullPath(Path.Combine(
+            //    Path.GetDirectoryName(thisAssemblyPath)!,
+            //    "..", "..", "..", "..", "devsko.LayoutAnalyzer.Host", "bin", platformDirectory, debug ? "Debug" : "Release", frameworkDirectory, Path.ChangeExtension("devsko.LayoutAnalyzer.Host.", fileExtension)));
+
             string hostAssemblyPath = Path.GetFullPath(Path.Combine(
                 Path.GetDirectoryName(thisAssemblyPath)!,
-                "..", "..", "..", "..", "devsko.LayoutAnalyzer.Host", "bin", platformDirectory, debug ? "Debug" : "Release", frameworkDirectory, Path.ChangeExtension("devsko.LayoutAnalyzer.Host.", fileExtension)));
+                "Host", platformDirectory, debug ? "Debug" : "Release", frameworkDirectory, Path.ChangeExtension("devsko.LayoutAnalyzer.Host.", fileExtension)));
 
             string exePath;
             string arguments;

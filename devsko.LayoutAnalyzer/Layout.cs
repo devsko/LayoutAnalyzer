@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
@@ -68,6 +69,26 @@ namespace devsko.LayoutAnalyzer
 #endif
         }
 
+        public string Runtime { get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+
+        public string AssemblyName
+        {
+            get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
+
+        public string AssemblyPath { get; set; }
+
         internal Layout(Type type, Analyzer analyzer)
         {
             Fields = analyzer.GetFields(type);
@@ -78,10 +99,13 @@ namespace devsko.LayoutAnalyzer
             AttributeKind = layoutAttr.Value;
             AttributeSize = layoutAttr.Size;
             AttributePack = layoutAttr.Pack;
+            Runtime = $"{RuntimeInformation.FrameworkDescription} ({RuntimeInformation.ProcessArchitecture})";
+            AssemblyName = type.Assembly.FullName ?? string.Empty;
+            AssemblyPath = type.Assembly.Location;
         }
 
         [JsonConstructor]
-        public Layout(Field[] fields, int totalSize, int totalPadding, TokenizedString name, bool isValueType, LayoutKind attributeKind, int attributeSize, int attributePack)
+        public Layout(Field[] fields, int totalSize, int totalPadding, TokenizedString name, bool isValueType, LayoutKind attributeKind, int attributeSize, int attributePack, string runtime, string assemblyName, string assemblyPath)
         {
             Fields = fields;
             TotalSize = totalSize;
@@ -91,10 +115,19 @@ namespace devsko.LayoutAnalyzer
             AttributeKind = attributeKind;
             AttributeSize = attributeSize;
             AttributePack = attributePack;
+            Runtime = runtime;
+            AssemblyName = assemblyName;
+            AssemblyPath = assemblyPath;
         }
 
         [JsonIgnore]
-        public IEnumerable<(FieldBase Field, int TotalOffset, int Level)> FieldsWithPaddings
-            => Padding.EnumerateWithPaddings(Fields, TotalSize, 0, 1);
+        public IEnumerable<FieldBase> FieldsAndPaddings
+            => Padding
+                .EnumerateWithPaddings(Fields, TotalSize, 0, 0, false)
+                .Select(tuple => tuple.Field);
+
+        [JsonIgnore]
+        public IEnumerable<(FieldBase Field, int TotalOffset, int Level)> AllFieldsAndPaddings
+            => Padding.EnumerateWithPaddings(Fields, TotalSize, 0, 1, true);
     }
 }

@@ -65,6 +65,12 @@ namespace devsko.LayoutAnalyzer
             Children = children;
         }
 
+        [JsonIgnore]
+        public IEnumerable<FieldBase> FieldsAndPaddings
+            => Padding
+                .EnumerateWithPaddings(Children, Size, 0, 0, false)
+                .Select(tuple => tuple.Field);
+
         private static readonly bool[] s_defaultNativeIntegerFlags = new[] { true };
 
         private unsafe static int GetOffset(FieldInfo info)

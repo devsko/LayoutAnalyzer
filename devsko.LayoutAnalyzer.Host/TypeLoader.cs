@@ -43,6 +43,16 @@ namespace devsko.LayoutAnalyzer.Host
             Console.Error.WriteLine("TypeLoader initialized");
         }
 
+        public string GetOriginalPath(string path)
+        {
+            if (path.StartsWith(_appDirectory.Path, StringComparison.OrdinalIgnoreCase))
+            {
+                return Path.Combine(Path.GetDirectoryName(AssemblyPath)!, path.Substring(_appDirectory.Path.Length + 1));
+            }
+
+            return path;
+        }
+
         partial void InitializeCore();
 
         partial void DisposeCore();

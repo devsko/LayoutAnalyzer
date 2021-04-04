@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
 
-namespace LayoutAnalyzer
+namespace devsko.LayoutAnalyzer
 {
     public sealed class TextManagerEventSink : IVsTextManagerEvents, IDisposable
     {

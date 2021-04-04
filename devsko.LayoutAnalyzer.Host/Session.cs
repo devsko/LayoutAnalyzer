@@ -72,6 +72,7 @@ namespace devsko.LayoutAnalyzer.Host
 
                 if (layout is not null)
                 {
+                    layout.AssemblyPath = _typeLoader.GetOriginalPath(layout.AssemblyPath);
                     await JsonSerializer.SerializeAsync(_outStream, layout, _jsonOptions, cancellationToken).ConfigureAwait(false);
                 }
             }

@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
-    <PackageReference Include="Ben.Demystifier" Version="0.3.0" />
   </ItemGroup>
  
   <Target Name="_IsValid" BeforeTargets="Build">

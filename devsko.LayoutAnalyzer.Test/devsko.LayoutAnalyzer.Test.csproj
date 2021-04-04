@@ -15,7 +15,7 @@
                       ReferenceOutputAssembly="false" />
   </ItemGroup>
 
-  <Target Name="BuildHost" AfterTargets="Build">
+  <Target Name="BuildHost" BeforeTargets="Build">
 
     <ItemGroup>
       <BatchProjects Include="..\devsko.LayoutAnalyzer.Host\devsko.LayoutAnalyzer.Host.csproj" />

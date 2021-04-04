@@ -2,13 +2,12 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Task = System.Threading.Tasks.Task;
 
-namespace LayoutAnalyzer
+namespace devsko.LayoutAnalyzer
 {
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [ProvideToolWindow(typeof(LayoutWindow), Style = VsDockStyle.Tabbed, Window = ToolWindowGuids.SolutionExplorer)]
@@ -19,6 +18,7 @@ namespace LayoutAnalyzer
         public IVsFontAndColorStorage FontAndColorStorage { get; private set; }
         public IVsTextManager TextManager { get; private set; }
         public TextManagerEventSink TextManagerEventSink { get; private set; }
+        public HostRunner HostRunner { get; private set; }
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -27,6 +27,13 @@ namespace LayoutAnalyzer
             TextManager = (IVsTextManager)await GetServiceAsync(typeof(SVsTextManager));
             FontAndColorStorage = (IVsFontAndColorStorage)await GetServiceAsync(typeof(SVsFontAndColorStorage));
             TextManagerEventSink = await TextManagerEventSink.SubscribeAsync(this);
+            HostRunner = HostRunner.GetHostRunner(TargetFramework.Net, Platform.x64,
+#if DEBUG
+                    debug: true, waitForDebugger: false
+#else
+                    debug: false, waitForDebugger: false
+#endif
+                    );
 
             await MyToolWindowCommand.InitializeAsync(this);
         }
