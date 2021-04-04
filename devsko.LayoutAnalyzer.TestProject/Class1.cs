@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace devsko.LayoutAnalyzer.TestProject
 {
@@ -113,6 +114,49 @@ namespace devsko.LayoutAnalyzer.TestProject
         public long L;
         public T T1 = default!;
     }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Explicit
+    {
+        [FieldOffset(0)]
+        public int I1;
+        [FieldOffset(0)]
+        public int I2;
+        [FieldOffset(0)]
+        public int I3;
+        [FieldOffset(0)]
+        public int I4;
+        [FieldOffset(0)]
+        public int I5;
+        [FieldOffset(0)]
+        public int I6;
+        [FieldOffset(8)]
+        public int I7;
+    }
+
+    public struct NoLayoutStructEmpty
+    { }
+
+    public struct NoLayoutStruct
+    {
+        public int I;
+    }
+
+    [StructLayout(LayoutKind.Auto)]
+    public struct AutoStruct
+    { }
+
+    [StructLayout(LayoutKind.Auto, Size = 0)]
+    public struct AutoStructSize0
+    { }
+
+    [StructLayout(LayoutKind.Auto, Size = 1)]
+    public struct AutoStructSize1
+    { }
+
+    [StructLayout(LayoutKind.Sequential, Size = 10)]
+    public struct AutoStructSize10
+    { }
 
 #if NET5_0_OR_GREATER
 #pragma warning restore CA2211 // Non-constant fields should not be visible

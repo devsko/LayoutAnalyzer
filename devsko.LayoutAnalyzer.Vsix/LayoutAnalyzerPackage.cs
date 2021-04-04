@@ -1,9 +1,12 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -25,6 +28,19 @@ namespace devsko.LayoutAnalyzer
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+            //var pane = GetOutputPane(VSConstants.OutputWindowPaneGuid.GeneralPane_guid, "");
+            //var current = VsColors.GetCurrentThemedColorValues().Where(kvp =>kvp.Key.Category == LayoutControl.TreeViewCategory);
+            //foreach (var group in current.GroupBy(kvp => kvp.Key.Category))
+            //{
+            //    pane.OutputString(group.Key.ToString() + Environment.NewLine);
+            //    foreach (var kvp in group)
+            //    {
+            //        var resourceKey = new ThemeResourceKey(group.Key, kvp.Key.Name, kvp.Key.KeyType);
+            //        var value = System.Windows.Application.Current.FindResource(resourceKey);
+            //        pane.OutputString($"      {kvp.Key.Name} {kvp.Key.KeyType}: {value} ({kvp.Value:x8}){Environment.NewLine}");
+            //    }
+            //}
 
             await MyToolWindowCommand.InitializeAsync(this);
         }

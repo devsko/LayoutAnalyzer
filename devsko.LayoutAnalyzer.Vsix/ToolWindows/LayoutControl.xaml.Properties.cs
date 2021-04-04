@@ -2,7 +2,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,7 +16,36 @@ namespace devsko.LayoutAnalyzer
 {
     partial class LayoutControl
     {
-        private record Property(string Name, string BindingPath, string? Format = null);
+        private class LayoutAttributeConverter : IValueConverter
+        {
+            public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+            {
+                if (value is not Layout layout
+                    || layout.AttributeKind == (layout.IsValueType ? LayoutKind.Sequential : LayoutKind.Auto)
+                        && layout.AttributeSize == 0
+                        && layout.AttributePack == 8)
+                {
+                    return string.Empty;
+                }
+
+                string result = $"LayoutKind.{layout.AttributeKind}";
+                if (layout.AttributeSize != 0)
+                {
+                    result += $", Size={layout.AttributeSize}";
+                }
+                if (layout.AttributePack != 8)
+                {
+                    result += $", Pack={layout.AttributePack}";
+                }
+
+                return result;
+            }
+
+            public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+                => throw new NotImplementedException();
+        }
+
+        private record Property(string Name, string BindingPath, IValueConverter? Converter = null, string? Format = null);
 
         private void CreatePropertyGrid()
         {
@@ -24,8 +55,9 @@ namespace devsko.LayoutAnalyzer
                 new("Type", "Name.Value"),
                 new("Assembly", "AssemblyName"),
                 new("Path", "AssemblyPath"),
-                new("Total size", "TotalSize", "{0:N0} Bytes"),
-                new("Total padding", "TotalPadding", "{0:N0} Bytes"),
+                new("Layout", "", Converter: new LayoutAttributeConverter()),
+                new("Total size", "TotalSize", Format: "{0:N0} Bytes"),
+                new("Total padding", "TotalPadding", Format: "{0:N0} Bytes"),
             };
 
             var labelStyle = (Style)Resources["PropertyStyle"];
@@ -51,6 +83,7 @@ namespace devsko.LayoutAnalyzer
                 {
                     Path = new PropertyPath(property.BindingPath),
                     StringFormat = property.Format,
+                    Converter = property.Converter,
                 };
                 ((FrameworkElement)value.Content).SetBinding(TextBlock.TextProperty, binding);
 

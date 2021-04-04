@@ -32,7 +32,7 @@ namespace devsko.LayoutAnalyzer.Test
 
                 HostRunner runner = HostRunner.GetHostRunner(hostBasePath, TargetFramework.Net, Platform.x64,
 #if DEBUG
-                    debug: true, waitForDebugger: true
+                    debug: true, waitForDebugger: false
 #else
                     debug: false, waitForDebugger: false
 #endif
@@ -74,9 +74,18 @@ namespace devsko.LayoutAnalyzer.Test
                 //await AnalyzeAndPrintAsync("abc,").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc,def").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.TestClass, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.S1, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.TestClass, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.S1, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
+
+                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.NoLayoutStruct, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.NoLayoutStructEmpty, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.AutoStruct, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.AutoStructSize0, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.AutoStructSize1, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.AutoStructSize10, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+
+                await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.Explicit, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
 
                 async Task AnalyzeAndPrintAsync(string typeName)
                 {

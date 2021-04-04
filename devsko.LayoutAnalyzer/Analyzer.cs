@@ -107,8 +107,22 @@ namespace devsko.LayoutAnalyzer
                 .OrderBy(t => t.Offset)
                 .ToArray();
 
-        internal int GetUnpaddedSize(Field[] fields)
-            => fields.Sum(field => field.Children is null ? field.Size : GetUnpaddedSize(field.Children));
+        internal static int GetUnpaddedSize(Field[] fields)
+            => fields.Sum(field
+                => field.Children is null
+                    ? field.Size
+                    : Math.Min(field.Size, GetUnpaddedSize(field.Children)));
+
+        internal static Token GetKind(Type type)
+            => type switch
+            {
+                { IsClass: true } when type.BaseType == typeof(MulticastDelegate) => Token.Delegate,
+                { IsClass: true } => Token.Class,
+                { IsEnum: true } => Token.Enum,
+                { IsValueType: true } => Token.Struct,
+                { IsInterface: true } => Token.Interface,
+                _ => throw new InvalidOperationException("unknown field kind.")
+            };
 
         private static IEnumerable<(Type Type, string Name, Token Token, int Size)> EnumeratePrimitiveTypes()
         {

@@ -40,7 +40,9 @@ namespace devsko.LayoutAnalyzer
                 set;
 #endif
         }
-        public bool IsValueType { get; private
+        public Token Kind
+        {
+            get; private
 #if NETCOREAPP3_1_OR_GREATER
                 init;
 #else
@@ -68,7 +70,6 @@ namespace devsko.LayoutAnalyzer
                 set;
 #endif
         }
-
         public string Runtime { get; private
 #if NETCOREAPP3_1_OR_GREATER
                 init;
@@ -76,7 +77,6 @@ namespace devsko.LayoutAnalyzer
                 set;
 #endif
         }
-
         public string AssemblyName
         {
             get; private
@@ -86,15 +86,14 @@ namespace devsko.LayoutAnalyzer
                 set;
 #endif
         }
-
         public string AssemblyPath { get; set; }
 
         internal Layout(Type type, Analyzer analyzer)
         {
             Fields = analyzer.GetFields(type);
             (Name, TotalSize) = analyzer.GetNameAndSize(type);
-            TotalPadding = TotalSize - analyzer.GetUnpaddedSize(Fields);
-            IsValueType = type.IsValueType;
+            TotalPadding = Math.Max(TotalSize - Analyzer.GetUnpaddedSize(Fields), 0);
+            Kind = Analyzer.GetKind(type);
             StructLayoutAttribute? layoutAttr = type.StructLayoutAttribute!;
             AttributeKind = layoutAttr.Value;
             AttributeSize = layoutAttr.Size;
@@ -105,13 +104,13 @@ namespace devsko.LayoutAnalyzer
         }
 
         [JsonConstructor]
-        public Layout(Field[] fields, int totalSize, int totalPadding, TokenizedString name, bool isValueType, LayoutKind attributeKind, int attributeSize, int attributePack, string runtime, string assemblyName, string assemblyPath)
+        public Layout(Field[] fields, int totalSize, int totalPadding, TokenizedString name, Token kind, LayoutKind attributeKind, int attributeSize, int attributePack, string runtime, string assemblyName, string assemblyPath)
         {
             Fields = fields;
             TotalSize = totalSize;
             TotalPadding = totalPadding;
             Name = name;
-            IsValueType = isValueType;
+            Kind = kind;
             AttributeKind = attributeKind;
             AttributeSize = attributeSize;
             AttributePack = attributePack;
@@ -119,6 +118,10 @@ namespace devsko.LayoutAnalyzer
             AssemblyName = assemblyName;
             AssemblyPath = assemblyPath;
         }
+
+        [JsonIgnore]
+        public bool IsValueType
+            => Kind == Token.Struct || Kind == Token.Enum;
 
         [JsonIgnore]
         public IEnumerable<FieldBase> FieldsAndPaddings

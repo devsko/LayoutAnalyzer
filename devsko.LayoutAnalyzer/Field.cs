@@ -19,6 +19,15 @@ namespace devsko.LayoutAnalyzer
                 set;
 #endif
         }
+        public Token Kind
+        {
+            get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
         public bool IsPublic { get; private
 #if NETCOREAPP3_1_OR_GREATER
                 init;
@@ -46,6 +55,7 @@ namespace devsko.LayoutAnalyzer
             Name = info.Name;
             IsPublic = info.IsPublic;
             Type type = info.FieldType;
+            Kind = Analyzer.GetKind(type);
             (TypeName, Size) = analyzer.GetNameAndSize(type, GetNativeIntegerData(info));
             Offset = GetOffset(info);
             if (type.IsValueType && !type.IsPrimitive)
@@ -55,11 +65,12 @@ namespace devsko.LayoutAnalyzer
         }
 
         [JsonConstructor]
-        public Field(int offset, int size, string name, bool isPublic, TokenizedString typeName, Field[]? children)
+        public Field(int offset, int size, string name, Token kind, bool isPublic, TokenizedString typeName, Field[]? children)
         {
             Offset = offset;
             Size = size;
             Name = name;
+            Kind = kind;
             IsPublic = isPublic;
             TypeName = typeName;
             Children = children;

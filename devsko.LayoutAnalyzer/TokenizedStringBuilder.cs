@@ -93,15 +93,7 @@ namespace devsko.LayoutAnalyzer
             }
 
             ReadOnlySpan<char> name = field.Type.Name.AsSpan();
-            Token token = field.Type switch
-            {
-                { IsClass: true } when field.Type.BaseType == typeof(MulticastDelegate) => Token.Delegate,
-                { IsClass: true } => Token.Class,
-                { IsEnum: true } => Token.Enum,
-                { IsValueType: true } => Token.Struct,
-                { IsInterface: true } => Token.Interface,
-                _ => throw new InvalidOperationException("unknown type of field type.")
-            };
+            Token token = Analyzer.GetKind(field.Type);
             if (sliceApostrophe)
             {
                 Append(name.Slice(0, name.IndexOf('`')), token);
@@ -114,7 +106,7 @@ namespace devsko.LayoutAnalyzer
                 }
                 else
                 {
-                    Append(name,  token);
+                    Append(name, token);
                 }
             }
         }
