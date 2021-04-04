@@ -23,6 +23,8 @@ namespace devsko.LayoutAnalyzer
             package.TextManagerEventSink.ColorsChanged += (sender, args) => ResetColors(package);
             ResetColors(package);
 
+            CreatePropertyGrid();
+
             DataContextChanged += (sender, args) =>
             {
                 if (args.NewValue is not Layout layout)

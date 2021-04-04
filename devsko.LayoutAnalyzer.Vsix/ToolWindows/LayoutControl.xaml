@@ -20,14 +20,14 @@
 
     <UserControl.Resources>
 
-        <Style x:Key="PropertyLabelStyle" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
+        <Style x:Key="PropertyStyle" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
             <Setter Property="Foreground" Value="{DynamicResource {x:Static local:LayoutControl.ForegroundKey}}"/>
             <Setter Property="Padding" Value="3,1,3,1"/>
             <Setter Property="BorderBrush" Value="{DynamicResource {x:Static local:LayoutControl.TreeViewItemInactiveSelectedBackgroundKey}}" />
             <Setter Property="BorderThickness" Value="0,0,1,1" />
             <Setter Property="Grid.Column" Value="0" />
         </Style>
-        <Style x:Key="PropertyLabelValueStyle" TargetType="{x:Type Label}" BasedOn="{StaticResource PropertyLabelStyle}">
+        <Style x:Key="PropertyValueStyle" TargetType="{x:Type Label}" BasedOn="{StaticResource PropertyStyle}">
             <Setter Property="BorderThickness" Value="0,0,0,1" />
             <Setter Property="Grid.Column" Value="1" />
         </Style>
@@ -257,35 +257,12 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0">
+        <Grid x:Name="propertyGrid"
+              Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
-            </Grid.RowDefinitions>
-            <Label Grid.Row="0" Style="{StaticResource ResourceKey=PropertyLabelStyle}" Content="Runtime" />
-            <Label Grid.Row="0" Style="{StaticResource ResourceKey=PropertyLabelValueStyle}" Content="{Binding Path=Runtime}" />
-            <Label Grid.Row="1" Style="{StaticResource ResourceKey=PropertyLabelStyle}" Content="Type" />
-            <Label Grid.Row="1" Style="{StaticResource ResourceKey=PropertyLabelValueStyle}" Content="{Binding Path=Name.Value}" />
-            <Label Grid.Row="2" Style="{StaticResource ResourceKey=PropertyLabelStyle}" Content="Assembly" />
-            <Label Grid.Row="2" Style="{StaticResource ResourceKey=PropertyLabelValueStyle}" Content="{Binding Path=AssemblyName}" />
-            <Label Grid.Row="3" Style="{StaticResource ResourceKey=PropertyLabelStyle}" Content="Path" />
-            <Label Grid.Row="3" Style="{StaticResource ResourceKey=PropertyLabelValueStyle}" Content="{Binding Path=AssemblyPath}" />
-            <Label Grid.Row="4" Style="{StaticResource ResourceKey=PropertyLabelStyle}" Content="Total size" />
-            <Label Grid.Row="4" Style="{StaticResource ResourceKey=PropertyLabelValueStyle}">
-                <TextBlock Text="{Binding Path=TotalSize, StringFormat={}{0:N0} Bytes}" />
-            </Label>
-            <Label Grid.Row="5" Style="{StaticResource ResourceKey=PropertyLabelStyle}" Content="Total padding" />
-            <Label Grid.Row="5" Style="{StaticResource ResourceKey=PropertyLabelValueStyle}">
-                <TextBlock Text="{Binding Path=TotalPadding, StringFormat={}{0:N0} Bytes}" />
-            </Label>
         </Grid>
         <TreeView Grid.Row="1"
                   x:Name="tree"
