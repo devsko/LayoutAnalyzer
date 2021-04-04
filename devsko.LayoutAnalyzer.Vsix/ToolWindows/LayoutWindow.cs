@@ -31,9 +31,8 @@ namespace devsko.LayoutAnalyzer
                 {
                     try
                     {
-                        Layout layout = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + typeof(int).AssemblyQualifiedName);
-
-                        content.DataContext = layout;
+                        content.DataContext = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + "System.IO.Pipelines.Pipe, System.IO.Pipelines");
+                        //content.DataContext = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + typeof(int).AssemblyQualifiedName);
                         //content.DataContext = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + "devsko.LayoutAnalyzer.TestProject.S1, devsko.LayoutAnalyzer.TestProject");
                     }
                     catch (Exception ex)

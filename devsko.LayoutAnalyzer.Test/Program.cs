@@ -13,8 +13,10 @@ namespace devsko.LayoutAnalyzer.Test
         {
             { Token.Identifier, ConsoleColor.Gray },
             { Token.Struct, ConsoleColor.Green },
-            { Token.Enum, ConsoleColor.Green },
+            { Token.Enum, ConsoleColor.DarkGreen },
             { Token.Class, ConsoleColor.DarkBlue },
+            { Token.Delegate, ConsoleColor.DarkCyan },
+            { Token.Interface, ConsoleColor.Black },
             { Token.Keyword, ConsoleColor.Cyan },
             { Token.Operator, ConsoleColor.DarkYellow },
             { Token.Punctuation, ConsoleColor.White },
@@ -24,9 +26,13 @@ namespace devsko.LayoutAnalyzer.Test
         {
             try
             {
-                HostRunner runner = HostRunner.GetHostRunner(TargetFramework.Net, Platform.x64,
+                string hostBasePath = Path.GetFullPath(Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+                    "..", "..", "..", "..", "devsko.LayoutAnalyzer.Host", "bin"));
+
+                HostRunner runner = HostRunner.GetHostRunner(hostBasePath, TargetFramework.Net, Platform.x64,
 #if DEBUG
-                    debug: true, waitForDebugger: false
+                    debug: true, waitForDebugger: true
 #else
                     debug: false, waitForDebugger: false
 #endif

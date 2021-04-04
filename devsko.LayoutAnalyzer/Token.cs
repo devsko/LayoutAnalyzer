@@ -11,6 +11,7 @@ namespace devsko.LayoutAnalyzer
         Class,
         Struct,
         Enum,
+        Delegate,
         Interface,
         Keyword,
         Punctuation,

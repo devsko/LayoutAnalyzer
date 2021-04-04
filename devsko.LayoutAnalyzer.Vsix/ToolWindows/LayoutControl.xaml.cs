@@ -100,6 +100,7 @@ namespace devsko.LayoutAnalyzer
                 SetResources(IdentifierForegroundColorKey, IdentifierBackgroundColorKey);
                 SetResources(ClassForegroundColorKey, ClassBackgroundColorKey);
                 SetResources(StructForegroundColorKey, StructBackgroundColorKey);
+                SetResources(DelegateForegroundColorKey, DelegateBackgroundColorKey);
                 SetResources(EnumForegroundColorKey, EnumBackgroundColorKey);
                 SetResources(InterfaceForegroundColorKey, InterfaceBackgroundColorKey);
                 SetResources(KeywordForegroundColorKey, KeywordBackgroundColorKey);

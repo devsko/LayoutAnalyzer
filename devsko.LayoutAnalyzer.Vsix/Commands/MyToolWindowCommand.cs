@@ -9,7 +9,7 @@ namespace devsko.LayoutAnalyzer
     {
         public static async Task InitializeAsync(AsyncPackage package)
         {
-            var command = new OleMenuCommand(Execute, new CommandID(new Guid("d18f8b78-d4ab-4bc2-bc4e-bb6ed891ee2f"), 0x0100));
+            var command = new OleMenuCommand(Execute, new CommandID(PackageGuids.guidLayoutAnalyzerPackageCmdSet, PackageIds.MyCommand));
             command.BeforeQueryStatus += BeforeQueryStatus;
             var commandService = (IMenuCommandService)await package.GetServiceAsync(typeof(IMenuCommandService));
             commandService?.AddCommand(command);

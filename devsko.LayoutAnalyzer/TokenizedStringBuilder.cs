@@ -24,34 +24,23 @@ namespace devsko.LayoutAnalyzer
 
         public void Append(FieldType field)
         {
-            //field.Type switch
-            //{
-            //    { IsNested: true } => AppendNested(field),
-            //    { IsPointer: true } => AppendPointer(field),
-            //    { IsArray: true } => AppendArray(field),
-            //    { IsGenericType: true } => AppendGeneric(field),
-            //    _ => AppendPrimitive(field)
-            //};
-
-            if (field.Type.IsNested)
+            switch (field.Type)
             {
-                AppendNested(field);
-            }
-            else if (field.Type.IsPointer)
-            {
-                AppendPointer(field);
-            }
-            else if (field.Type.IsArray)
-            {
-                AppendArray(field);
-            }
-            else if (field.Type.IsGenericType)
-            {
-                AppendGeneric(field);
-            }
-            else
-            {
-                AppendPrimitive(field);
+                case { IsNested: true }:
+                    AppendNested(field);
+                    break;
+                case { IsPointer: true }:
+                    AppendPointer(field);
+                    break;
+                case { IsArray: true }:
+                    AppendArray(field);
+                    break;
+                case { IsGenericType: true }:
+                    AppendGeneric(field);
+                    break;
+                default:
+                    AppendPrimitive(field);
+                    break;
             }
         }
 
@@ -106,6 +95,7 @@ namespace devsko.LayoutAnalyzer
             ReadOnlySpan<char> name = field.Type.Name.AsSpan();
             Token token = field.Type switch
             {
+                { IsClass: true } when field.Type.BaseType == typeof(MulticastDelegate) => Token.Delegate,
                 { IsClass: true } => Token.Class,
                 { IsEnum: true } => Token.Enum,
                 { IsValueType: true } => Token.Struct,

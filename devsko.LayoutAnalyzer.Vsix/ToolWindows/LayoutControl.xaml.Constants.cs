@@ -23,6 +23,7 @@ namespace devsko.LayoutAnalyzer
         public static readonly ThemeResourceKey ClassForegroundColorKey = new(MefItemsCategory, "class name", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey EnumForegroundColorKey = new(MefItemsCategory, "enum name", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey StructForegroundColorKey = new(MefItemsCategory, "struct name", ThemeResourceKeyType.ForegroundColor);
+        public static readonly ThemeResourceKey DelegateForegroundColorKey = new(MefItemsCategory, "delegate name", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey InterfaceForegroundColorKey = new(MefItemsCategory, "interface name", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey KeywordForegroundColorKey = new(MefItemsCategory, "Keyword", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey OperatorForegroundColorKey = new(MefItemsCategory, "Operator", ThemeResourceKeyType.ForegroundColor);
@@ -33,6 +34,7 @@ namespace devsko.LayoutAnalyzer
         public static readonly ThemeResourceKey ClassBackgroundColorKey = new(MefItemsCategory, "class name", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey EnumBackgroundColorKey = new(MefItemsCategory, "enum name", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey StructBackgroundColorKey = new(MefItemsCategory, "struct name", ThemeResourceKeyType.BackgroundColor);
+        public static readonly ThemeResourceKey DelegateBackgroundColorKey = new(MefItemsCategory, "delegate name", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey InterfaceBackgroundColorKey = new(MefItemsCategory, "interface name", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey KeywordBackgroundColorKey = new(MefItemsCategory, "Keyword", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey OperatorBackgroundColorKey = new(MefItemsCategory, "Operator", ThemeResourceKeyType.BackgroundColor);

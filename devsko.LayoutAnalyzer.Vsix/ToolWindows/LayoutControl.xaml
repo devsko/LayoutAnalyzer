@@ -36,6 +36,7 @@
         <SolidColorBrush x:Key="ClassForeground"        Color="{DynamicResource {x:Static local:LayoutControl.ClassForegroundColorKey}}" />
         <SolidColorBrush x:Key="EnumForeground"         Color="{DynamicResource {x:Static local:LayoutControl.EnumForegroundColorKey}}" />
         <SolidColorBrush x:Key="StructForeground"       Color="{DynamicResource {x:Static local:LayoutControl.StructForegroundColorKey}}" />
+        <SolidColorBrush x:Key="DelegateForeground"     Color="{DynamicResource {x:Static local:LayoutControl.DelegateForegroundColorKey}}" />
         <SolidColorBrush x:Key="InterfaceForeground"    Color="{DynamicResource {x:Static local:LayoutControl.InterfaceForegroundColorKey}}" />
         <SolidColorBrush x:Key="KeywordForeground"      Color="{DynamicResource {x:Static local:LayoutControl.KeywordForegroundColorKey}}" />
         <SolidColorBrush x:Key="PunctuationForeground"  Color="{DynamicResource {x:Static local:LayoutControl.PunctuationForegroundColorKey}}" />
@@ -46,6 +47,7 @@
         <SolidColorBrush x:Key="ClassBackground"        Color="{DynamicResource {x:Static local:LayoutControl.ClassBackgroundColorKey}}" />
         <SolidColorBrush x:Key="EnumBackground"         Color="{DynamicResource {x:Static local:LayoutControl.EnumBackgroundColorKey}}" />
         <SolidColorBrush x:Key="StructBackground"       Color="{DynamicResource {x:Static local:LayoutControl.StructBackgroundColorKey}}" />
+        <SolidColorBrush x:Key="DelegateBackground"     Color="{DynamicResource {x:Static local:LayoutControl.DelegateBackgroundColorKey}}" />
         <SolidColorBrush x:Key="InterfaceBackground"    Color="{DynamicResource {x:Static local:LayoutControl.InterfaceBackgroundColorKey}}" />
         <SolidColorBrush x:Key="KeywordBackground"      Color="{DynamicResource {x:Static local:LayoutControl.KeywordBackgroundColorKey}}" />
         <SolidColorBrush x:Key="PunctuationBackground"  Color="{DynamicResource {x:Static local:LayoutControl.PunctuationBackgroundColorKey}}" />
@@ -205,7 +207,7 @@
         <HierarchicalDataTemplate DataType="{x:Type analyzer:Layout}"
                                   ItemsSource="{Binding Path=FieldsAndPaddings}">
             <StackPanel Orientation="Horizontal"
-                        Margin="0,3,0,3">
+                        Margin="0,1,0,1">
                 <TextBlock Foreground="{StaticResource IdentifierForeground}"
                            FontFamily="{DynamicResource CodeFontFamily}"
                            Text="{Binding Path=Name.Value}" />
@@ -214,7 +216,7 @@
         <HierarchicalDataTemplate DataType="{x:Type analyzer:Field}"
                                   ItemsSource="{Binding Path=FieldsAndPaddings}">
             <StackPanel Orientation="Horizontal"
-                        Margin="0,3,0,3">
+                        Margin="0,1,0,1">
                 <TextBlock Width="30"
                            TextAlignment="Right"
                            Text="{Binding Path=Offset}" />
@@ -233,7 +235,7 @@
         </HierarchicalDataTemplate>
         <DataTemplate DataType="{x:Type analyzer:Padding}">
             <StackPanel Orientation="Horizontal"
-                        Margin="0,3,0,3">
+                        Margin="0,1,0,1">
                 <TextBlock Width="30"
                            TextAlignment="Right"
                            Text="{Binding Path=Offset}" />

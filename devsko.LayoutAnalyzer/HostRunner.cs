@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,9 +26,9 @@ namespace devsko.LayoutAnalyzer
     {
         private static readonly ConcurrentDictionary<(TargetFramework, Platform), HostRunner> s_cache = new();
 
-        public static HostRunner GetHostRunner(TargetFramework framework, Platform platform, bool debug = false, bool waitForDebugger = false)
+        public static HostRunner GetHostRunner(string hostBasePath, TargetFramework framework, Platform platform, bool debug = false, bool waitForDebugger = false)
         {
-            return s_cache.GetOrAdd((framework, platform), _ => new HostRunner(framework, platform, debug, waitForDebugger));
+            return s_cache.GetOrAdd((framework, platform), _ => new HostRunner(hostBasePath, framework, platform, debug, waitForDebugger));
         }
 
         public static void DisposeAll()
@@ -52,7 +51,7 @@ namespace devsko.LayoutAnalyzer
         private Process? _process;
         private EofDetectingStream? _outStream;
 
-        private HostRunner(TargetFramework framework, Platform platform, bool debug, bool waitForDebugger)
+        private HostRunner(string hostBasePath, TargetFramework framework, Platform platform, bool debug, bool waitForDebugger)
         {
             debug |= waitForDebugger;
 
@@ -77,16 +76,12 @@ namespace devsko.LayoutAnalyzer
                 _ => throw new ArgumentException("", nameof(platform))
             };
 
-            string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
-
-            // TODO This is for development. How are files layout in VS package?
-            //string hostAssemblyPath = Path.GetFullPath(Path.Combine(
-            //    Path.GetDirectoryName(thisAssemblyPath)!,
-            //    "..", "..", "..", "..", "devsko.LayoutAnalyzer.Host", "bin", platformDirectory, debug ? "Debug" : "Release", frameworkDirectory, Path.ChangeExtension("devsko.LayoutAnalyzer.Host.", fileExtension)));
-
             string hostAssemblyPath = Path.GetFullPath(Path.Combine(
-                Path.GetDirectoryName(thisAssemblyPath)!,
-                "Host", platformDirectory, debug ? "Debug" : "Release", frameworkDirectory, Path.ChangeExtension("devsko.LayoutAnalyzer.Host.", fileExtension)));
+                hostBasePath,
+                platformDirectory,
+                debug ? "Debug" : "Release",
+                frameworkDirectory,
+                Path.ChangeExtension("devsko.LayoutAnalyzer.Host.", fileExtension)));
 
             string exePath;
             string arguments;
