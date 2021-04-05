@@ -16,7 +16,7 @@ namespace devsko.LayoutAnalyzer.Host
 
         [MemberNotNull(nameof(_appDomain))]
         [MemberNotNull(nameof(_marshaledTypeLoader))]
-        partial void InitializeCore()
+        private void InitializeCore()
         {
             string hostAssemblyDirectoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             CopyFiles(hostAssemblyDirectoryPath, "devsko.LayoutAnalyzer.???");
@@ -39,7 +39,7 @@ namespace devsko.LayoutAnalyzer.Host
         public Layout? LoadAndAnalyze(AssemblyName assemblyName, string typeName)
             => _marshaledTypeLoader.LoadAndAnalyze(assemblyName, typeName);
 
-        partial void DisposeCore()
+        private void DisposeCore()
         {
             AppDomain.Unload(_appDomain);
         }

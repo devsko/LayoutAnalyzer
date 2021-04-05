@@ -35,7 +35,8 @@ namespace devsko.LayoutAnalyzer.Host
                             await Task.Delay(interval, _cts.Token).ConfigureAwait(false);
                             if (!Debugger.IsAttached)
                             {
-                                Process.GetCurrentProcess().Kill();
+                                Console.Error.WriteLine("Shutdown idle host");
+                                Environment.Exit(0);
                             }
                         }
                     }).ConfigureAwait(false);

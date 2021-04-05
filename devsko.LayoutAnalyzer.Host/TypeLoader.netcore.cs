@@ -37,7 +37,7 @@ namespace devsko.LayoutAnalyzer.Host
 
         [MemberNotNull(nameof(_loadContext))]
         [MemberNotNull(nameof(_analyzer))]
-        partial void InitializeCore()
+        private void InitializeCore()
         {
             _loadContext = new LoadContext(Path.Combine(_appDirectory.Path, Path.GetFileName(AssemblyPath)));
             _analyzer = new Analyzer();
@@ -56,7 +56,7 @@ namespace devsko.LayoutAnalyzer.Host
             return _analyzer.Analyze(type);
         }
 
-        partial void DisposeCore()
+        private void DisposeCore()
         {
             _analyzer = null!;
 

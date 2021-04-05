@@ -16,8 +16,9 @@ namespace devsko.LayoutAnalyzer
 {
     partial class LayoutControl
     {
-        private class LayoutAttributeConverter : IValueConverter
+        private class StructLayoutAttributeConverter : IValueConverter
         {
+            public static readonly StructLayoutAttributeConverter Instance = new();
             public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
             {
                 if (value is not Layout layout
@@ -55,7 +56,7 @@ namespace devsko.LayoutAnalyzer
                 new("Type", "Name.Value"),
                 new("Assembly", "AssemblyName"),
                 new("Path", "AssemblyPath"),
-                new("Layout", "", Converter: new LayoutAttributeConverter()),
+                new("StructLayout", "", Converter: StructLayoutAttributeConverter.Instance),
                 new("Total size", "TotalSize", Format: "{0:N0} Bytes"),
                 new("Total padding", "TotalPadding", Format: "{0:N0} Bytes"),
             };

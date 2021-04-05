@@ -53,10 +53,6 @@ namespace devsko.LayoutAnalyzer.Host
             return path;
         }
 
-        partial void InitializeCore();
-
-        partial void DisposeCore();
-
         public void Dispose()
         {
             DisposeCore();
