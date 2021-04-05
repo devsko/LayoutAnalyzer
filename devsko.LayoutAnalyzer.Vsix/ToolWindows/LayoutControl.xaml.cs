@@ -20,7 +20,7 @@ namespace devsko.LayoutAnalyzer
 
             InitializeComponent();
 
-            package.TextManagerEventSink.ColorsChanged += (sender, args) => ResetColors(package);
+            package.TextManagerEventSink.ColorsChanged += () => ResetColors(package);
             ResetColors(package);
 
             CreatePropertyGrid();

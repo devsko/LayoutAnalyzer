@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
+using Task = System.Threading.Tasks.Task;
 
 namespace devsko.LayoutAnalyzer
 {
     public sealed class TextManagerEventSink : IVsTextManagerEvents, IDisposable
     {
-        public event EventHandler ColorsChanged;
+        public event Action ColorsChanged;
 
         private IConnectionPoint _connectionPoint;
         private uint _cookie;
@@ -48,8 +50,25 @@ namespace devsko.LayoutAnalyzer
 
             if (pColorPrefs is not null && pColorPrefs.Length > 0)
             {
-                ColorsChanged?.Invoke(this, EventArgs.Empty);
+                DelayEvent();
             }
+        }
+
+        private CancellationTokenSource _tokenSource;
+
+        private void DelayEvent()
+        {
+            if (_tokenSource is null)
+            {
+                _tokenSource = new CancellationTokenSource();
+                _tokenSource.Token.Register(static state =>
+                {
+                    var @this = (TextManagerEventSink)state;
+                    @this._tokenSource = null;
+                    @this.ColorsChanged?.Invoke();
+                }, this, useSynchronizationContext: true);
+            }
+            _tokenSource?.CancelAfter(TimeSpan.FromMilliseconds(500));
         }
     }
 }
