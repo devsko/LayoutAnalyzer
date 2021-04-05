@@ -61,7 +61,7 @@
                         <Path x:Name="ExpandPath"
                                   Data="{StaticResource TreeArrow}"
                                   Fill="Transparent"
-                                  Margin="7,7,0,0"
+                                  Margin="5,5,0,0"
                                   StrokeThickness="1"
                                   Stroke="{DynamicResource {x:Static local:LayoutControl.TreeViewGlyphKey}}">
                             <Path.RenderTransform>

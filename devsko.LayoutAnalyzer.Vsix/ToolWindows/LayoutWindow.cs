@@ -29,6 +29,7 @@ namespace devsko.LayoutAnalyzer
             {
                 package.JoinableTaskFactory.RunAsync(async () =>
                 {
+                    content.DataContext = null;
                     try
                     {
                         //content.DataContext = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + "devsko.LayoutAnalyzer.TestProject.Explicit, devsko.LayoutAnalyzer.TestProject");
@@ -38,7 +39,6 @@ namespace devsko.LayoutAnalyzer
                     }
                     catch (Exception ex)
                     {
-                        content.DataContext = null;
                         ex.ToStringDemystified();
                     }
                 });

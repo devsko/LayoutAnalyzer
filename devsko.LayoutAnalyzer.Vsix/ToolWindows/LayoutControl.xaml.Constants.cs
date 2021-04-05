@@ -19,7 +19,7 @@ namespace devsko.LayoutAnalyzer
         public static readonly object BackgroundKey = VsBrushes.ToolWindowBackgroundKey;
         public static readonly object BackgroundColorKey = VsColors.ToolWindowBackgroundKey;
 
-        public static readonly ThemeResourceKey IdentifierForegroundColorKey = new(MefItemsCategory, "Plain Text", ThemeResourceKeyType.ForegroundColor);
+        public static readonly ThemeResourceKey IdentifierForegroundColorKey = new(MefItemsCategory, "Identifier", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey ClassForegroundColorKey = new(MefItemsCategory, "class name", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey EnumForegroundColorKey = new(MefItemsCategory, "enum name", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey StructForegroundColorKey = new(MefItemsCategory, "struct name", ThemeResourceKeyType.ForegroundColor);
@@ -30,7 +30,7 @@ namespace devsko.LayoutAnalyzer
         public static readonly ThemeResourceKey PunctuationForegroundColorKey = new(MefItemsCategory, "punctuation", ThemeResourceKeyType.ForegroundColor);
         public static readonly ThemeResourceKey CommentForegroundColorKey = new(MefItemsCategory, "Comment", ThemeResourceKeyType.ForegroundColor);
 
-        public static readonly ThemeResourceKey IdentifierBackgroundColorKey = new(MefItemsCategory, "Plain Text", ThemeResourceKeyType.BackgroundColor);
+        public static readonly ThemeResourceKey IdentifierBackgroundColorKey = new(MefItemsCategory, "Identifier", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey ClassBackgroundColorKey = new(MefItemsCategory, "class name", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey EnumBackgroundColorKey = new(MefItemsCategory, "enum name", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey StructBackgroundColorKey = new(MefItemsCategory, "struct name", ThemeResourceKeyType.BackgroundColor);

@@ -48,18 +48,21 @@
                     <HierarchicalDataTemplate DataType="{x:Type analyzer:Layout}"
                                               ItemsSource="{Binding Path=FieldsAndPaddings}">
                         <StackPanel Orientation="Horizontal"
-                                    Margin="0,2,0,2">
-                            <imaging:CrispImage Moniker="{Binding Path=Kind, Converter={StaticResource ImageMonikerConverter}}" />
-                            <TextBlock Foreground="{StaticResource IdentifierForeground}"
-                                       Padding="10,0,0,0"
-                                       FontFamily="{DynamicResource CodeFontFamily}"
-                                       Text="{Binding Path=Name.Value}" />
+                                    Margin="0">
+                            <imaging:CrispImage Width="12"
+                                                Height="12"
+                                                Margin="0,1,0,0"
+                                                Moniker="{Binding Path=Kind, Converter={StaticResource ImageMonikerConverter}}" />
+                            <local:TokenizedTextBlock String="{Binding Path=Name}"
+                                                      Height="16"
+                                                      Padding="10,0,0,0"
+                                                      FontFamily="{DynamicResource CodeFontFamily}" />
                         </StackPanel>
                     </HierarchicalDataTemplate>
                     <HierarchicalDataTemplate DataType="{x:Type analyzer:Field}"
                                               ItemsSource="{Binding Path=FieldsAndPaddings}">
                         <StackPanel Orientation="Horizontal"
-                                    Margin="0,2,0,2">
+                                    Margin="0">
                             <TextBlock Width="30"
                                        TextAlignment="Right"
                                        Text="{Binding Path=Offset}" />
@@ -67,11 +70,14 @@
                                        Padding="0,0,10,0"
                                        TextAlignment="Right"
                                        Text="{Binding Path=Size}" />
-                            <imaging:CrispImage Moniker="{Binding Path=Kind, Converter={StaticResource ImageMonikerConverter}}" />
-                            <TextBlock Foreground="{StaticResource IdentifierForeground}"
-                                       Padding="10,0,5,0"
-                                       FontFamily="{DynamicResource CodeFontFamily}"
-                                       Text="{Binding Path=TypeName.Value}" />
+                            <imaging:CrispImage Width="12"
+                                                Height="12"
+                                                Margin="0,1,0,0"
+                                                Moniker="{Binding Path=Kind, Converter={StaticResource ImageMonikerConverter}}" />
+                            <local:TokenizedTextBlock String="{Binding Path=TypeName}"
+                                                      Height="16"
+                                                      Padding="10,0,5,0"
+                                                      FontFamily="{DynamicResource CodeFontFamily}" />
                             <TextBlock Foreground="{StaticResource IdentifierForeground}"
                                        FontFamily="{DynamicResource CodeFontFamily}"
                                        Text="{Binding Path=Name}" />
@@ -79,7 +85,7 @@
                     </HierarchicalDataTemplate>
                     <DataTemplate DataType="{x:Type analyzer:Padding}">
                         <StackPanel Orientation="Horizontal"
-                                    Margin="0,2,0,2">
+                                    Margin="0">
                             <TextBlock Width="30"
                                        TextAlignment="Right"
                                        Text="{Binding Path=Offset}" />
@@ -87,11 +93,15 @@
                                        Padding="0,0,10,0"
                                        TextAlignment="Right"
                                        Text="{Binding Path=Size}" />
-                            <imaging:CrispImage Moniker="{x:Static catalog:KnownMonikers.SpaceDown}" />
+                            <imaging:CrispImage Width="12"
+                                                Height="12"
+                                                Margin="0,1,0,0"
+                                                Moniker="{x:Static catalog:KnownMonikers.SpaceDown}" />
                             <TextBlock Foreground="{StaticResource CommentForeground}"
                                        Background="{StaticResource CommentBackground}"
                                        FontFamily="{DynamicResource CodeFontFamily}"
                                        Padding="10,0,0,0"
+                                       Height="16"
                                        Text="=== Padding ===" />
                         </StackPanel>
                     </DataTemplate>

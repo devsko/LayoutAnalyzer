@@ -57,6 +57,7 @@
       <DependentUpon>source.extension.vsixmanifest</DependentUpon>
     </Compile>
     <Compile Include="TextManagerEventSink.cs" />
+    <Compile Include="TokenizedTextBlock.cs" />
     <Compile Include="ToolWindows\ImageMonikerConverter.cs" />
     <Compile Include="ToolWindows\LayoutControl.xaml.Constants.cs" />
     <Compile Include="ToolWindows\LayoutControl.xaml.Properties.cs" />
