@@ -3,255 +3,103 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:s="clr-namespace:System;assembly=mscorlib"
              xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
-             xmlns:theming="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Imaging"
-             xmlns:util="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Utilities"
              xmlns:catalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
-             xmlns:local="clr-namespace:devsko.LayoutAnalyzer" xmlns:platformui="clr-namespace:Microsoft.Internal.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
              xmlns:analyzer="clr-namespace:devsko.LayoutAnalyzer;assembly=devsko.LayoutAnalyzer"
+             xmlns:local="clr-namespace:devsko.LayoutAnalyzer"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300"
              Name="LayoutWindow">
-
-    <d:UserControl.DataContext>
-        <analyzer:Layout />
-    </d:UserControl.DataContext>
 
     <UserControl.Resources>
 
-        <Style x:Key="PropertyStyle" TargetType="{x:Type Label}" BasedOn="{StaticResource {x:Type Label}}">
-            <Setter Property="Foreground" Value="{DynamicResource {x:Static local:LayoutControl.ForegroundKey}}"/>
-            <Setter Property="Padding" Value="3,1,3,1"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static local:LayoutControl.TreeViewItemInactiveSelectedBackgroundKey}}" />
-            <Setter Property="BorderThickness" Value="0,0,1,1" />
-            <Setter Property="Grid.Column" Value="0" />
-        </Style>
-        <Style x:Key="PropertyValueStyle" TargetType="{x:Type Label}" BasedOn="{StaticResource PropertyStyle}">
-            <Setter Property="BorderThickness" Value="0,0,0,1" />
-            <Setter Property="Grid.Column" Value="1" />
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="TreeViewStyle.xaml" />
+                <ResourceDictionary Source="PropertyStyle.xaml" />
 
-        <SolidColorBrush x:Key="IdentifierForeground"   Color="{DynamicResource {x:Static local:LayoutControl.IdentifierForegroundColorKey}}" />
-        <SolidColorBrush x:Key="ClassForeground"        Color="{DynamicResource {x:Static local:LayoutControl.ClassForegroundColorKey}}" />
-        <SolidColorBrush x:Key="EnumForeground"         Color="{DynamicResource {x:Static local:LayoutControl.EnumForegroundColorKey}}" />
-        <SolidColorBrush x:Key="StructForeground"       Color="{DynamicResource {x:Static local:LayoutControl.StructForegroundColorKey}}" />
-        <SolidColorBrush x:Key="DelegateForeground"     Color="{DynamicResource {x:Static local:LayoutControl.DelegateForegroundColorKey}}" />
-        <SolidColorBrush x:Key="InterfaceForeground"    Color="{DynamicResource {x:Static local:LayoutControl.InterfaceForegroundColorKey}}" />
-        <SolidColorBrush x:Key="KeywordForeground"      Color="{DynamicResource {x:Static local:LayoutControl.KeywordForegroundColorKey}}" />
-        <SolidColorBrush x:Key="PunctuationForeground"  Color="{DynamicResource {x:Static local:LayoutControl.PunctuationForegroundColorKey}}" />
-        <SolidColorBrush x:Key="OperatorForeground"     Color="{DynamicResource {x:Static local:LayoutControl.OperatorForegroundColorKey}}" />
-        <SolidColorBrush x:Key="CommentForeground"      Color="{DynamicResource {x:Static local:LayoutControl.CommentForegroundColorKey}}" />
+                <ResourceDictionary>
+                    
+                    <SolidColorBrush x:Key="IdentifierForeground"   Color="{DynamicResource {x:Static local:LayoutControl.IdentifierForegroundColorKey}}" />
+                    <SolidColorBrush x:Key="ClassForeground"        Color="{DynamicResource {x:Static local:LayoutControl.ClassForegroundColorKey}}" />
+                    <SolidColorBrush x:Key="EnumForeground"         Color="{DynamicResource {x:Static local:LayoutControl.EnumForegroundColorKey}}" />
+                    <SolidColorBrush x:Key="StructForeground"       Color="{DynamicResource {x:Static local:LayoutControl.StructForegroundColorKey}}" />
+                    <SolidColorBrush x:Key="DelegateForeground"     Color="{DynamicResource {x:Static local:LayoutControl.DelegateForegroundColorKey}}" />
+                    <SolidColorBrush x:Key="InterfaceForeground"    Color="{DynamicResource {x:Static local:LayoutControl.InterfaceForegroundColorKey}}" />
+                    <SolidColorBrush x:Key="KeywordForeground"      Color="{DynamicResource {x:Static local:LayoutControl.KeywordForegroundColorKey}}" />
+                    <SolidColorBrush x:Key="PunctuationForeground"  Color="{DynamicResource {x:Static local:LayoutControl.PunctuationForegroundColorKey}}" />
+                    <SolidColorBrush x:Key="OperatorForeground"     Color="{DynamicResource {x:Static local:LayoutControl.OperatorForegroundColorKey}}" />
+                    <SolidColorBrush x:Key="CommentForeground"      Color="{DynamicResource {x:Static local:LayoutControl.CommentForegroundColorKey}}" />
 
-        <SolidColorBrush x:Key="IdentifierBackground"   Color="{DynamicResource {x:Static local:LayoutControl.IdentifierBackgroundColorKey}}" />
-        <SolidColorBrush x:Key="ClassBackground"        Color="{DynamicResource {x:Static local:LayoutControl.ClassBackgroundColorKey}}" />
-        <SolidColorBrush x:Key="EnumBackground"         Color="{DynamicResource {x:Static local:LayoutControl.EnumBackgroundColorKey}}" />
-        <SolidColorBrush x:Key="StructBackground"       Color="{DynamicResource {x:Static local:LayoutControl.StructBackgroundColorKey}}" />
-        <SolidColorBrush x:Key="DelegateBackground"     Color="{DynamicResource {x:Static local:LayoutControl.DelegateBackgroundColorKey}}" />
-        <SolidColorBrush x:Key="InterfaceBackground"    Color="{DynamicResource {x:Static local:LayoutControl.InterfaceBackgroundColorKey}}" />
-        <SolidColorBrush x:Key="KeywordBackground"      Color="{DynamicResource {x:Static local:LayoutControl.KeywordBackgroundColorKey}}" />
-        <SolidColorBrush x:Key="PunctuationBackground"  Color="{DynamicResource {x:Static local:LayoutControl.PunctuationBackgroundColorKey}}" />
-        <SolidColorBrush x:Key="OperatorBackground"     Color="{DynamicResource {x:Static local:LayoutControl.OperatorBackgroundColorKey}}" />
-        <SolidColorBrush x:Key="CommentBackground"      Color="{DynamicResource {x:Static local:LayoutControl.CommentBackgroundColorKey}}" />
+                    <SolidColorBrush x:Key="IdentifierBackground"   Color="{DynamicResource {x:Static local:LayoutControl.IdentifierBackgroundColorKey}}" />
+                    <SolidColorBrush x:Key="ClassBackground"        Color="{DynamicResource {x:Static local:LayoutControl.ClassBackgroundColorKey}}" />
+                    <SolidColorBrush x:Key="EnumBackground"         Color="{DynamicResource {x:Static local:LayoutControl.EnumBackgroundColorKey}}" />
+                    <SolidColorBrush x:Key="StructBackground"       Color="{DynamicResource {x:Static local:LayoutControl.StructBackgroundColorKey}}" />
+                    <SolidColorBrush x:Key="DelegateBackground"     Color="{DynamicResource {x:Static local:LayoutControl.DelegateBackgroundColorKey}}" />
+                    <SolidColorBrush x:Key="InterfaceBackground"    Color="{DynamicResource {x:Static local:LayoutControl.InterfaceBackgroundColorKey}}" />
+                    <SolidColorBrush x:Key="KeywordBackground"      Color="{DynamicResource {x:Static local:LayoutControl.KeywordBackgroundColorKey}}" />
+                    <SolidColorBrush x:Key="PunctuationBackground"  Color="{DynamicResource {x:Static local:LayoutControl.PunctuationBackgroundColorKey}}" />
+                    <SolidColorBrush x:Key="OperatorBackground"     Color="{DynamicResource {x:Static local:LayoutControl.OperatorBackgroundColorKey}}" />
+                    <SolidColorBrush x:Key="CommentBackground"      Color="{DynamicResource {x:Static local:LayoutControl.CommentBackgroundColorKey}}" />
 
-        <FontFamily x:Key="CodeFontFamily">Consolas</FontFamily>
+                    <FontFamily x:Key="CodeFontFamily">Consolas</FontFamily>
 
-        <local:ImageMonikerConverter x:Key="ImageMonikerConverter" />
+                    <local:ImageMonikerConverter x:Key="ImageMonikerConverter" />
 
-        <Style x:Key="TreeViewStyle1" TargetType="{x:Type TreeView}">
-            <Setter Property="Background" Value="{DynamicResource {x:Static local:LayoutControl.BackgroundKey}}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static local:LayoutControl.TreeViewItemInactiveSelectedBackgroundKey}}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="1"/>
-            <Setter Property="Foreground" Value="{DynamicResource {x:Static local:LayoutControl.ForegroundKey}}"/>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
-            <Setter Property="ScrollViewer.PanningMode" Value="Both"/>
-            <Setter Property="Stylus.IsFlicksEnabled" Value="False"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type TreeView}">
-                        <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="true">
-                            <ScrollViewer x:Name="_tv_scrollviewer_" Background="{TemplateBinding Background}" CanContentScroll="false" Focusable="false" HorizontalScrollBarVisibility="{TemplateBinding ScrollViewer.HorizontalScrollBarVisibility}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" VerticalScrollBarVisibility="{TemplateBinding ScrollViewer.VerticalScrollBarVisibility}">
-                                <ItemsPresenter/>
-                            </ScrollViewer>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="VirtualizingPanel.IsVirtualizing" Value="true">
-                                <Setter Property="CanContentScroll" TargetName="_tv_scrollviewer_" Value="true"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="VirtualizingPanel.IsVirtualizing" Value="true">
-                    <Setter Property="ItemsPanel">
-                        <Setter.Value>
-                            <ItemsPanelTemplate>
-                                <VirtualizingStackPanel/>
-                            </ItemsPanelTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="TreeViewItemFocusVisual">
-            <Setter Property="Control.Template">
-                <Setter.Value>
-                    <ControlTemplate>
-                        <Rectangle Stroke="{DynamicResource {x:Static local:LayoutControl.TreeViewFocusVisualBorderKey}}"/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <PathGeometry x:Key="TreeArrow" Figures="M0,6 L0,0 L6,0 z"/>
-        <Style x:Key="ExpandCollapseToggleStyle" TargetType="{x:Type ToggleButton}">
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type ToggleButton}">
-                        <Border Background="Transparent">
-                            <Path x:Name="ExpandPath"
-                                  Data="{StaticResource TreeArrow}"
-                                  Fill="Transparent"
-                                  Margin="7,7,0,0"
-                                  StrokeThickness="1"
-                                  Stroke="{DynamicResource {x:Static local:LayoutControl.TreeViewGlyphKey}}">
-                                <Path.RenderTransform>
-                                    <RotateTransform Angle="135" CenterY="3" CenterX="3"/>
-                                </Path.RenderTransform>
-                            </Path>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="RenderTransform" TargetName="ExpandPath">
-                                    <Setter.Value>
-                                        <RotateTransform Angle="180" CenterY="3" CenterX="3"/>
-                                    </Setter.Value>
-                                </Setter>
-                                <Setter Property="Fill" TargetName="ExpandPath" Value="{DynamicResource {x:Static local:LayoutControl.TreeViewGlyphKey}}"/>
-                                <Setter Property="Stroke" TargetName="ExpandPath" Value="{DynamicResource {x:Static local:LayoutControl.TreeViewGlyphKey}}"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Stroke" TargetName="ExpandPath" Value="{DynamicResource {x:Static local:LayoutControl.TreeViewGlyphMouseOverKey}}"/>
-                                <Setter Property="Fill" TargetName="ExpandPath" Value="Transparent"/>
-                            </Trigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="IsMouseOver" Value="True"/>
-                                    <Condition Property="IsChecked" Value="True"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Stroke" TargetName="ExpandPath" Value="{DynamicResource {x:Static local:LayoutControl.TreeViewGlyphMouseOverKey}}"/>
-                                <Setter Property="Fill" TargetName="ExpandPath" Value="{DynamicResource {x:Static local:LayoutControl.TreeViewGlyphMouseOverKey}}"/>
-                            </MultiTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style x:Key="TreeViewItemStyle1" TargetType="{x:Type TreeViewItem}">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="HorizontalContentAlignment" Value="{Binding HorizontalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
-            <Setter Property="VerticalContentAlignment" Value="{Binding VerticalContentAlignment, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"/>
-            <Setter Property="Padding" Value="1,0,0,0"/>
-            <Setter Property="Foreground" Value="{DynamicResource {x:Static local:LayoutControl.ForegroundKey}}"/>
-            <Setter Property="FocusVisualStyle" Value="{StaticResource TreeViewItemFocusVisual}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="{x:Type TreeViewItem}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition MinWidth="19" Width="Auto"/>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <ToggleButton x:Name="Expander" ClickMode="Press" IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}" Style="{StaticResource ExpandCollapseToggleStyle}"/>
-                            <Border x:Name="Bd" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Grid.Column="1" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="true">
-                                <ContentPresenter x:Name="PART_Header" ContentSource="Header" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                            </Border>
-                            <ItemsPresenter x:Name="ItemsHost" Grid.ColumnSpan="2" Grid.Column="1" Grid.Row="1"/>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsExpanded" Value="false">
-                                <Setter Property="Visibility" TargetName="ItemsHost" Value="Collapsed"/>
-                            </Trigger>
-                            <Trigger Property="HasItems" Value="false">
-                                <Setter Property="Visibility" TargetName="Expander" Value="Hidden"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="VirtualizingPanel.IsVirtualizing" Value="true">
-                    <Setter Property="ItemsPanel">
-                        <Setter.Value>
-                            <ItemsPanelTemplate>
-                                <VirtualizingStackPanel/>
-                            </ItemsPanelTemplate>
-                        </Setter.Value>
-                    </Setter>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+                    <HierarchicalDataTemplate DataType="{x:Type analyzer:Layout}"
+                                              ItemsSource="{Binding Path=FieldsAndPaddings}">
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2,0,2">
+                            <imaging:CrispImage Moniker="{Binding Path=Kind, Converter={StaticResource ImageMonikerConverter}}" />
+                            <TextBlock Foreground="{StaticResource IdentifierForeground}"
+                                       Padding="10,0,0,0"
+                                       FontFamily="{DynamicResource CodeFontFamily}"
+                                       Text="{Binding Path=Name.Value}" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type analyzer:Field}"
+                                              ItemsSource="{Binding Path=FieldsAndPaddings}">
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2,0,2">
+                            <TextBlock Width="30"
+                                       TextAlignment="Right"
+                                       Text="{Binding Path=Offset}" />
+                            <TextBlock Width="30"
+                                       Padding="0,0,10,0"
+                                       TextAlignment="Right"
+                                       Text="{Binding Path=Size}" />
+                            <imaging:CrispImage Moniker="{Binding Path=Kind, Converter={StaticResource ImageMonikerConverter}}" />
+                            <TextBlock Foreground="{StaticResource IdentifierForeground}"
+                                       Padding="10,0,5,0"
+                                       FontFamily="{DynamicResource CodeFontFamily}"
+                                       Text="{Binding Path=TypeName.Value}" />
+                            <TextBlock Foreground="{StaticResource IdentifierForeground}"
+                                       FontFamily="{DynamicResource CodeFontFamily}"
+                                       Text="{Binding Path=Name}" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                    <DataTemplate DataType="{x:Type analyzer:Padding}">
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0,2,0,2">
+                            <TextBlock Width="30"
+                                       TextAlignment="Right"
+                                       Text="{Binding Path=Offset}" />
+                            <TextBlock Width="30"
+                                       Padding="0,0,10,0"
+                                       TextAlignment="Right"
+                                       Text="{Binding Path=Size}" />
+                            <imaging:CrispImage Moniker="{x:Static catalog:KnownMonikers.SpaceDown}" />
+                            <TextBlock Foreground="{StaticResource CommentForeground}"
+                                       Background="{StaticResource CommentBackground}"
+                                       FontFamily="{DynamicResource CodeFontFamily}"
+                                       Padding="10,0,0,0"
+                                       Text="=== Padding ===" />
+                        </StackPanel>
+                    </DataTemplate>
 
-        <HierarchicalDataTemplate DataType="{x:Type analyzer:Layout}"
-                                  ItemsSource="{Binding Path=FieldsAndPaddings}">
-            <StackPanel Orientation="Horizontal"
-                        Margin="0,2,0,2">
-                <imaging:CrispImage Moniker="{Binding Path=Kind, Converter={StaticResource ImageMonikerConverter}}" />
-                <TextBlock Foreground="{StaticResource IdentifierForeground}"
-                           Padding="10,0,0,0"
-                           FontFamily="{DynamicResource CodeFontFamily}"
-                           Text="{Binding Path=Name.Value}" />
-            </StackPanel>
-        </HierarchicalDataTemplate>
-        <HierarchicalDataTemplate DataType="{x:Type analyzer:Field}"
-                                  ItemsSource="{Binding Path=FieldsAndPaddings}">
-            <StackPanel Orientation="Horizontal"
-                        Margin="0,2,0,2">
-                <TextBlock Width="30"
-                           TextAlignment="Right"
-                           Text="{Binding Path=Offset}" />
-                <TextBlock Width="30"
-                           Padding="0,0,10,0"
-                           TextAlignment="Right"
-                           Text="{Binding Path=Size}" />
-                <imaging:CrispImage Moniker="{Binding Path=Kind, Converter={StaticResource ImageMonikerConverter}}" />
-                <TextBlock Foreground="{StaticResource IdentifierForeground}"
-                           Padding="10,0,5,0"
-                           FontFamily="{DynamicResource CodeFontFamily}"
-                           Text="{Binding Path=TypeName.Value}" />
-                <TextBlock Foreground="{StaticResource IdentifierForeground}"
-                           FontFamily="{DynamicResource CodeFontFamily}"
-                           Text="{Binding Path=Name}" />
-            </StackPanel>
-        </HierarchicalDataTemplate>
-        <DataTemplate DataType="{x:Type analyzer:Padding}">
-            <StackPanel Orientation="Horizontal"
-                        Margin="0,2,0,2">
-                <TextBlock Width="30"
-                           TextAlignment="Right"
-                           Text="{Binding Path=Offset}" />
-                <TextBlock Width="30"
-                           Padding="0,0,10,0"
-                           TextAlignment="Right"
-                           Text="{Binding Path=Size}" />
-                <imaging:CrispImage Moniker="{x:Static catalog:KnownMonikers.SpaceDown}" />
-                <TextBlock Foreground="{StaticResource CommentForeground}"
-                           Background="{StaticResource CommentBackground}"
-                           FontFamily="{DynamicResource CodeFontFamily}"
-                           Padding="10,0,0,0"
-                           Text="=== Padding ===" />
-            </StackPanel>
-        </DataTemplate>
-
+                </ResourceDictionary>
+                
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid>
@@ -273,4 +121,5 @@
                   ItemContainerStyle="{DynamicResource TreeViewItemStyle1}" >
         </TreeView>
     </Grid>
+    
 </UserControl>

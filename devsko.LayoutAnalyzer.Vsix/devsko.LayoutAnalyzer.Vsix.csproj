@@ -93,6 +93,14 @@
     <Compile Include="ToolWindows\LayoutControl.xaml.cs">
       <DependentUpon>LayoutControl.xaml</DependentUpon>
     </Compile>
+    <Page Include="ToolWindows\PropertyStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ToolWindows\TreeViewStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);NET40_OR_GREATER</DefineConstants>
