@@ -39,7 +39,8 @@ namespace devsko.LayoutAnalyzer
                     }
                     catch (Exception ex)
                     {
-                        ex.ToStringDemystified();
+                        // TODO OutputWindow
+                        ex.ToString();
                     }
                 });
             };

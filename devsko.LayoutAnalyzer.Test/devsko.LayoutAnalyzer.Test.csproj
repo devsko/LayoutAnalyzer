@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net5.0;netcoreapp3.1;net472</TargetFrameworks>
@@ -15,27 +15,23 @@
                       ReferenceOutputAssembly="false" />
   </ItemGroup>
 
-  <Target Name="BuildHost" BeforeTargets="Build">
+  <Target Name="BuildHost" BeforeTargets="BeforeBuild">
 
     <ItemGroup>
       <BatchProjects Include="..\devsko.LayoutAnalyzer.Host\devsko.LayoutAnalyzer.Host.csproj" />
       <BatchConfigurations Include="Debug;Release" />
       <BatchPlatforms Include="x64;x86" />
 
-      <Batch_ProjConf Include="@(BatchProjects)">
+      <Batch_1 Include="@(BatchProjects)">
         <Configuration>%(BatchConfigurations.Identity)</Configuration>
-      </Batch_ProjConf>
-      <Batch_ProjConfPltf Include="@(Batch_ProjConf)">
+      </Batch_1>
+      <Batch_2 Include="@(Batch_1)">
         <Platform>%(BatchPlatforms.Identity)</Platform>
-      </Batch_ProjConfPltf>
-      <BatchToBuild Include="@(Batch_ProjConfPltf)">
-        <AdditionalProperties>Platform=%(Batch_ProjConfPltf.Platform);Configuration=%(Batch_ProjConfPltf.Configuration)</AdditionalProperties>
+      </Batch_2>
+      <BatchToBuild Include="@(Batch_2)">
+        <AdditionalProperties>Platform=%(Batch_2.Platform);Configuration=%(Batch_2.Configuration)</AdditionalProperties>
       </BatchToBuild>
     </ItemGroup>
-
-    <Message Importance="high"
-             Condition="'$(TargetFramework)' != ''"
-             Text="Building host %(BatchToBuild.Filename) ($(TargetFramework)|%(BatchToBuild.Configuration)|%(BatchToBuild.Platform))" />
 
     <MSBuild Projects="@(BatchToBuild)"
              Condition="'$(TargetFramework)' != ''"

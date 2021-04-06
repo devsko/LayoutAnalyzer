@@ -67,7 +67,7 @@ namespace devsko.LayoutAnalyzer.Host
                     }
                     catch (Exception e)
                     {
-                        Console.Error.WriteLine(e.ToStringDemystified());
+                        Console.Error.WriteLine(e);
                     }
                 }
             }
