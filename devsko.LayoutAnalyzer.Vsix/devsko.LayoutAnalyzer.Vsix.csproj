@@ -152,7 +152,16 @@
 
   <Target Name="RemoveTestProjectFromVsix" DependsOnTargets="GetVsixSourceItems">
     <ItemGroup>
-      <VsixSourceItem Remove="@(VsixSourceItem)" Condition="'%(VsixSourceItem.TargetPath)' == 'devsko.LayoutAnalyzer.Test.exe' or '%(VsixSourceItem.TargetPath)' == 'devsko.LayoutAnalyzer.Test.exe.config'" />
+      <RemoveProjectOutput Include="..\devsko.LayoutAnalyzer.Test\devsko.LayoutAnalyzer.Test.csproj" />
+    </ItemGroup>
+    <PropertyGroup>
+      <RemoveProjectsFullPaths>@(RemoveProjectOutput->Metadata('FullPath'));</RemoveProjectsFullPaths>
+    </PropertyGroup>
+    <ItemGroup>
+      <VsixSourceItem Remove="@(VsixSourceItem)" Condition="'%(VsixSourceItem.MSBuildSourceProjectFile)' != '' and $([System.String]::new( $(RemoveProjectsFullPaths) ).Contains('%(VsixSourceItem.MSBuildSourceProjectFile);'))" />
+
+      <!-- Works also -->
+      <!--<VsixSourceItem Remove="@(VsixSourceItem)" Condition="$([System.String]::new('%(VsixSourceItem.MSBuildSourceProjectFile)').EndsWith('devsko.LayoutAnalyzer.Test.csproj'))" />-->
     </ItemGroup>
   </Target>
   
