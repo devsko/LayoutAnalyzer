@@ -42,5 +42,13 @@ namespace devsko.LayoutAnalyzer
             Value = value;
             Tokens = new[] { new TokenSpan(token, value.Length) };
         }
+
+        public TokenizedString Append(TokenizedString append)
+        {
+            TokenSpan[] tokens = new TokenSpan[Tokens.Length + append.Tokens.Length];
+            Tokens.CopyTo(tokens.AsSpan());
+            append.Tokens.CopyTo(tokens.AsSpan(Tokens.Length));
+            return new TokenizedString(Value + append.Value, (TokenSpan[])tokens);
+        }
     }
 }

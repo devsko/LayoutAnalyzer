@@ -12,6 +12,8 @@ namespace devsko.LayoutAnalyzer
 {
     public class ImageMonikerConverter : IValueConverter
     {
+        public static readonly ImageMonikerConverter Instance = new();
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is not Token token)

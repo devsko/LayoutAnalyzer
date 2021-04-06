@@ -41,14 +41,14 @@ namespace devsko.LayoutAnalyzer
         public static readonly ThemeResourceKey PunctuationBackgroundColorKey = new(MefItemsCategory, "punctuation", ThemeResourceKeyType.BackgroundColor);
         public static readonly ThemeResourceKey CommentBackgroundColorKey = new(MefItemsCategory, "Comment", ThemeResourceKeyType.BackgroundColor);
 
-        public static readonly object TreeViewItemInactiveSelectedForegroundKey = new ThemeResourceKey(TreeViewCategory, "SelectedItemInactive", ThemeResourceKeyType.ForegroundBrush);
-        public static readonly object TreeViewItemInactiveSelectedBackgroundKey = new ThemeResourceKey(TreeViewCategory, "SelectedItemInactive", ThemeResourceKeyType.BackgroundBrush);
-        public static readonly object TreeViewFocusVisualBorderKey = new ThemeResourceKey(TreeViewCategory, "FocusVisualBorder", ThemeResourceKeyType.BackgroundBrush);
-        public static readonly object TreeViewItemActiveGlyphMouseOverKey = new ThemeResourceKey(TreeViewCategory, "SelectedItemActiveGlyphMouseOver", ThemeResourceKeyType.BackgroundBrush);
-        public static readonly object TreeViewGlyphKey = new ThemeResourceKey(TreeViewCategory, "Glyph", ThemeResourceKeyType.BackgroundBrush);
-        public static readonly object TreeViewGlyphMouseOverKey = new ThemeResourceKey(TreeViewCategory, "GlyphMouseOver", ThemeResourceKeyType.BackgroundBrush);
-        public static readonly object TreeViewItemActiveGlyphKey = new ThemeResourceKey(TreeViewCategory, "SelectedItemActiveGlyph", ThemeResourceKeyType.BackgroundBrush);
-        public static readonly object TreeViewItemInactiveGlyphMouseOverKey = new ThemeResourceKey(TreeViewCategory, "SelectedItemInactiveGlyphMouseOver", ThemeResourceKeyType.BackgroundBrush);
-        public static readonly object TreeViewItemInactiveGlyphKey = new ThemeResourceKey(TreeViewCategory, "SelectedItemInactiveGlyph", ThemeResourceKeyType.BackgroundBrush);
+        public static readonly ThemeResourceKey TreeViewItemInactiveSelectedForegroundKey = new ThemeResourceKey(TreeViewCategory, "SelectedItemInactive", ThemeResourceKeyType.ForegroundBrush);
+        public static readonly ThemeResourceKey TreeViewItemInactiveSelectedBackgroundKey = new(TreeViewCategory, "SelectedItemInactive", ThemeResourceKeyType.BackgroundBrush);
+        public static readonly ThemeResourceKey TreeViewFocusVisualBorderKey = new(TreeViewCategory, "FocusVisualBorder", ThemeResourceKeyType.BackgroundBrush);
+        public static readonly ThemeResourceKey TreeViewItemActiveGlyphMouseOverKey = new(TreeViewCategory, "SelectedItemActiveGlyphMouseOver", ThemeResourceKeyType.BackgroundBrush);
+        public static readonly ThemeResourceKey TreeViewGlyphKey = new(TreeViewCategory, "Glyph", ThemeResourceKeyType.BackgroundBrush);
+        public static readonly ThemeResourceKey TreeViewGlyphMouseOverKey = new(TreeViewCategory, "GlyphMouseOver", ThemeResourceKeyType.BackgroundBrush);
+        public static readonly ThemeResourceKey TreeViewItemActiveGlyphKey = new(TreeViewCategory, "SelectedItemActiveGlyph", ThemeResourceKeyType.BackgroundBrush);
+        public static readonly ThemeResourceKey TreeViewItemInactiveGlyphMouseOverKey = new(TreeViewCategory, "SelectedItemInactiveGlyphMouseOver", ThemeResourceKeyType.BackgroundBrush);
+        public static readonly ThemeResourceKey TreeViewItemInactiveGlyphKey = new(TreeViewCategory, "SelectedItemInactiveGlyph", ThemeResourceKeyType.BackgroundBrush);
     }
 }

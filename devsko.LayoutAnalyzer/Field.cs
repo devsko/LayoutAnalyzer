@@ -12,7 +12,9 @@ namespace devsko.LayoutAnalyzer
 #endif
     public sealed class Field : FieldBase
     {
-        public string Name { get; private
+        public TokenizedString TypeAndName
+        {
+            get; private
 #if NETCOREAPP3_1_OR_GREATER
                 init;
 #else
@@ -35,13 +37,6 @@ namespace devsko.LayoutAnalyzer
                 set;
 #endif
         }
-        public TokenizedString TypeName { get; private
-#if NETCOREAPP3_1_OR_GREATER
-                init;
-#else
-                set;
-#endif
-        }
         public Field[]? Children { get; private
 #if NETCOREAPP3_1_OR_GREATER
                 init;
@@ -52,11 +47,12 @@ namespace devsko.LayoutAnalyzer
 
         internal Field(FieldInfo info, Analyzer analyzer)
         {
-            Name = info.Name;
             IsPublic = info.IsPublic;
             Type type = info.FieldType;
             Kind = Analyzer.GetKind(type);
-            (TypeName, Size) = analyzer.GetNameAndSize(type, GetNativeIntegerData(info));
+            TokenizedString typeName;
+            (typeName, Size) = analyzer.GetNameAndSize(type, GetNativeIntegerData(info));
+            TypeAndName = typeName.Append(new TokenizedString(' ' + info.Name, Token.Identifier));
             Offset = GetOffset(info);
             if (type.IsValueType && !type.IsPrimitive)
             {
@@ -65,14 +61,13 @@ namespace devsko.LayoutAnalyzer
         }
 
         [JsonConstructor]
-        public Field(int offset, int size, string name, Token kind, bool isPublic, TokenizedString typeName, Field[]? children)
+        public Field(int offset, int size, TokenizedString typeAndName, Token kind, bool isPublic, Field[]? children)
         {
             Offset = offset;
             Size = size;
-            Name = name;
+            TypeAndName = typeAndName;
             Kind = kind;
             IsPublic = isPublic;
-            TypeName = typeName;
             Children = children;
         }
 

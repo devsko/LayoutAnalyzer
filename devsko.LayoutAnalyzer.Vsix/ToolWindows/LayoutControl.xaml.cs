@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Documents;
+using System.Windows.Data;
 using System.Windows.Media;
-using devsko.LayoutAnalyzer;
 using Microsoft.VisualStudio.Editor;
-using Microsoft.VisualStudio.PlatformUI;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -23,7 +20,6 @@ namespace devsko.LayoutAnalyzer
             package.TextManagerEventSink.ColorsChanged += () => ResetColors(package);
             ResetColors(package);
 
-            CreatePropertyGrid();
 
             DataContextChanged += (sender, args) =>
             {
@@ -50,37 +46,6 @@ namespace devsko.LayoutAnalyzer
                     }
                 }
             };
-
-            // MOCK
-            #region
-            var tokenString = new TokenizedString(
-                "devsko.LayoutAnalyzer.TestProject.TestClass",
-                new[]
-                {
-                    new TokenSpan(Token.Identifier, 6),
-                    new TokenSpan(Token.Operator, 1),
-                    new TokenSpan(Token.Identifier, 14),
-                    new TokenSpan(Token.Operator, 1),
-                    new TokenSpan(Token.Identifier, 11),
-                    new TokenSpan(Token.Operator, 1),
-                    new TokenSpan(Token.Class, 9),
-                });
-
-            //IEnumerable<Run> ConvertTokenizedString(TokenizedString value)
-            //{
-            //    ThreadHelper.ThrowIfNotOnUIThread();
-
-            //    int index = 0;
-            //    foreach (TokenSpan span in value.Tokens)
-            //    {
-            //        Run run = new(value.Value.Substring(index, span.Length));
-            //        run.Foreground = (Brush)Resources[span.Token.ToString() + "Foreground"];
-            //        run.Background = (Brush)Resources[span.Token.ToString() + "Background"];
-            //        yield return run;
-            //        index += span.Length;
-            //    }
-            //}
-            #endregion
         }
 
         private void ResetColors(LayoutAnalyzerPackage package)

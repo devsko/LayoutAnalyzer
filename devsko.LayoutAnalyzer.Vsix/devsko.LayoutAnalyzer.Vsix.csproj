@@ -48,6 +48,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Controls\LayoutTreeView.cs" />
+    <Compile Include="Controls\PropertyGrid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Commands\MyToolWindowCommand.cs" />
     <Compile Include="LayoutAnalyzerPackage.cs" />
@@ -57,10 +59,9 @@
       <DependentUpon>source.extension.vsixmanifest</DependentUpon>
     </Compile>
     <Compile Include="TextManagerEventSink.cs" />
-    <Compile Include="TokenizedTextBlock.cs" />
+    <Compile Include="Controls\TokenizedTextBlock.cs" />
     <Compile Include="ToolWindows\ImageMonikerConverter.cs" />
     <Compile Include="ToolWindows\LayoutControl.xaml.Constants.cs" />
-    <Compile Include="ToolWindows\LayoutControl.xaml.Properties.cs" />
     <Compile Include="VSCommandTable.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -87,6 +88,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ToolWindows\LayoutWindow.cs" />
+    <Page Include="ToolWindows\CodeStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ToolWindows\LayoutControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

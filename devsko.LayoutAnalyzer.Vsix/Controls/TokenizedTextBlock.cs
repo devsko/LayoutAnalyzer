@@ -27,8 +27,9 @@ namespace devsko.LayoutAnalyzer
                 foreach (TokenSpan span in value.Tokens)
                 {
                     Run run = new(value.Value.Substring(index, span.Length));
-                    run.Foreground = (Brush)@this.FindResource(span.Token.ToString() + "Foreground");
-                    run.Background = (Brush)@this.FindResource(span.Token.ToString() + "Background");
+                    string tokenString = span.Token.ToString();
+                    run.Foreground = (Brush)@this.FindResource(tokenString + "Foreground");
+                    run.Background = (Brush)@this.FindResource(tokenString + "Background");
                     @this.Inlines.Add(run);
                     index += span.Length;
                 }

@@ -1,0 +1,30 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:devsko.LayoutAnalyzer">
+
+    <SolidColorBrush x:Key="IdentifierForeground"   Color="{DynamicResource {x:Static local:LayoutControl.IdentifierForegroundColorKey}}" />
+    <SolidColorBrush x:Key="ClassForeground"        Color="{DynamicResource {x:Static local:LayoutControl.ClassForegroundColorKey}}" />
+    <SolidColorBrush x:Key="EnumForeground"         Color="{DynamicResource {x:Static local:LayoutControl.EnumForegroundColorKey}}" />
+    <SolidColorBrush x:Key="StructForeground"       Color="{DynamicResource {x:Static local:LayoutControl.StructForegroundColorKey}}" />
+    <SolidColorBrush x:Key="DelegateForeground"     Color="{DynamicResource {x:Static local:LayoutControl.DelegateForegroundColorKey}}" />
+    <SolidColorBrush x:Key="InterfaceForeground"    Color="{DynamicResource {x:Static local:LayoutControl.InterfaceForegroundColorKey}}" />
+    <SolidColorBrush x:Key="KeywordForeground"      Color="{DynamicResource {x:Static local:LayoutControl.KeywordForegroundColorKey}}" />
+    <SolidColorBrush x:Key="PunctuationForeground"  Color="{DynamicResource {x:Static local:LayoutControl.PunctuationForegroundColorKey}}" />
+    <SolidColorBrush x:Key="OperatorForeground"     Color="{DynamicResource {x:Static local:LayoutControl.OperatorForegroundColorKey}}" />
+    <SolidColorBrush x:Key="CommentForeground"      Color="{DynamicResource {x:Static local:LayoutControl.CommentForegroundColorKey}}" />
+
+    <SolidColorBrush x:Key="IdentifierBackground"   Color="{DynamicResource {x:Static local:LayoutControl.IdentifierBackgroundColorKey}}" />
+    <SolidColorBrush x:Key="ClassBackground"        Color="{DynamicResource {x:Static local:LayoutControl.ClassBackgroundColorKey}}" />
+    <SolidColorBrush x:Key="EnumBackground"         Color="{DynamicResource {x:Static local:LayoutControl.EnumBackgroundColorKey}}" />
+    <SolidColorBrush x:Key="StructBackground"       Color="{DynamicResource {x:Static local:LayoutControl.StructBackgroundColorKey}}" />
+    <SolidColorBrush x:Key="DelegateBackground"     Color="{DynamicResource {x:Static local:LayoutControl.DelegateBackgroundColorKey}}" />
+    <SolidColorBrush x:Key="InterfaceBackground"    Color="{DynamicResource {x:Static local:LayoutControl.InterfaceBackgroundColorKey}}" />
+    <SolidColorBrush x:Key="KeywordBackground"      Color="{DynamicResource {x:Static local:LayoutControl.KeywordBackgroundColorKey}}" />
+    <SolidColorBrush x:Key="PunctuationBackground"  Color="{DynamicResource {x:Static local:LayoutControl.PunctuationBackgroundColorKey}}" />
+    <SolidColorBrush x:Key="OperatorBackground"     Color="{DynamicResource {x:Static local:LayoutControl.OperatorBackgroundColorKey}}" />
+    <SolidColorBrush x:Key="CommentBackground"      Color="{DynamicResource {x:Static local:LayoutControl.CommentBackgroundColorKey}}" />
+
+    <FontFamily x:Key="CodeFontFamily">Consolas</FontFamily>
+
+</ResourceDictionary>

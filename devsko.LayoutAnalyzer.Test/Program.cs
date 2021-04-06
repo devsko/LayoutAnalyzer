@@ -147,9 +147,7 @@ namespace devsko.LayoutAnalyzer.Test
 
                 if (fieldOrPadding.Field is Field field)
                 {
-                    WriteName(field.TypeName);
-                    Console.Write(' ');
-                    Console.WriteLine(field.Name);
+                    WriteName(field.TypeAndName);
                 }
                 else
                 {

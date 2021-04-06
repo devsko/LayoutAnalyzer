@@ -10,41 +10,17 @@
              mc:Ignorable="d"
              Name="LayoutWindow">
 
-    <UserControl.Resources>
+    <d:UserControl.Width>600</d:UserControl.Width>
+    <d:UserControl.Height>300</d:UserControl.Height>
 
+    <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="TreeViewStyle.xaml" />
                 <ResourceDictionary Source="PropertyStyle.xaml" />
+                <ResourceDictionary Source="CodeStyle.xaml" />
 
                 <ResourceDictionary>
-                    
-                    <SolidColorBrush x:Key="IdentifierForeground"   Color="{DynamicResource {x:Static local:LayoutControl.IdentifierForegroundColorKey}}" />
-                    <SolidColorBrush x:Key="ClassForeground"        Color="{DynamicResource {x:Static local:LayoutControl.ClassForegroundColorKey}}" />
-                    <SolidColorBrush x:Key="EnumForeground"         Color="{DynamicResource {x:Static local:LayoutControl.EnumForegroundColorKey}}" />
-                    <SolidColorBrush x:Key="StructForeground"       Color="{DynamicResource {x:Static local:LayoutControl.StructForegroundColorKey}}" />
-                    <SolidColorBrush x:Key="DelegateForeground"     Color="{DynamicResource {x:Static local:LayoutControl.DelegateForegroundColorKey}}" />
-                    <SolidColorBrush x:Key="InterfaceForeground"    Color="{DynamicResource {x:Static local:LayoutControl.InterfaceForegroundColorKey}}" />
-                    <SolidColorBrush x:Key="KeywordForeground"      Color="{DynamicResource {x:Static local:LayoutControl.KeywordForegroundColorKey}}" />
-                    <SolidColorBrush x:Key="PunctuationForeground"  Color="{DynamicResource {x:Static local:LayoutControl.PunctuationForegroundColorKey}}" />
-                    <SolidColorBrush x:Key="OperatorForeground"     Color="{DynamicResource {x:Static local:LayoutControl.OperatorForegroundColorKey}}" />
-                    <SolidColorBrush x:Key="CommentForeground"      Color="{DynamicResource {x:Static local:LayoutControl.CommentForegroundColorKey}}" />
-
-                    <SolidColorBrush x:Key="IdentifierBackground"   Color="{DynamicResource {x:Static local:LayoutControl.IdentifierBackgroundColorKey}}" />
-                    <SolidColorBrush x:Key="ClassBackground"        Color="{DynamicResource {x:Static local:LayoutControl.ClassBackgroundColorKey}}" />
-                    <SolidColorBrush x:Key="EnumBackground"         Color="{DynamicResource {x:Static local:LayoutControl.EnumBackgroundColorKey}}" />
-                    <SolidColorBrush x:Key="StructBackground"       Color="{DynamicResource {x:Static local:LayoutControl.StructBackgroundColorKey}}" />
-                    <SolidColorBrush x:Key="DelegateBackground"     Color="{DynamicResource {x:Static local:LayoutControl.DelegateBackgroundColorKey}}" />
-                    <SolidColorBrush x:Key="InterfaceBackground"    Color="{DynamicResource {x:Static local:LayoutControl.InterfaceBackgroundColorKey}}" />
-                    <SolidColorBrush x:Key="KeywordBackground"      Color="{DynamicResource {x:Static local:LayoutControl.KeywordBackgroundColorKey}}" />
-                    <SolidColorBrush x:Key="PunctuationBackground"  Color="{DynamicResource {x:Static local:LayoutControl.PunctuationBackgroundColorKey}}" />
-                    <SolidColorBrush x:Key="OperatorBackground"     Color="{DynamicResource {x:Static local:LayoutControl.OperatorBackgroundColorKey}}" />
-                    <SolidColorBrush x:Key="CommentBackground"      Color="{DynamicResource {x:Static local:LayoutControl.CommentBackgroundColorKey}}" />
-
-                    <FontFamily x:Key="CodeFontFamily">Consolas</FontFamily>
-
-                    <local:ImageMonikerConverter x:Key="ImageMonikerConverter" />
-
                     <HierarchicalDataTemplate DataType="{x:Type analyzer:Layout}"
                                               ItemsSource="{Binding Path=FieldsAndPaddings}">
                         <StackPanel Orientation="Horizontal"
@@ -52,7 +28,7 @@
                             <imaging:CrispImage Width="12"
                                                 Height="12"
                                                 Margin="0,1,0,0"
-                                                Moniker="{Binding Path=Kind, Converter={StaticResource ImageMonikerConverter}}" />
+                                                Moniker="{Binding Path=Kind, Converter={x:Static local:ImageMonikerConverter.Instance}}" />
                             <local:TokenizedTextBlock String="{Binding Path=Name}"
                                                       Height="16"
                                                       Padding="10,0,0,0"
@@ -63,32 +39,27 @@
                                               ItemsSource="{Binding Path=FieldsAndPaddings}">
                         <StackPanel Orientation="Horizontal"
                                     Margin="0">
-                            <TextBlock Width="30"
-                                       TextAlignment="Right"
-                                       Text="{Binding Path=Offset}" />
+                            <TextBlock Width="35"
+                                       Text="{Binding Path=Offset, StringFormat='0x{0:X3}'}" />
                             <TextBlock Width="30"
                                        Padding="0,0,10,0"
-                                       TextAlignment="Right"
+                                       TextAlignment="Right" 
                                        Text="{Binding Path=Size}" />
                             <imaging:CrispImage Width="12"
                                                 Height="12"
                                                 Margin="0,1,0,0"
-                                                Moniker="{Binding Path=Kind, Converter={StaticResource ImageMonikerConverter}}" />
-                            <local:TokenizedTextBlock String="{Binding Path=TypeName}"
+                                                Moniker="{Binding Path=Kind, Converter={x:Static local:ImageMonikerConverter.Instance}}" />
+                            <local:TokenizedTextBlock String="{Binding Path=TypeAndName}"
                                                       Height="16"
-                                                      Padding="10,0,5,0"
+                                                      Padding="10,0,0,0"
                                                       FontFamily="{DynamicResource CodeFontFamily}" />
-                            <TextBlock Foreground="{StaticResource IdentifierForeground}"
-                                       FontFamily="{DynamicResource CodeFontFamily}"
-                                       Text="{Binding Path=Name}" />
                         </StackPanel>
                     </HierarchicalDataTemplate>
                     <DataTemplate DataType="{x:Type analyzer:Padding}">
                         <StackPanel Orientation="Horizontal"
                                     Margin="0">
-                            <TextBlock Width="30"
-                                       TextAlignment="Right"
-                                       Text="{Binding Path=Offset}" />
+                            <TextBlock Width="35"
+                                       Text="{Binding Path=Offset, StringFormat='0x{0:X3}'}" />
                             <TextBlock Width="30"
                                        Padding="0,0,10,0"
                                        TextAlignment="Right"
@@ -105,7 +76,6 @@
                                        Text="=== Padding ===" />
                         </StackPanel>
                     </DataTemplate>
-
                 </ResourceDictionary>
                 
             </ResourceDictionary.MergedDictionaries>
@@ -117,19 +87,13 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <Grid x:Name="propertyGrid"
-              Grid.Row="0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-        </Grid>
-        <TreeView Grid.Row="1"
-                  x:Name="tree"
-                  Background="{StaticResource IdentifierBackground}"
-                  Style="{DynamicResource TreeViewStyle1}"
-                  ItemContainerStyle="{DynamicResource TreeViewItemStyle1}" >
-        </TreeView>
+        <local:PropertyGrid Grid.Row="0"
+                            Properties="{x:Static local:PropertyGrid.DefaultProperties}" />
+        <local:LayoutTreeView x:Name="tree"
+                              Grid.Row="1"
+                              Background="{StaticResource IdentifierBackground}"
+                              Style="{StaticResource TreeViewStyle1}"
+                              ItemContainerStyle="{StaticResource TreeViewItemStyle1}" />
     </Grid>
     
 </UserControl>
