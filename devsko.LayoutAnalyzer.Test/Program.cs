@@ -37,20 +37,12 @@ namespace devsko.LayoutAnalyzer.Test
                     debug: false, waitForDebugger: false
 #endif
                     );
-                runner.MessageReceived += message =>
+                runner.MessageReceived += async message =>
                 {
-                    ConsoleAccessor.WaitAsync()
-                        .ContinueWith(task =>
-                            {
-                                if (task.Status == TaskStatus.RanToCompletion)
-                                {
-                                    using (task.Result)
-                                    {
-                                        Console.WriteLine(message);
-                                    }
-                                }
-                            },
-                            TaskScheduler.Default);
+                    using (await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
+                    {
+                        Console.WriteLine(message);
+                    }
                 };
 
                 // Find the 'TestProject' bins
@@ -76,7 +68,7 @@ namespace devsko.LayoutAnalyzer.Test
                 //await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.TestClass, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.S1, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
+                await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
 
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.NoLayoutStruct, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.NoLayoutStructEmpty, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
@@ -85,7 +77,7 @@ namespace devsko.LayoutAnalyzer.Test
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.AutoStructSize1, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.AutoStructSize10, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
 
-                await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.Explicit, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.Explicit, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
 
                 async Task AnalyzeAndPrintAsync(string typeName)
                 {
@@ -120,6 +112,7 @@ namespace devsko.LayoutAnalyzer.Test
         {
             Console.BackgroundColor = ConsoleColor.DarkGray;
 
+            Console.WriteLine($"Elapsed time:  {layout.ElapsedTime}");
             Console.WriteLine($"Total size:    {layout.TotalSize} bytes");
             Console.WriteLine($"Total padding: {layout.TotalPadding} bytes");
             if (layout.AttributeKind != (layout.IsValueType ? LayoutKind.Sequential : LayoutKind.Auto) || layout.AttributeSize != 0)
@@ -148,6 +141,7 @@ namespace devsko.LayoutAnalyzer.Test
                 if (fieldOrPadding.Field is Field field)
                 {
                     WriteName(field.TypeAndName);
+                    Console.WriteLine();
                 }
                 else
                 {

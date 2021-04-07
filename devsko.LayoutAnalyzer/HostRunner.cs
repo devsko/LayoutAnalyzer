@@ -25,6 +25,7 @@ namespace devsko.LayoutAnalyzer
     public sealed class HostRunner : IDisposable
     {
         private static readonly ConcurrentDictionary<(TargetFramework, Platform), HostRunner> s_cache = new();
+        private static int s_currentId;
 
         public static HostRunner GetHostRunner(string hostBasePath, TargetFramework framework, Platform platform, bool debug = false, bool waitForDebugger = false)
         {
@@ -39,11 +40,12 @@ namespace devsko.LayoutAnalyzer
             }
         }
 
-        public Action<string>? MessageReceived;
+        public event Action<string>? MessageReceived;
 
         public TargetFramework TargetFramework { get; private init; }
         public Platform Platform { get; private init; }
         public bool IsDebug { get; private init; }
+        public int Id { get; private init; }
 
         private JsonSerializerOptions _jsonOptions;
         private SemaphoreSlim _semaphore;
@@ -58,6 +60,7 @@ namespace devsko.LayoutAnalyzer
             TargetFramework = framework;
             Platform = platform;
             IsDebug = debug;
+            Id = Interlocked.Increment(ref s_currentId);
 
             _jsonOptions = new JsonSerializerOptions();
             _semaphore = new SemaphoreSlim(1);
@@ -99,6 +102,7 @@ namespace devsko.LayoutAnalyzer
                 }
                 arguments = hostAssemblyPath;
             }
+            arguments += $" -id:{Id}";
 #if DEBUG
             if (waitForDebugger)
             {
@@ -123,16 +127,30 @@ namespace devsko.LayoutAnalyzer
         public async Task<Layout?> AnalyzeAsync(string command, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-            EnsureRunningProcess();
             try
             {
+                EnsureRunningProcess();
+                Stopwatch watch = Stopwatch.StartNew();
                 _process.StandardInput.WriteLine(command);
 
-                return await JsonSerializer.DeserializeAsync<Layout>(_outStream, _jsonOptions, cancellationToken).ConfigureAwait(false);
+                try
+                {
+                    Layout? layout = await JsonSerializer.DeserializeAsync<Layout>(_outStream, _jsonOptions, cancellationToken).ConfigureAwait(false);
+                    if (layout is not null)
+                    {
+                        layout.ElapsedTime = watch.Elapsed;
+                    }
+
+                    return layout;
+                }
+                catch (JsonException ex) when (ex.LineNumber == 0 && ex.BytePositionInLine == 0)
+                {
+                    return null;
+                }
             }
             finally
             {
-                _outStream.Reset();
+                _outStream?.Reset();
                 _semaphore.Release();
             }
         }
@@ -175,7 +193,10 @@ namespace devsko.LayoutAnalyzer
             _outStream = new EofDetectingStream(_process.StandardOutput.BaseStream);
             _process.ErrorDataReceived += (sender, e) =>
             {
-                MessageReceived?.Invoke(e.Data ?? string.Empty);
+                if (e.Data is not null)
+                {
+                    MessageReceived?.Invoke(e.Data);
+                }
             };
             _process.BeginErrorReadLine();
 

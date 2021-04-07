@@ -87,6 +87,7 @@ namespace devsko.LayoutAnalyzer
 #endif
         }
         public string AssemblyPath { get; set; }
+        public TimeSpan ElapsedTime { get; set; }
 
         internal Layout(Type type, Analyzer analyzer)
         {

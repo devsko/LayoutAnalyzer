@@ -18,10 +18,32 @@ namespace devsko.LayoutAnalyzer.Host
         {
             Console.Error.WriteLine($"{RuntimeInformation.FrameworkDescription} ({RuntimeInformation.ProcessArchitecture})");
 
-            if (args.Length > 0 && args[0].ToLowerInvariant() == "-wait")
+            bool waitForDebugger = false;
+            int? id = null;
+            foreach (string arg in args)
+            {
+                if (arg.Equals("-wait", StringComparison.OrdinalIgnoreCase))
+                {
+                    waitForDebugger = true;
+                }
+                else if (arg.StartsWith("-id:", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (int.TryParse(arg.Substring(4).Trim(), out int i))
+                    {
+                        id = i;
+                    }
+                }
+            }
+            if (waitForDebugger)
             {
 #if DEBUG
-                Console.Error.WriteLine("Waiting for debugger...");
+                int pid =
+#if NET5_0_OR_GREATER
+                Environment.ProcessId;
+#else
+                Process.GetCurrentProcess().Id;
+#endif
+                Console.Error.WriteLine($"PID {pid} Waiting for debugger...");
 
                 using (ShutdownTimer.Start(TimeSpan.FromMinutes(1)))
                     while (!Debugger.IsAttached)
@@ -39,12 +61,11 @@ namespace devsko.LayoutAnalyzer.Host
                 using (ShutdownTimer.Start(s_shutdownTimerInterval))
                 {
                     string? line = Console.ReadLine();
-                    command = line ?? "";
-                }
-
-                if (command == "")
-                {
-                    break;
+                    if (line is null)
+                    {
+                        break;
+                    }
+                    command = line;
                 }
 
                 using (var consoleAccess = await ConsoleOutAccessor.WaitAsync().ConfigureAwait(false))
@@ -67,7 +88,7 @@ namespace devsko.LayoutAnalyzer.Host
                     }
                     catch (Exception e)
                     {
-                        Console.Error.WriteLine(e);
+                        Console.Error.WriteLine(e.ToStringDemystified());
                     }
                 }
             }

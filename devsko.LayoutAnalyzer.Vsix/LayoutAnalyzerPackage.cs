@@ -20,10 +20,18 @@ namespace devsko.LayoutAnalyzer
     [Guid(PackageGuids.guidPackageString)]
     public sealed class LayoutAnalyzerPackage : AsyncPackage
     {
+        private OutputWindowTextWriter _outWriter;
+
         public IVsFontAndColorStorage FontAndColorStorage { get; private set; }
         public IVsTextManager TextManager { get; private set; }
         public TextManagerEventSink TextManagerEventSink { get; private set; }
         public HostRunner HostRunner { get; private set; }
+
+        public async Task<OutputWindowTextWriter> GetOutAsync()
+        {
+            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            return _outWriter ??= new OutputWindowTextWriter(GetOutputPane(new Guid("A19B6446-F4A7-4A70-86F3-93A03B38F335"), "Layout Analyzer"));
+        }
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
@@ -74,6 +82,10 @@ namespace devsko.LayoutAnalyzer
                     debug: false, waitForDebugger: false
 #endif
                     );
+#pragma warning disable VSTHRD101 // Avoid unsupported async delegates
+            HostRunner.MessageReceived +=
+                async message => await (await GetOutAsync()).WriteLineAsync($"HOST ({HostRunner.Id}): " + message);
+#pragma warning restore VSTHRD101 // Avoid unsupported async delegates
 
             return this;
         }

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
+using Task = System.Threading.Tasks.Task;
 
 namespace devsko.LayoutAnalyzer
 {
@@ -32,15 +34,35 @@ namespace devsko.LayoutAnalyzer
                     content.DataContext = null;
                     try
                     {
-                        //content.DataContext = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + "devsko.LayoutAnalyzer.TestProject.Explicit, devsko.LayoutAnalyzer.TestProject");
-                        content.DataContext = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + "System.IO.Pipelines.Pipe, System.IO.Pipelines");
-                        //content.DataContext = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + typeof(int).AssemblyQualifiedName);
-                        //content.DataContext = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + "devsko.LayoutAnalyzer.TestProject.S1, devsko.LayoutAnalyzer.TestProject");
+                        await AnalyzeAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines");
+
+                        await Task.Delay(TimeSpan.FromSeconds(5));
+
+                        await AnalyzeAsync(typeof(int).AssemblyQualifiedName);
+
+                        await Task.Delay(TimeSpan.FromSeconds(65));
+
+                        await AnalyzeAsync("devsko.LayoutAnalyzer.TestProject.Explicit, devsko.LayoutAnalyzer.TestProject");
+
+                        await Task.Delay(TimeSpan.FromSeconds(5));
+
+                        await AnalyzeAsync("x,y");
+
+                        //await AnalyzeAsync("devsko.LayoutAnalyzer.TestProject.S1, devsko.LayoutAnalyzer.TestProject");
                     }
                     catch (Exception ex)
                     {
-                        // TODO OutputWindow
-                        ex.ToString();
+                        await (await package.GetOutAsync()).WriteLineAsync("Unexpected error: " + ex.ToStringDemystified());
+                    }
+
+                    async Task AnalyzeAsync(string typeName)
+                    {
+                        Layout layout = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + typeName);
+                        if (layout is not null)
+                        {
+                            await (await package.GetOutAsync()).WriteLineAsync($"Layout from HOST ({package.HostRunner.Id}) took {layout.ElapsedTime}");
+                        }
+                        content.DataContext = layout;
                     }
                 });
             };
