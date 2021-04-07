@@ -9,7 +9,7 @@ namespace devsko.LayoutAnalyzer
     {
         public const string Id = "LayoutAnalyzer.C27ACBEE-B136-4CEE-99A3-8495261E6863";
         public const string Name = "LayoutAnalyzer";
-        public const string Description = @"Empty VSIX Project.";
+        public const string Description = @"Visual Studio extension that analyzes how classes and structures are laid out in memory.";
         public const string Language = "en-US";
         public const string Version = "1.0";
         public const string Author = "devsko";

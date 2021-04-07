@@ -34,35 +34,43 @@ namespace devsko.LayoutAnalyzer
                     content.DataContext = null;
                     try
                     {
-                        await AnalyzeAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines");
+                        await AnalyzeAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines", TimeSpan.FromSeconds(5));
 
-                        await Task.Delay(TimeSpan.FromSeconds(5));
+                        await AnalyzeAsync(typeof(int).AssemblyQualifiedName, TimeSpan.Zero);
+                        await AnalyzeAsync(typeof(int).AssemblyQualifiedName, TimeSpan.Zero);
+                        await AnalyzeAsync(typeof(int).AssemblyQualifiedName, TimeSpan.FromSeconds(65));
 
-                        await AnalyzeAsync(typeof(int).AssemblyQualifiedName);
+                        await AnalyzeAsync("devsko.LayoutAnalyzer.TestProject.Explicit, devsko.LayoutAnalyzer.TestProject", TimeSpan.FromSeconds(5));
 
-                        await Task.Delay(TimeSpan.FromSeconds(65));
-
-                        await AnalyzeAsync("devsko.LayoutAnalyzer.TestProject.Explicit, devsko.LayoutAnalyzer.TestProject");
-
-                        await Task.Delay(TimeSpan.FromSeconds(5));
-
-                        await AnalyzeAsync("x,y");
+                        await AnalyzeAsync("x,y", TimeSpan.Zero);
 
                         //await AnalyzeAsync("devsko.LayoutAnalyzer.TestProject.S1, devsko.LayoutAnalyzer.TestProject");
                     }
-                    catch (Exception ex)
-                    {
-                        await (await package.GetOutAsync()).WriteLineAsync("Unexpected error: " + ex.ToStringDemystified());
-                    }
+                    catch (TaskCanceledException)
+                    { }
 
-                    async Task AnalyzeAsync(string typeName)
+                    async Task AnalyzeAsync(string typeName, TimeSpan delayAfter)
                     {
-                        Layout layout = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + typeName);
-                        if (layout is not null)
+                        try
                         {
-                            await (await package.GetOutAsync()).WriteLineAsync($"Layout from HOST ({package.HostRunner.Id}) took {layout.ElapsedTime}");
+                            Layout layout = await package.HostRunner.AnalyzeAsync(projectAssemblyPath + '|' + typeName, VsShellUtilities.ShutdownToken);
+                            if (layout is not null)
+                            {
+                                await (await package.GetOutAsync()).WriteLineAsync($"Layout from HOST ({package.HostRunner.Id}) took {layout.ElapsedTime}");
+                            }
+                            content.DataContext = layout;
+
+                            await Task.Delay(delayAfter, VsShellUtilities.ShutdownToken);
                         }
-                        content.DataContext = layout;
+                        catch (TaskCanceledException)
+                        {
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            content.DataContext = null;
+                            await (await package.GetOutAsync()).WriteLineAsync("Unexpected error: " + ex.ToStringDemystified());
+                        }
                     }
                 });
             };

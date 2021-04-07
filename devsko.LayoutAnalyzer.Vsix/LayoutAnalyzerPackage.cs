@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -6,7 +7,10 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Microsoft;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.ComponentModelHost;
+using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -18,14 +22,27 @@ namespace devsko.LayoutAnalyzer
     [ProvideToolWindow(typeof(LayoutWindow), Style = VsDockStyle.Tabbed, Window = ToolWindowGuids.SolutionExplorer)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(PackageGuids.guidPackageString)]
+    [Export]
     public sealed class LayoutAnalyzerPackage : AsyncPackage
     {
-        private OutputWindowTextWriter _outWriter;
+        public static LayoutAnalyzerPackage Instance { get; private set; }
 
+        public LayoutAnalyzer Analyzer { get; private set; }
         public IVsFontAndColorStorage FontAndColorStorage { get; private set; }
+        public IVsSolution Solution { get; private set; }
+        public IVsRunningDocumentTable RunningDocumentTable { get; private set; }
+        public RunningDocumentTableEventSink RunningDocumentTableEventSink { get; private set; }
+        public SolutionEventSink SolutionEventSink { get; private set; }
         public IVsTextManager TextManager { get; private set; }
         public TextManagerEventSink TextManagerEventSink { get; private set; }
         public HostRunner HostRunner { get; private set; }
+
+        private OutputWindowTextWriter _outWriter;
+
+        public LayoutAnalyzerPackage()
+        {
+            Instance = this;
+        }
 
         public async Task<OutputWindowTextWriter> GetOutAsync()
         {
@@ -36,6 +53,11 @@ namespace devsko.LayoutAnalyzer
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+            Analyzer = new LayoutAnalyzer();
+            var componenModel = (IComponentModel)await GetServiceAsync(typeof(SComponentModel));
+            Assumes.Present(componenModel);
+            componenModel.DefaultCompositionService.SatisfyImportsOnce(Analyzer);
 
             //var pane = GetOutputPane(VSConstants.OutputWindowPaneGuid.GeneralPane_guid, "");
             //var current = VsColors.GetCurrentThemedColorValues().Where(kvp =>kvp.Key.Category == LayoutControl.TreeViewCategory);
@@ -67,9 +89,13 @@ namespace devsko.LayoutAnalyzer
         {
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            TextManager = (IVsTextManager)await GetServiceAsync(typeof(SVsTextManager));
             FontAndColorStorage = (IVsFontAndColorStorage)await GetServiceAsync(typeof(SVsFontAndColorStorage));
-            TextManagerEventSink = await TextManagerEventSink.SubscribeAsync(this);
+            Solution = (IVsSolution)await GetServiceAsync(typeof(SVsSolution));
+            SolutionEventSink = await SolutionEventSink.SubscribeAsync();
+            RunningDocumentTable = (IVsRunningDocumentTable)await GetServiceAsync(typeof(SVsRunningDocumentTable));
+            RunningDocumentTableEventSink = await RunningDocumentTableEventSink.SubscribeAsync();
+            TextManager = (IVsTextManager)await GetServiceAsync(typeof(SVsTextManager));
+            TextManagerEventSink = await TextManagerEventSink.SubscribeAsync();
 
             string hostBasePath = Path.Combine(
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
@@ -82,6 +108,7 @@ namespace devsko.LayoutAnalyzer
                     debug: false, waitForDebugger: false
 #endif
                     );
+
 #pragma warning disable VSTHRD101 // Avoid unsupported async delegates
             HostRunner.MessageReceived +=
                 async message => await (await GetOutAsync()).WriteLineAsync($"HOST ({HostRunner.Id}): " + message);
@@ -96,7 +123,10 @@ namespace devsko.LayoutAnalyzer
             {
                 ThreadHelper.ThrowIfNotOnUIThread();
 
+                SolutionEventSink?.Dispose();
+                SolutionEventSink = null;
                 TextManagerEventSink?.Dispose();
+                TextManagerEventSink = null;
             }
             finally
             {

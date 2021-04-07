@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -12,17 +13,14 @@ namespace devsko.LayoutAnalyzer
     {
         public event Action ColorsChanged;
 
-        private IConnectionPoint _connectionPoint;
         private uint _cookie;
 
-        public static async Task<TextManagerEventSink> SubscribeAsync(LayoutAnalyzerPackage package)
+        public static async Task<TextManagerEventSink> SubscribeAsync()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            var eventGuid = typeof(IVsTextManagerEvents).GUID;
-            TextManagerEventSink instance = new TextManagerEventSink();
-            ((IConnectionPointContainer)package.TextManager).FindConnectionPoint(ref eventGuid, out instance._connectionPoint);
-            instance._connectionPoint.Advise(instance, out instance._cookie);
+            TextManagerEventSink instance = new();
+            GetConnectionPoint().Advise(instance, out instance._cookie);
 
             return instance;
         }
@@ -34,8 +32,18 @@ namespace devsko.LayoutAnalyzer
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            _connectionPoint?.Unadvise(_cookie);
-            _connectionPoint = null;
+            GetConnectionPoint().Unadvise(_cookie);
+        }
+
+        private static IConnectionPoint GetConnectionPoint()
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var eventGuid = typeof(IVsTextManagerEvents).GUID;
+            IConnectionPoint connectionPoint;
+            ((IConnectionPointContainer)LayoutAnalyzerPackage.Instance.TextManager).FindConnectionPoint(ref eventGuid, out connectionPoint);
+
+            return connectionPoint;
         }
 
         public void OnRegisterMarkerType(int iMarkerType)
@@ -50,25 +58,24 @@ namespace devsko.LayoutAnalyzer
 
             if (pColorPrefs is not null && pColorPrefs.Length > 0)
             {
-                DelayEvent();
+                DelayEvent(ColorsChanged);
             }
         }
 
         private CancellationTokenSource _tokenSource;
 
-        private void DelayEvent()
+        private void DelayEvent(Action action)
         {
+            _tokenSource?.CancelAfter(TimeSpan.FromMilliseconds(500));
             if (_tokenSource is null)
             {
-                _tokenSource = new CancellationTokenSource();
-                _tokenSource.Token.Register(static state =>
+                _tokenSource = new CancellationTokenSource(500);
+                _tokenSource.Token.Register(() =>
                 {
-                    var @this = (TextManagerEventSink)state;
-                    @this._tokenSource = null;
-                    @this.ColorsChanged?.Invoke();
-                }, this, useSynchronizationContext: true);
+                    _tokenSource = null;
+                    action?.Invoke();
+                }, useSynchronizationContext: true);
             }
-            _tokenSource?.CancelAfter(TimeSpan.FromMilliseconds(500));
         }
     }
 }
