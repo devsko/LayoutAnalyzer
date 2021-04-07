@@ -7,14 +7,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
-  </ItemGroup>
 
-  <!-- ensure unreferenced LayoutAnalyzer.TestProject is up to date -->
-  <ItemGroup>
+    <!-- ensure unreferenced LayoutAnalyzer.TestProject is up to date -->
     <ProjectReference Include="..\devsko.LayoutAnalyzer.TestProject\devsko.LayoutAnalyzer.TestProject.csproj"
                       ReferenceOutputAssembly="false" />
   </ItemGroup>
 
+  <ItemGroup>
+    <UpToDateCheckInput Include="..\devsko.LayoutAnalyzer.Host\*.cs*" />
+    <UpToDateCheckInput Include="..\devsko.LayoutAnalyzer.Host.net4\*.cs*" />
+  </ItemGroup>
+  
   <Target Name="BuildHost" BeforeTargets="BeforeBuild">
 
     <ItemGroup>
