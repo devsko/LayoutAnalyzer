@@ -50,9 +50,7 @@
   <ItemGroup>
     <Compile Include="Controls\LayoutTreeView.cs" />
     <Compile Include="Controls\PropertyGrid.cs" />
-    <Compile Include="LayoutAnalyzer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Commands\MyToolWindowCommand.cs" />
     <Compile Include="LayoutAnalyzerPackage.cs" />
     <Compile Include="RunningDocumentTableEventSink.cs" />
     <Compile Include="SolutionEventSink.cs" />

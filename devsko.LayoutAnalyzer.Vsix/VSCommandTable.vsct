@@ -5,26 +5,22 @@
   <Extern href="vsshlids.h"/>
   <Include href="KnownImageIds.vsct"/>
 
-  <Commands package="guidPackage">
-    <!--This section defines the elements the user can interact with, like a menu command or a button or combo box in a toolbar. -->
+  <Commands package="Package">
     <Buttons>
-      <Button guid="guidLayoutAnalyzerPackageCmdSet" id="MyCommand" priority="0x0100" type="Button">
+      <Button guid="CommandSet" id="LayoutWindowCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
-        <Icon guid="ImageCatalogGuid" id="StatusInformation" />
-        <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
           <ButtonText>Layout Window</ButtonText>
-          <LocCanonicalName>.View.LayoutWindow</LocCanonicalName>
         </Strings>
       </Button>
     </Buttons>
   </Commands>
 
   <Symbols>
-    <GuidSymbol name="guidPackage" value="{512c11db-6dde-43c1-9a10-d8aa821444e2}" />
-
-    <GuidSymbol name="guidLayoutAnalyzerPackageCmdSet" value="{d18f8b78-d4ab-4bc2-bc4e-bb6ed891ee2f}">
-      <IDSymbol name="MyCommand" value="0x0100" />
+    <GuidSymbol name="Package" value="{512c11db-6dde-43c1-9a10-d8aa821444e2}" />
+    <GuidSymbol name="CommandSet" value="{d18f8b78-d4ab-4bc2-bc4e-bb6ed891ee2f}">
+      <IDSymbol name="LayoutWindowCommand" value="0x0100" />
     </GuidSymbol>
+      <GuidSymbol name="OutputWindowPane" value="{A19B6446-F4A7-4A70-86F3-93A03B38F335}" />
   </Symbols>
 </CommandTable>
