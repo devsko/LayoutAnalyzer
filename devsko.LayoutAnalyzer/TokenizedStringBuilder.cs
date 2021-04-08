@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using devsko.LayoutAnalyzer;
 
 namespace devsko.LayoutAnalyzer
 {

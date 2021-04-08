@@ -1,10 +1,9 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace devsko.LayoutAnalyzer
 {
 #if NET40_OR_GREATER
-    [Serializable]
+    [System.Serializable]
 #endif
     public
 #if NETCOREAPP3_1_OR_GREATER

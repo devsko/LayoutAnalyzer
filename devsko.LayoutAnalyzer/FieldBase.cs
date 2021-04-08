@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace devsko.LayoutAnalyzer
+﻿namespace devsko.LayoutAnalyzer
 {
 #if NET40_OR_GREATER
-    [Serializable]
+    [System.Serializable]
 #endif
     public abstract class FieldBase
     {

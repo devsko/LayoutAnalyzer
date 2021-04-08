@@ -141,12 +141,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.LanguageServices">
-      <Version>3.10.0-1.final</Version>
+      <Version>3.10.0-2.21121.14</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.SDK">
-      <Version>16.9.31025.194</Version>
+      <Version>16.9.31201.295</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.10.31">
+    <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.10.32">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

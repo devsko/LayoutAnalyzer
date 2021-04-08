@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace devsko.LayoutAnalyzer
 {
 #if NET40_OR_GREATER
-    [Serializable]
+    [System.Serializable]
 #endif
     public sealed class Padding : FieldBase
     {
