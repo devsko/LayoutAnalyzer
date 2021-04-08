@@ -9,19 +9,13 @@
              Include="..\Downlevel\*.net4.cs" 
              Visible="false" />
 
-    <Compile Condition="'$(NeedsDownlevel)' != 'false' and ($(TargetFramework.StartsWith('netcore')))"
-             Include="..\Downlevel\*.netcore.cs"
+    <Compile Condition="'$(NeedsDownlevel)' != 'false' and $(TargetFramework.StartsWith('netcoreapp2'))"
+             Include="..\Downlevel\*.netcore2.cs" 
              Visible="false" />
-  </ItemGroup>
 
-  <ItemGroup Condition="!$(TargetFramework.StartsWith('net4'))">
-    <None Include="*.net4.cs" />
-    <Compile Remove="*.net4.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <None Include="*.netcore.cs" />
-    <Compile Remove="*.netcore.cs" />
+    <Compile Condition="'$(NeedsDownlevel)' != 'false' and ($(TargetFramework.StartsWith('netcoreapp3')))"
+             Include="..\Downlevel\*.netcore3.cs"
+             Visible="false" />
   </ItemGroup>
 
 </Project>

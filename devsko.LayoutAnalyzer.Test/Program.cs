@@ -30,9 +30,9 @@ namespace devsko.LayoutAnalyzer.Test
                     Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
                     "..", "..", "..", "..", "devsko.LayoutAnalyzer.Host", "bin"));
 
-                HostRunner runner = HostRunner.GetHostRunner(hostBasePath, TargetFramework.Net, Platform.x64,
+                HostRunner runner = HostRunner.GetHostRunner(hostBasePath, TargetFramework.NetCore2, Platform.x64,
 #if DEBUG
-                    debug: true, waitForDebugger: false
+                    debug: true, waitForDebugger: true
 #else
                     debug: false, waitForDebugger: false
 #endif
@@ -50,7 +50,8 @@ namespace devsko.LayoutAnalyzer.Test
                 string frameworkDirectory = runner.TargetFramework switch
                 {
                     TargetFramework.NetFramework => "net472",
-                    TargetFramework.NetCore => "netcoreapp3.1",
+                    TargetFramework.NetCore3 => "netcoreapp3.1",
+                    TargetFramework.NetCore2 => "netcoreapp2.1",
                     TargetFramework.Net => "net5.0",
                     _ => throw new ArgumentException("")
                 };
@@ -61,6 +62,8 @@ namespace devsko.LayoutAnalyzer.Test
                     Path.GetDirectoryName(thisAssemblyPath)!,
                     "..", "..", "..", "..", "devsko.LayoutAnalyzer.TestProject", "bin", "Debug", frameworkDirectory, "devsko.LayoutAnalyzer.TestProject.dll"));
 
+                await AnalyzeAndPrintAsync(typeof(int).AssemblyQualifiedName!).ConfigureAwait(false);
+
                 //await AnalyzeAndPrintAsync("").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc,").ConfigureAwait(false);
@@ -68,7 +71,7 @@ namespace devsko.LayoutAnalyzer.Test
                 //await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.TestClass, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.S1, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
 
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.NoLayoutStruct, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.NoLayoutStructEmpty, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);

@@ -1,23 +1,42 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1;net472</TargetFrameworks>
+    <TargetFrameworks>net5.0;netcoreapp3.1;netcoreapp2.1;net472</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <Platforms>x64;x86;AnyCPU</Platforms>
     <RuntimeIdentifiers>win10-x64;win10-x86;win7-x64;win7-x86</RuntimeIdentifiers>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
+  </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <ProjectReference Include="..\devsko.LayoutAnalyzer.Host.net4\devsko.LayoutAnalyzer.Host.net4.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
+    <None Include="*.net*.cs" />
+    <Compile Remove="*.net*.cs" />
   </ItemGroup>
- 
+  
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <None Remove="*.net4.cs" />
+    <Compile Include="*.net4.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netcoreapp2'))">
+    <None Remove="*.netcore2.cs" />
+    <Compile Include="*.netcore2.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework.StartsWith('netcoreapp3')) or $(TargetFramework.StartsWith('net5'))">
+    <None Remove="*.netcore.cs" />
+    <Compile Include="*.netcore.cs" />
+  </ItemGroup>
+
   <Target Name="_IsValid" BeforeTargets="Build">
-    <Error Condition="'$(Platform)' == 'AnyCPU'"
-           Text="Build LayoutAnalyzer.Test instead" />
+    <Error Condition="'$(Platform)' == 'AnyCPU'" Text="Build LayoutAnalyzer.Test instead" />
   </Target>
   
 </Project>

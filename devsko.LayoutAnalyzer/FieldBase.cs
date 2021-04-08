@@ -6,14 +6,14 @@
     public abstract class FieldBase
     {
         public int Offset { get; protected
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
 #endif
         }
         public int Size { get; protected
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;

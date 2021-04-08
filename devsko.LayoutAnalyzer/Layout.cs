@@ -12,28 +12,28 @@ namespace devsko.LayoutAnalyzer
     public sealed class Layout
     {
         public Field[] Fields { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
 #endif
         }
         public int TotalSize { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
 #endif
         }
         public int TotalPadding { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
 #endif
         }
         public TokenizedString Name { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
@@ -42,35 +42,35 @@ namespace devsko.LayoutAnalyzer
         public Token Kind
         {
             get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
 #endif
         }
         public LayoutKind AttributeKind { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
 #endif
         }
         public int AttributeSize { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
 #endif
         }
         public int AttributePack { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
 #endif
         }
         public string Runtime { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
@@ -79,7 +79,7 @@ namespace devsko.LayoutAnalyzer
         public string AssemblyName
         {
             get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;

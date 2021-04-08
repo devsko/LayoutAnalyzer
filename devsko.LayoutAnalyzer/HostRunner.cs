@@ -12,7 +12,8 @@ namespace devsko.LayoutAnalyzer
     public enum TargetFramework
     {
         NetFramework,
-        NetCore,
+        NetCore3,
+        NetCore2,
         Net,
     }
 
@@ -68,7 +69,8 @@ namespace devsko.LayoutAnalyzer
             (string frameworkDirectory, string fileExtension) = framework switch
             {
                 TargetFramework.NetFramework => ("net472", "exe"),
-                TargetFramework.NetCore => ("netcoreapp3.1", "dll"),
+                TargetFramework.NetCore2 => ("netcoreapp2.1", "dll"),
+                TargetFramework.NetCore3 => ("netcoreapp3.1", "dll"),
                 TargetFramework.Net => ("net5.0", "exe"),
                 _ => throw new ArgumentException("", nameof(framework))
             };

@@ -15,7 +15,7 @@ namespace devsko.LayoutAnalyzer
         public TokenizedString TypeAndName
         {
             get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
@@ -24,21 +24,21 @@ namespace devsko.LayoutAnalyzer
         public Token Kind
         {
             get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
 #endif
         }
         public bool IsPublic { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
 #endif
         }
         public Field[]? Children { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;

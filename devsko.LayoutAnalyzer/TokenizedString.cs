@@ -7,20 +7,20 @@ namespace devsko.LayoutAnalyzer
     [Serializable]
 #endif
     public
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
         readonly
 #endif
         struct TokenizedString
     {
         public string Value { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;
 #endif
         }
         public TokenSpan[] Tokens { get; private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
                 init;
 #else
                 set;

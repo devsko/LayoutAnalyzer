@@ -6,13 +6,13 @@ namespace devsko.LayoutAnalyzer
     [System.Serializable]
 #endif
     public
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
         readonly
 #endif
         struct TokenSpan
     {
         private
-#if NETCOREAPP3_1_OR_GREATER
+#if NETCOREAPP2_1_OR_GREATER
         readonly
 #endif
             ushort _value;
