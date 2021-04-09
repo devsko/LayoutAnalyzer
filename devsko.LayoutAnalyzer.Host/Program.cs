@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace devsko.LayoutAnalyzer.Host
 {
-    static class Program
+    public static class Program
     {
         private static readonly TimeSpan s_shutdownTimerInterval = TimeSpan.FromMinutes(1);
 
