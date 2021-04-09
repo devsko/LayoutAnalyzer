@@ -11,14 +11,14 @@ namespace devsko.LayoutAnalyzer
         public event Action SolutionOpened;
         public event Action SolutionClosed;
 
-        private uint _cookie;
+        //private uint _cookie;
 
         public static async Task<SolutionEventSink> SubscribeAsync()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             SolutionEventSink instance = new();
-            LayoutAnalyzerPackage.Instance.Solution.AdviseSolutionEvents(instance, out instance._cookie);
+            //LayoutAnalyzerPackage.Instance.Solution.AdviseSolutionEvents(instance, out instance._cookie);
 
             return instance;
         }
@@ -30,7 +30,7 @@ namespace devsko.LayoutAnalyzer
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            LayoutAnalyzerPackage.Instance.Solution.UnadviseSolutionEvents(_cookie);
+            //LayoutAnalyzerPackage.Instance.Solution.UnadviseSolutionEvents(_cookie);
         }
 
         public int OnAfterOpenSolution(object pUnkReserved, int fNewSolution)

@@ -1,26 +1,44 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  <Extern href="stdidcmd.h"/>
-  <Extern href="vsshlids.h"/>
-  <Include href="KnownImageIds.vsct"/>
+    <Extern href="stdidcmd.h"/>
+    <Extern href="vsshlids.h"/>
+    <Include href="KnownImageIds.vsct"/>
 
-  <Commands package="Package">
-    <Buttons>
-      <Button guid="CommandSet" id="LayoutWindowCommand" priority="0x0100" type="Button">
-        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
-        <Strings>
-          <ButtonText>Layout Window</ButtonText>
-        </Strings>
-      </Button>
-    </Buttons>
-  </Commands>
+    <Commands package="Package">
 
-  <Symbols>
-    <GuidSymbol name="Package" value="{512c11db-6dde-43c1-9a10-d8aa821444e2}" />
-    <GuidSymbol name="CommandSet" value="{d18f8b78-d4ab-4bc2-bc4e-bb6ed891ee2f}">
-      <IDSymbol name="LayoutWindowCommand" value="0x0100" />
-    </GuidSymbol>
-      <GuidSymbol name="OutputWindowPane" value="{A19B6446-F4A7-4A70-86F3-93A03B38F335}" />
-  </Symbols>
+        <Groups>
+            <Group guid="ContextMenuCommandSet" id="ContextMenuGroup" priority="0x110">
+                <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+            </Group>    
+        </Groups>
+        
+        <Buttons>
+            <Button guid="CommandSet" id="LayoutWindowCommand" priority="0x0100" type="Button">
+                <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1"/>
+                <Strings>
+                    <ButtonText>Layout Window</ButtonText>
+                </Strings>
+            </Button>
+            <Button guid="ContextMenuCommandSet" id="AnalyzeCommand" priority="0x100" type="Button">
+                <Parent guid="ContextMenuCommandSet" id="ContextMenuGroup"/>
+                <Strings>
+                    <ButtonText>Analyze Layout</ButtonText>
+                </Strings>
+            </Button>
+        </Buttons>
+    </Commands>
+
+    <Symbols>
+        <GuidSymbol name="Package" value="{512c11db-6dde-43c1-9a10-d8aa821444e2}" />
+        <GuidSymbol name="CommandSet" value="{d18f8b78-d4ab-4bc2-bc4e-bb6ed891ee2f}">
+            <IDSymbol name="LayoutWindowCommand" value="0x0100" />
+        </GuidSymbol>
+        <GuidSymbol name="ContextMenuCommandSet" value="{15340EF4-80EE-4311-94C5-DBD2ADECDF74}">
+            <IDSymbol name="ContextMenuGroup" value="0x100" />
+            <IDSymbol name="AnalyzeCommand" value="0x101" />
+        </GuidSymbol>
+        <GuidSymbol name="OutputWindowPane" value="{A19B6446-F4A7-4A70-86F3-93A03B38F335}" />
+    </Symbols>
+    
 </CommandTable>

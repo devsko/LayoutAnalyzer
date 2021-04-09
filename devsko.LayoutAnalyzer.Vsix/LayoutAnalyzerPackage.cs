@@ -1,19 +1,24 @@
 ﻿using System;
-using System.ComponentModel.Composition;
+using System.Collections.Immutable;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using EnvDTE80;
 using Microsoft;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.FindSymbols;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ComponentModelHost;
 using Microsoft.VisualStudio.LanguageServices;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.TextManager.Interop;
 using Microsoft.VisualStudio.Threading;
+using IVsTextManager = Microsoft.VisualStudio.TextManager.Interop.IVsTextManager;
+using SVsTextManager = Microsoft.VisualStudio.TextManager.Interop.SVsTextManager;
 using Task = System.Threading.Tasks.Task;
 
 namespace devsko.LayoutAnalyzer
@@ -27,11 +32,12 @@ namespace devsko.LayoutAnalyzer
         public static LayoutAnalyzerPackage Instance { get; private set; }
 
         public VisualStudioWorkspace Workspace { get; private set; }
+        public DTE2 DTE { get; private set; }
         public IVsFontAndColorStorage FontAndColorStorage { get; private set; }
-        public IVsSolution Solution { get; private set; }
-        public IVsRunningDocumentTable RunningDocumentTable { get; private set; }
-        public RunningDocumentTableEventSink RunningDocumentTableEventSink { get; private set; }
-        public SolutionEventSink SolutionEventSink { get; private set; }
+        //public IVsSolution Solution { get; private set; }
+        //public IVsRunningDocumentTable RunningDocumentTable { get; private set; }
+        //public RunningDocumentTableEventSink RunningDocumentTableEventSink { get; private set; }
+        //public SolutionEventSink SolutionEventSink { get; private set; }
         public IVsTextManager TextManager { get; private set; }
         public TextManagerEventSink TextManagerEventSink { get; private set; }
         public HostRunner HostRunner { get; private set; }
@@ -80,13 +86,20 @@ namespace devsko.LayoutAnalyzer
             mcs.AddCommand(new MenuCommand(
                 ShowLayoutWindow,
                 new CommandID(PackageGuids.CommandSet, PackageIds.LayoutWindowCommand)));
+            mcs.AddCommand(new MenuCommand(
+                Analyze,
+                new CommandID(PackageGuids.ContextMenuCommandSet, PackageIds.AnalyzeCommand)));
 
+            DTE = (DTE2)await GetServiceAsync(typeof(SDTE));
+            Assumes.Present(DTE);
             FontAndColorStorage = (IVsFontAndColorStorage)await GetServiceAsync(typeof(SVsFontAndColorStorage));
-            Solution = (IVsSolution)await GetServiceAsync(typeof(SVsSolution));
-            SolutionEventSink = await SolutionEventSink.SubscribeAsync();
-            RunningDocumentTable = (IVsRunningDocumentTable)await GetServiceAsync(typeof(SVsRunningDocumentTable));
-            RunningDocumentTableEventSink = await RunningDocumentTableEventSink.SubscribeAsync();
+            Assumes.Present(FontAndColorStorage);
+            //Solution = (IVsSolution)await GetServiceAsync(typeof(SVsSolution));
+            //SolutionEventSink = await SolutionEventSink.SubscribeAsync();
+            //RunningDocumentTable = (IVsRunningDocumentTable)await GetServiceAsync(typeof(SVsRunningDocumentTable));
+            //RunningDocumentTableEventSink = await RunningDocumentTableEventSink.SubscribeAsync();
             TextManager = (IVsTextManager)await GetServiceAsync(typeof(SVsTextManager));
+            Assumes.Present(TextManager);
             TextManagerEventSink = await TextManagerEventSink.SubscribeAsync();
         }
 
@@ -111,8 +124,8 @@ namespace devsko.LayoutAnalyzer
 
                 if (disposing)
                 {
-                    SolutionEventSink?.Dispose();
-                    SolutionEventSink = null;
+                    //SolutionEventSink?.Dispose();
+                    //SolutionEventSink = null;
                     TextManagerEventSink?.Dispose();
                     TextManagerEventSink = null;
                 }
@@ -131,6 +144,47 @@ namespace devsko.LayoutAnalyzer
 
                 ErrorHandler.ThrowOnFailure(((IVsWindowFrame)(await LayoutWindow.GetValueAsync()).Frame).Show());
             });
+        }
+
+        private void Analyze(object sender, EventArgs args)
+        {
+            JoinableTaskFactory.RunAsync(async () =>
+            {
+                await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
+
+                EnvDTE.Document dteDocument = DTE.ActiveDocument;
+                if (dteDocument is not null)
+                {
+                    EnvDTE.Project dteProject = dteDocument.ProjectItem?.ContainingProject;
+                    if (dteProject is not null)
+                    {
+                        EnvDTE.TextSelection selection = (EnvDTE.TextSelection)dteDocument.Selection;
+                        if (selection is not null)
+                        {
+                            // TODO CRLF?
+                            int position = selection.ActivePoint.AbsoluteCharOffset + selection.CurrentLine - 1;
+                            string filePath = dteDocument.FullName;
+                            ImmutableArray<DocumentId> documentIds = Workspace.CurrentSolution.GetDocumentIdsWithFilePath(filePath);
+                            if (!documentIds.IsEmpty)
+                            {
+                                Document document = Workspace.CurrentSolution.GetDocument(documentIds[0]);
+
+                                ISymbol symbol = await SymbolFinder.FindSymbolAtPositionAsync(document, position).ConfigureAwait(false);
+
+                                //SemanticModel semanticModel = await document.GetSemanticModelAsync().ConfigureAwait(false);
+                                //SyntaxTree syntaxTree = await document.GetSyntaxTreeAsync().ConfigureAwait(false);
+
+                                //GetNearestType(semanticModel, syntaxTree, offset);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        private static void GetNearestType(SemanticModel semanticModel, SyntaxTree syntaxTree, int offset)
+        {
+            FileLinePositionSpan span = syntaxTree.GetLineSpan(new TextSpan(offset, 0));
         }
     }
 }

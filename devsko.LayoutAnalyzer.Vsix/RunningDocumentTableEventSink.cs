@@ -10,14 +10,14 @@ namespace devsko.LayoutAnalyzer
     {
         public event Action<uint> DocumentSaved;
 
-        private uint _cookie;
+        //private uint _cookie;
 
         public static async Task<RunningDocumentTableEventSink> SubscribeAsync()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             RunningDocumentTableEventSink instance = new();
-            LayoutAnalyzerPackage.Instance.RunningDocumentTable.AdviseRunningDocTableEvents(instance, out instance._cookie);
+            //LayoutAnalyzerPackage.Instance.RunningDocumentTable.AdviseRunningDocTableEvents(instance, out instance._cookie);
 
             return instance;
         }
@@ -29,7 +29,7 @@ namespace devsko.LayoutAnalyzer
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            LayoutAnalyzerPackage.Instance.RunningDocumentTable.UnadviseRunningDocTableEvents(_cookie);
+            //LayoutAnalyzerPackage.Instance.RunningDocumentTable.UnadviseRunningDocTableEvents(_cookie);
         }
 
         public int OnAfterSave(uint docCookie)
