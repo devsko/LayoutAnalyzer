@@ -9,30 +9,32 @@ namespace devsko.LayoutAnalyzer.Host
 
         private AppDirectory _appDirectory;
         private readonly FileSystemWatcher _watcher;
+        private readonly Pipe _log;
 
         public event Action? AssemblyDirectoryChanged;
 
-        public TypeLoader(string assemblyPath)
+        public TypeLoader(string assemblyPath, Pipe log)
         {
+            _log = log;
             AssemblyPath = assemblyPath;
             _appDirectory = new AppDirectory();
             CopyFiles(Path.GetDirectoryName(assemblyPath)!);
 
             _watcher = new FileSystemWatcher(Path.GetDirectoryName(assemblyPath)!);
-            _watcher.Changed += (sender, e) =>
+            _watcher.Changed += async (sender, e) =>
             {
-                Console.Error.WriteLine($"{DateTime.Now:mm:ss,fffffff} {e.ChangeType}");
+                await log.WriteLineAsync($"{DateTime.Now:mm:ss,fffffff} {e.ChangeType}").ConfigureAwait(false);
 
                 _watcher.EnableRaisingEvents = false;
                 AssemblyDirectoryChanged?.Invoke();
             };
             _watcher.EnableRaisingEvents = true;
 
-            Console.Error.WriteLine("Watching " + _watcher.Path);
+            //await log.WriteLineAsync("Watching " + _watcher.Path).ConfigureAwait(false);
 
             InitializeCore();
 
-            Console.Error.WriteLine("TypeLoader initialized");
+            //await log.WriteLineAsync("TypeLoader initialized").ConfigureAwait(false);
         }
 
         public string GetOriginalPath(string path)
@@ -52,7 +54,7 @@ namespace devsko.LayoutAnalyzer.Host
             _watcher.Dispose();
             _appDirectory.Dispose();
 
-            Console.Error.WriteLine("TypeLoader disposed");
+            //_log.WriteLine("TypeLoader disposed");
         }
 
         private void CopyFiles(string directory, string searchPattern = "*.*")

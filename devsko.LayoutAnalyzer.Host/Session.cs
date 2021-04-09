@@ -13,13 +13,13 @@ namespace devsko.LayoutAnalyzer.Host
         private static Dictionary<string, Session> s_allSessions = new(StringComparer.OrdinalIgnoreCase);
         private static object s_sync = new object();
 
-        public static Session GetOrCreate(Stream outStream, string assemblyName)
+        public static Session GetOrCreate(Pipe outPipe, string assemblyName, Pipe log)
         {
             lock (s_sync)
             {
                 if (!s_allSessions.TryGetValue(assemblyName, out Session? session))
                 {
-                    s_allSessions.Add(assemblyName, session = new Session(outStream, assemblyName));
+                    s_allSessions.Add(assemblyName, session = new Session(outPipe, assemblyName, log));
                 }
 
                 return session;
@@ -39,16 +39,18 @@ namespace devsko.LayoutAnalyzer.Host
         }
 
         private JsonSerializerOptions _jsonOptions;
-        private Stream _outStream;
+        private Pipe _outPipe;
+        private Pipe _log;
         private SemaphoreSlim _semaphore;
         private TypeLoader _typeLoader;
 
-        public Session(Stream outStream, string assemblyPath)
+        public Session(Pipe outPipe, string assemblyPath, Pipe log)
         {
             _jsonOptions = new JsonSerializerOptions();
-            _outStream = outStream;
+            _outPipe = outPipe;
+            _log = log;
             _semaphore = new SemaphoreSlim(1);
-            _typeLoader = new TypeLoader(assemblyPath);
+            _typeLoader = new TypeLoader(assemblyPath, log);
             _typeLoader.AssemblyDirectoryChanged += () =>
             {
                 Dispose();
@@ -73,7 +75,7 @@ namespace devsko.LayoutAnalyzer.Host
                 if (layout is not null)
                 {
                     layout.AssemblyPath = _typeLoader.GetOriginalPath(layout.AssemblyPath);
-                    await JsonSerializer.SerializeAsync(_outStream, layout, _jsonOptions, cancellationToken).ConfigureAwait(false);
+                    await JsonSerializer.SerializeAsync(_outPipe.Stream, layout, _jsonOptions, cancellationToken).ConfigureAwait(false);
                 }
             }
             finally
@@ -91,7 +93,7 @@ namespace devsko.LayoutAnalyzer.Host
                 s_allSessions.Remove(_typeLoader.AssemblyPath);
             }
 
-            Console.Error.WriteLine("Session disposed");
+            //_log.WriteLine("Session disposed");
         }
     }
 }

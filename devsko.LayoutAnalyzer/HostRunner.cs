@@ -51,6 +51,8 @@ namespace devsko.LayoutAnalyzer
         private SemaphoreSlim _semaphore;
         private ProcessStartInfo _startInfo;
         private Process? _process;
+        private Pipe? _inOutPipe;
+        private Pipe? _logPipe;
         private EofDetectingStream? _outStream;
 
         private HostRunner(string hostBasePath, TargetFramework framework, Platform platform, bool debug, bool waitForDebugger)
@@ -116,9 +118,6 @@ namespace devsko.LayoutAnalyzer
                 Arguments = arguments,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
                 UseShellExecute = false,
                 WorkingDirectory = Path.GetDirectoryName(hostAssemblyPath)!,
             };
@@ -129,13 +128,13 @@ namespace devsko.LayoutAnalyzer
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                EnsureRunningProcess();
+                await EnsureRunningProcessAsync().ConfigureAwait(false);
                 Stopwatch watch = Stopwatch.StartNew();
-                _process.StandardInput.WriteLine(command);
+                await _inOutPipe!.WriteLineAsync(command).ConfigureAwait(false);
 
                 try
                 {
-                    Layout? layout = await JsonSerializer.DeserializeAsync<Layout>(_outStream, _jsonOptions, cancellationToken).ConfigureAwait(false);
+                    Layout? layout = await JsonSerializer.DeserializeAsync<Layout>(_outStream!, _jsonOptions, cancellationToken).ConfigureAwait(false);
                     if (layout is not null)
                     {
                         layout.ElapsedTime = watch.Elapsed;
@@ -157,6 +156,10 @@ namespace devsko.LayoutAnalyzer
 
         public void Dispose()
         {
+            _outStream?.Dispose();
+            _inOutPipe?.Dispose();
+            _logPipe?.Dispose();
+
             if (_process?.HasExited == false)
             {
                 try
@@ -167,21 +170,20 @@ namespace devsko.LayoutAnalyzer
                 { }
             }
             _process?.Dispose();
-            _outStream?.Dispose();
         }
 
-        [MemberNotNull(nameof(_process), nameof(_outStream))]
-        private void EnsureRunningProcess()
+        [MemberNotNull(nameof(_process))]
+        private async Task EnsureRunningProcessAsync()
         {
             if (_process is null || _process.HasExited || _outStream is null)
             {
                 Dispose();
-                StartProcess();
+                await StartProcessAsync().ConfigureAwait(false);
             }
         }
 
-        [MemberNotNull(nameof(_process), nameof(_outStream))]
-        private void StartProcess()
+        [MemberNotNull(nameof(_process))]
+        private async Task StartProcessAsync()
         {
             Process? process = Process.Start(_startInfo);
             if (process is null)
@@ -190,17 +192,28 @@ namespace devsko.LayoutAnalyzer
             }
 
             _process = process;
-            _outStream = new EofDetectingStream(_process.StandardOutput.BaseStream);
-            _process.ErrorDataReceived += (sender, e) =>
-            {
-                if (e.Data is not null)
-                {
-                    MessageReceived?.Invoke(e.Data);
-                }
-            };
-            _process.BeginErrorReadLine();
+
+            _inOutPipe = await Pipe.ConnectAsync(Pipe.InOutName, true).ConfigureAwait(false);
+            _logPipe = await Pipe.ConnectAsync(Pipe.LogName, false).ConfigureAwait(false);
+
+            _outStream = new EofDetectingStream(_inOutPipe.Stream);
+
+            _ = ReadLogAsync();
 
             Console.WriteLine($"Host process started PID={process.Id}");
+
+            async Task ReadLogAsync()
+            {
+                while (true)
+                {
+                    string? line = await _logPipe.ReadLineAsync().ConfigureAwait(false);
+                    if (line is null)
+                    {
+                        break;
+                    }
+                    MessageReceived?.Invoke(line);
+                }
+            }
         }
     }
 }

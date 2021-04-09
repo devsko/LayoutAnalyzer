@@ -70,10 +70,10 @@ namespace devsko.LayoutAnalyzer.Host
 
                 if (!weakRef.IsAlive)
                 {
-                    Console.Error.WriteLine("LoadContext collected");
+                    //_log.WriteLine("LoadContext collected");
                     break;
                 }
-                Console.Error.WriteLine("Waiting for GC " + i);
+                //_log.WriteLine("Waiting for GC " + i);
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]
