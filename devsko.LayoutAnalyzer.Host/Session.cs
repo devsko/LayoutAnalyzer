@@ -18,6 +18,8 @@ namespace devsko.LayoutAnalyzer.Host
 
         public static async ValueTask<Session> GetOrCreateAsync(Stream stream, SessionData data, Pipe log)
         {
+            MSBuild.ProjectItem result = await MSBuild.GenerateWatchListAsync(data.ProjectFilePath, default).ConfigureAwait(false);
+
             Session? session;
             await s_semaphore.WaitAsync().ConfigureAwait(false);
             try

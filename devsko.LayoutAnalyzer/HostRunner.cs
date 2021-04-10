@@ -13,7 +13,8 @@ namespace devsko.LayoutAnalyzer
     {
         NetFramework,
         NetCore,
-        Net,
+        Net5Plus,
+        NetStandard,
     }
 
     public enum Platform
@@ -72,7 +73,7 @@ namespace devsko.LayoutAnalyzer
             {
                 TargetFramework.NetFramework => ("net472", "exe"),
                 TargetFramework.NetCore => ("netcoreapp3.1", "dll"),
-                TargetFramework.Net => ("net5.0", "exe"),
+                TargetFramework.Net5Plus => ("net5.0", "exe"),
                 _ => throw new ArgumentException("", nameof(framework))
             };
             (string platformDirectory, string programFilesDirectory) = platform switch

@@ -30,7 +30,7 @@ namespace devsko.LayoutAnalyzer.Test
                     Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
                     "..", "..", "..", "..", "devsko.LayoutAnalyzer.Host", "bin"));
 
-                HostRunner runner = HostRunner.GetHostRunner(hostBasePath, TargetFramework.Net, Platform.x64,
+                HostRunner runner = HostRunner.GetHostRunner(hostBasePath, TargetFramework.Net5Plus, Platform.x64,
 #if DEBUG
                     debug: true, waitForDebugger: false
 #else

@@ -34,6 +34,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "devsko.LayoutAnalyzer.Host.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "devsko.LayoutAnalyzer.Vsix", "devsko.LayoutAnalyzer.Vsix\devsko.LayoutAnalyzer.Vsix.csproj", "{899E2A85-2C41-441D-8624-E4B1C8F97BBC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LayoutAnalyzerTasks", "LayoutAnalyzerTasks\LayoutAnalyzerTasks.csproj", "{97DFA260-03FA-4D00-824A-6E7CBBBB61D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{899E2A85-2C41-441D-8624-E4B1C8F97BBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{899E2A85-2C41-441D-8624-E4B1C8F97BBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{899E2A85-2C41-441D-8624-E4B1C8F97BBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97DFA260-03FA-4D00-824A-6E7CBBBB61D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97DFA260-03FA-4D00-824A-6E7CBBBB61D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97DFA260-03FA-4D00-824A-6E7CBBBB61D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97DFA260-03FA-4D00-824A-6E7CBBBB61D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "ConsoleApp1": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\dotnet\\dotnet.exe",
+      "commandLineArgs": "\"C:\\Users\\stefa\\source\\repos\\LayoutAnalyzer\\ConsoleApp1\\bin\\Debug\\net6.0\\ConsoleApp1.dll\""
+    }
+  }
+}

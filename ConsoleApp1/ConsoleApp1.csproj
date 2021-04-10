@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="C:\Program Files\dotnet\sdk\6.0.100-preview.3.21202.5\DotnetTools\dotnet-watch\6.0.100-preview.3.21201.24\tools\net6.0\any\dotnet-watch.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="DotNetWatch.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DotNetWatchTasks.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

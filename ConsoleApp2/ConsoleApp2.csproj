@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="C:\Users\stefa\source\repos\LayoutAnalyzer\devsko.LayoutAnalyzer.Host\bin\x64\Debug\net5.0\devsko.LayoutAnalyzer.Host.dll" />
+    <ProjectReference Include="C:\Users\stefa\source\repos\LayoutAnalyzer\devsko.LayoutAnalyzer.TestProject\devsko.LayoutAnalyzer.TestProject.csproj" />
+  </ItemGroup>
+
+</Project>
