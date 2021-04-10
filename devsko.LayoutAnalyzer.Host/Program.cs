@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,6 +16,7 @@ namespace devsko.LayoutAnalyzer.Host
         public static async Task Main(string[] args)
         {
             using Pipe inOut = await Pipe.StartServerAsync(Pipe.InOutName, bidirectional: true).ConfigureAwait(false);
+            using BinaryReader pipeReader = new(inOut.Stream, Encoding.UTF8, leaveOpen: true);
             using Pipe log = await Pipe.StartServerAsync(Pipe.LogName, bidirectional: false).ConfigureAwait(false);
 
             await log.WriteLineAsync($"{RuntimeInformation.FrameworkDescription} ({RuntimeInformation.ProcessArchitecture})").ConfigureAwait(false);
@@ -30,32 +33,26 @@ namespace devsko.LayoutAnalyzer.Host
 
             while (true)
             {
-                string command;
+                string projectFilePath;
+                string typeName;
                 using (ShutdownTimer.Start(s_shutdownTimerInterval, log))
                 {
-                    string? line = await inOut.ReadLineAsync().ConfigureAwait(false);
-                    if (line is null)
-                    {
-                        break;
-                    }
-                    command = line;
+                    projectFilePath = pipeReader.ReadString();
+                    typeName = pipeReader.ReadString();
                 }
 
-                await log.WriteLineAsync("ANALYZE " + command).ConfigureAwait(false);
+                await log.WriteLineAsync($"ANALYZE {projectFilePath} {typeName}").ConfigureAwait(false);
 
                 try
                 {
-                    int index = command.IndexOf('|');
-                    if (index < 0 || index >= command.Length - 1)
-                    {
-                        throw new InvalidOperationException($"Wrong command format '{command}'");
-                    }
-                    string assemblyName = command.Substring(0, index);
-                    string typeName = command.Substring(index + 1);
                     await Session
-                        .GetOrCreate(inOut, assemblyName, log)
+                        .GetOrCreate(inOut.Stream, projectFilePath, log)
                         .AnalyzeAsync(typeName)
                         .ConfigureAwait(false);
+                }
+                catch (EndOfStreamException)
+                {
+                    break;
                 }
                 catch (Exception e)
                 {

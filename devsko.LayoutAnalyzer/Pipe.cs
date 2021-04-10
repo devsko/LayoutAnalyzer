@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,34 +9,12 @@ namespace devsko.LayoutAnalyzer
 {
     public class Pipe : IDisposable
     {
-        public struct PipeAccessor : IDisposable
-        {
-            private Pipe _pipe;
-
-            public static async Task<PipeAccessor> WaitAsync(Pipe pipe)
-            {
-                await pipe._semaphore.WaitAsync().ConfigureAwait(false);
-
-                return new PipeAccessor { _pipe = pipe };
-            }
-
-            public PipeStream Stream
-                => _pipe.Stream;
-
-            public void Dispose()
-            {
-                _pipe._semaphore.Release();
-                this = default;
-            }
-        }
-
         public const string InOutName = "layoutanalyzer-inout";
         public const string LogName = "layoutanalyzer-log";
 
         private readonly PipeStream _stream;
         private TextWriter? _writer;
         private TextReader? _reader;
-        private readonly SemaphoreSlim _semaphore = new(1);
 
         private Pipe(string name, bool isServer, bool bidirectional)
         {
@@ -80,10 +56,10 @@ namespace devsko.LayoutAnalyzer
             => _stream;
 
         private TextWriter Writer
-            => _writer ??= new StreamWriter(_stream, Encoding.UTF8);
+            => _writer ??= new StreamWriter(_stream, Encoding.UTF8, -1, leaveOpen: true);
 
         private TextReader Reader
-            => _reader ??= new StreamReader(_stream, Encoding.UTF8);
+            => _reader ??= new StreamReader(_stream, Encoding.UTF8, detectEncodingFromByteOrderMarks:false, -1, leaveOpen: true);
 
         public async Task WriteLineAsync(string line)
         {
@@ -94,10 +70,11 @@ namespace devsko.LayoutAnalyzer
         public Task<string?> ReadLineAsync()
             => Reader.ReadLineAsync();
 
-        public Task<PipeAccessor> GetAsync()
-            => PipeAccessor.WaitAsync(this);
-
         public void Dispose()
-            => _stream.Dispose();
+        {
+            _reader?.Dispose();
+            _writer?.Dispose();
+            _stream.Dispose();
+        }
     }
 }

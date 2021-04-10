@@ -51,9 +51,9 @@ namespace devsko.LayoutAnalyzer
         private SemaphoreSlim _semaphore;
         private ProcessStartInfo _startInfo;
         private Process? _process;
-        private Pipe? _inOutPipe;
         private Pipe? _logPipe;
-        private EofDetectingStream? _outStream;
+        private BinaryWriter? _pipeWriter;
+        private EofDetectingStream? _responseStream;
 
         private HostRunner(string hostBasePath, TargetFramework framework, Platform platform, bool debug, bool waitForDebugger)
         {
@@ -74,10 +74,10 @@ namespace devsko.LayoutAnalyzer
                 TargetFramework.Net => ("net5.0", "exe"),
                 _ => throw new ArgumentException("", nameof(framework))
             };
-            (string platformDirectory, string programFilesDirectory) = platform switch
+            string platformDirectory = platform switch
             {
-                Platform.x64 => ("x64", "%ProgramW6432%"),
-                Platform.x86 => ("x86", "%ProgramFiles(x86)%"),
+                Platform.x64 => "x64",
+                Platform.x86 => "x86",
                 _ => throw new ArgumentException("", nameof(platform))
             };
 
@@ -97,7 +97,7 @@ namespace devsko.LayoutAnalyzer
             }
             else
             {
-                exePath = Path.Combine(Environment.ExpandEnvironmentVariables(programFilesDirectory), "dotnet", "dotnet.exe");
+                exePath = Path.Combine(Environment.GetEnvironmentVariable("ProgramFiles")!, "dotnet", "dotnet.exe");
                 if (!File.Exists(exePath))
                 {
                     throw new InvalidOperationException($"Install .NET ('{exePath}' not found.)");
@@ -123,21 +123,24 @@ namespace devsko.LayoutAnalyzer
             };
         }
 
-        public async Task<Layout?> AnalyzeAsync(string command, CancellationToken cancellationToken = default)
+        public async Task<Layout?> AnalyzeAsync(string projectFilePath, string typeName, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 await EnsureRunningProcessAsync().ConfigureAwait(false);
-                Stopwatch watch = Stopwatch.StartNew();
-                await _inOutPipe!.WriteLineAsync(command).ConfigureAwait(false);
+                long start = Stopwatch.GetTimestamp();
+
+                _pipeWriter!.Write(projectFilePath);
+                _pipeWriter.Write(typeName);
+                _pipeWriter.Flush();
 
                 try
                 {
-                    Layout? layout = await JsonSerializer.DeserializeAsync<Layout>(_outStream!, _jsonOptions, cancellationToken).ConfigureAwait(false);
+                    Layout? layout = await JsonSerializer.DeserializeAsync<Layout>(_responseStream!, _jsonOptions, cancellationToken).ConfigureAwait(false);
                     if (layout is not null)
                     {
-                        layout.ElapsedTime = watch.Elapsed;
+                        layout.ElapsedTime = TimeSpan.FromTicks(Stopwatch.GetTimestamp() - start);
                     }
 
                     return layout;
@@ -149,15 +152,15 @@ namespace devsko.LayoutAnalyzer
             }
             finally
             {
-                _outStream?.Reset();
+                _responseStream?.Reset();
                 _semaphore.Release();
             }
         }
 
         public void Dispose()
         {
-            _outStream?.Dispose();
-            _inOutPipe?.Dispose();
+            _pipeWriter?.Dispose();
+            _responseStream?.Dispose();
             _logPipe?.Dispose();
 
             if (_process?.HasExited == false)
@@ -175,7 +178,7 @@ namespace devsko.LayoutAnalyzer
         [MemberNotNull(nameof(_process))]
         private async Task EnsureRunningProcessAsync()
         {
-            if (_process is null || _process.HasExited || _outStream is null)
+            if (_process is null || _process.HasExited)
             {
                 Dispose();
                 await StartProcessAsync().ConfigureAwait(false);
@@ -193,10 +196,11 @@ namespace devsko.LayoutAnalyzer
 
             _process = process;
 
-            _inOutPipe = await Pipe.ConnectAsync(Pipe.InOutName, true).ConfigureAwait(false);
-            _logPipe = await Pipe.ConnectAsync(Pipe.LogName, false).ConfigureAwait(false);
+            Pipe inOutPipe = await Pipe.ConnectAsync(Pipe.InOutName, true).ConfigureAwait(false);
+            _responseStream = new EofDetectingStream(inOutPipe.Stream);
+            _pipeWriter = new BinaryWriter(inOutPipe.Stream);
 
-            _outStream = new EofDetectingStream(_inOutPipe.Stream);
+            _logPipe = await Pipe.ConnectAsync(Pipe.LogName, false).ConfigureAwait(false);
 
             _ = ReadLogAsync();
 

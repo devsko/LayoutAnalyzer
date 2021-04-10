@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 
 namespace devsko.LayoutAnalyzer.Host
 {
@@ -6,6 +7,10 @@ namespace devsko.LayoutAnalyzer.Host
     {
         public void CopyFiles(string directory, string searchPattern = "*.*")
         {
+            if (!Directory.Exists(directory))
+            {
+                throw new DirectoryNotFoundException(directory);
+            }
             // Seems to be the only way to copy files that are locked (e.g. by VisualStudio)
             ExecuteCmd($"copy \"{directory}\\{searchPattern}\" \"{Path}\"");
         }

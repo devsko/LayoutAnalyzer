@@ -13,8 +13,14 @@ namespace devsko.LayoutAnalyzer.Host
 
         public event Action? AssemblyDirectoryChanged;
 
-        public TypeLoader(string assemblyPath, Pipe log)
+        public TypeLoader(string projectFilePath, Pipe log)
         {
+            // TODO
+            string assemblyPath = Path.Combine(
+                Path.GetDirectoryName(projectFilePath)!,
+                "bin", "Debug", "net5.0",
+                Path.ChangeExtension(Path.GetFileName(projectFilePath), ".dll"));
+
             _log = log;
             AssemblyPath = assemblyPath;
             _appDirectory = new AppDirectory();

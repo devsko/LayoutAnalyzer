@@ -45,21 +45,13 @@ namespace devsko.LayoutAnalyzer.Test
                     }
                 };
 
-                // Find the 'TestProject' bins
+                // Find TestProject.csproj
 
-                string frameworkDirectory = runner.TargetFramework switch
-                {
-                    TargetFramework.NetFramework => "net472",
-                    TargetFramework.NetCore => "netcoreapp3.1",
-                    TargetFramework.Net => "net5.0",
-                    _ => throw new ArgumentException("")
-                };
-
-                string thisAssemblyPath = Assembly.GetExecutingAssembly().Location;
-
-                string projectAssemblyPath = Path.GetFullPath(Path.Combine(
-                    Path.GetDirectoryName(thisAssemblyPath)!,
-                    "..", "..", "..", "..", "devsko.LayoutAnalyzer.TestProject", "bin", "Debug", frameworkDirectory, "devsko.LayoutAnalyzer.TestProject.dll"));
+                string projectFilePath = Path.GetFullPath(Path.Combine(
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+                    "..", "..", "..", "..",
+                    "devsko.LayoutAnalyzer.TestProject",
+                    "devsko.LayoutAnalyzer.TestProject.csproj"));
 
                 //await AnalyzeAndPrintAsync("").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc").ConfigureAwait(false);
@@ -83,7 +75,7 @@ namespace devsko.LayoutAnalyzer.Test
                 {
                     try
                     {
-                        Layout? layout = await runner.AnalyzeAsync(projectAssemblyPath + '|' + typeName).ConfigureAwait(false);
+                        Layout? layout = await runner.AnalyzeAsync(projectFilePath, typeName).ConfigureAwait(false);
                         if (layout is not null)
                         {
                             using (await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
