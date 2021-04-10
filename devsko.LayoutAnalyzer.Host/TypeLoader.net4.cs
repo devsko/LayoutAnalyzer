@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using devsko.LayoutAnalyzer.Host.net4;
 
 namespace devsko.LayoutAnalyzer.Host
@@ -36,9 +37,11 @@ namespace devsko.LayoutAnalyzer.Host
         public Layout? LoadAndAnalyze(AssemblyName assemblyName, string typeName)
             => _marshaledTypeLoader.LoadAndAnalyze(assemblyName, typeName);
 
-        private void DisposeCore()
+        private ValueTask DisposeCoreAsync()
         {
             AppDomain.Unload(_appDomain);
+
+            return default;
         }
     }
 }

@@ -33,22 +33,27 @@ namespace devsko.LayoutAnalyzer.Host
 
             while (true)
             {
-                string projectFilePath;
+                SessionData data;
                 string typeName;
                 using (ShutdownTimer.Start(s_shutdownTimerInterval, log))
                 {
-                    projectFilePath = pipeReader.ReadString();
+                    data = new SessionData
+                    (
+                        ProjectFilePath: pipeReader.ReadString(),
+                        Debug: pipeReader.ReadBoolean(),
+                        Platform: (Platform)pipeReader.ReadByte(),
+                        TargetFramework: pipeReader.ReadString(),
+                        Exe: pipeReader.ReadBoolean()
+                    );
                     typeName = pipeReader.ReadString();
                 }
 
-                await log.WriteLineAsync($"ANALYZE {projectFilePath} {typeName}").ConfigureAwait(false);
+                await log.WriteLineAsync($"ANALYZE {data.ProjectFilePath} {typeName}").ConfigureAwait(false);
 
                 try
                 {
-                    await Session
-                        .GetOrCreate(inOut.Stream, projectFilePath, log)
-                        .AnalyzeAsync(typeName)
-                        .ConfigureAwait(false);
+                    Session session = await Session.GetOrCreateAsync(inOut.Stream, data, log).ConfigureAwait(false);
+                    await session.AnalyzeAsync(typeName).ConfigureAwait(false);
                 }
                 catch (EndOfStreamException)
                 {
@@ -64,7 +69,7 @@ namespace devsko.LayoutAnalyzer.Host
                 }
             }
 
-            Session.DisposeAll();
+            await Session.DisposeAllAsync().ConfigureAwait(false);
 
             void ProcessArgs()
             {

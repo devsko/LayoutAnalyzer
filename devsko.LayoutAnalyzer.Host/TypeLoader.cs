@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace devsko.LayoutAnalyzer.Host
 {
-    public sealed partial class TypeLoader : IDisposable
+    public sealed partial class TypeLoader : IAsyncDisposable
     {
         public string AssemblyPath { get; private init; }
 
@@ -13,13 +14,17 @@ namespace devsko.LayoutAnalyzer.Host
 
         public event Action? AssemblyDirectoryChanged;
 
-        public TypeLoader(string projectFilePath, Pipe log)
+        public TypeLoader(SessionData data, Pipe log)
         {
-            // TODO
+            // TODO get from MSBuild
+
             string assemblyPath = Path.Combine(
-                Path.GetDirectoryName(projectFilePath)!,
-                "bin", "Debug", "net5.0",
-                Path.ChangeExtension(Path.GetFileName(projectFilePath), ".dll"));
+                Path.GetDirectoryName(data.ProjectFilePath)!,
+                "bin",
+                data.Platform == Platform.Any ? "" : data.Platform.ToString(),
+                data.Debug ? "Debug" : "Release",
+                data.TargetFramework,
+                Path.ChangeExtension(Path.GetFileName(data.ProjectFilePath), data.Exe ? ".exe" : ".dll"));
 
             _log = log;
             AssemblyPath = assemblyPath;
@@ -53,14 +58,14 @@ namespace devsko.LayoutAnalyzer.Host
             return path;
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            DisposeCore();
+            await DisposeCoreAsync().ConfigureAwait(false);
 
             _watcher.Dispose();
             _appDirectory.Dispose();
 
-            //_log.WriteLine("TypeLoader disposed");
+            await _log.WriteLineAsync("TypeLoader disposed").ConfigureAwait(false);
         }
 
         private void CopyFiles(string directory, string searchPattern = "*.*")

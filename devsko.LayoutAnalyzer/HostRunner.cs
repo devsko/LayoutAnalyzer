@@ -125,7 +125,7 @@ namespace devsko.LayoutAnalyzer
             };
         }
 
-        public async Task<Layout?> AnalyzeAsync(string projectFilePath, string typeName, CancellationToken cancellationToken = default)
+        public async Task<Layout?> AnalyzeAsync(string projectFilePath, bool debug, Platform platform, string targetFramework,bool exe, string typeName, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -134,6 +134,10 @@ namespace devsko.LayoutAnalyzer
                 long start = Stopwatch.GetTimestamp();
 
                 _pipeWriter!.Write(projectFilePath);
+                _pipeWriter.Write(debug);
+                _pipeWriter.Write((byte)platform);
+                _pipeWriter.Write(targetFramework);
+                _pipeWriter.Write(exe);
                 _pipeWriter.Write(typeName);
                 _pipeWriter.Flush();
 

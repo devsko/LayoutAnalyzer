@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
+using System.Threading.Tasks;
 
 namespace devsko.LayoutAnalyzer.Host
 {
@@ -56,7 +57,7 @@ namespace devsko.LayoutAnalyzer.Host
             return _analyzer.Analyze(type);
         }
 
-        private void DisposeCore()
+        private async ValueTask DisposeCoreAsync()
         {
             _analyzer = null!;
 
@@ -70,10 +71,10 @@ namespace devsko.LayoutAnalyzer.Host
 
                 if (!weakRef.IsAlive)
                 {
-                    //_log.WriteLine("LoadContext collected");
+                    await _log.WriteLineAsync("LoadContext collected").ConfigureAwait(false);
                     break;
                 }
-                //_log.WriteLine("Waiting for GC " + i);
+                await _log.WriteLineAsync("Waiting for GC " + i).ConfigureAwait(false);
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]

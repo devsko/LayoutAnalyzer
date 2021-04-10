@@ -8,52 +8,66 @@ using System.Threading.Tasks;
 
 namespace devsko.LayoutAnalyzer.Host
 {
-    public sealed class Session : IDisposable
+    public sealed class Session : IAsyncDisposable
     {
-        private static Dictionary<string, Session> s_allSessions = new(StringComparer.OrdinalIgnoreCase);
-        private static object s_sync = new object();
+        private static readonly Dictionary<string, Session> s_allSessions = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly SemaphoreSlim s_semaphore = new(1);
 
-        public static Session GetOrCreate(Stream stream, string projectFileName, Pipe log)
+        private static string GetSessionKey(SessionData data)
+            => data.ProjectFilePath;
+
+        public static async ValueTask<Session> GetOrCreateAsync(Stream stream, SessionData data, Pipe log)
         {
-            lock (s_sync)
+            Session? session;
+            await s_semaphore.WaitAsync().ConfigureAwait(false);
+            try
             {
-                if (!s_allSessions.TryGetValue(projectFileName, out Session? session))
+                if (!s_allSessions.TryGetValue(GetSessionKey(data), out session))
                 {
-                    s_allSessions.Add(projectFileName, session = new Session(stream, projectFileName, log));
+                    s_allSessions.Add(GetSessionKey(data), session = new Session(stream, data, log));
                 }
-
-                return session;
             }
+            finally
+            {
+                s_semaphore.Release();
+            }
+
+            return session;
         }
 
-        public static void DisposeAll()
+        public static async ValueTask DisposeAllAsync()
         {
-            lock (s_sync)
+            await s_semaphore.WaitAsync().ConfigureAwait(false);
+            try
             {
                 foreach (Session session in s_allSessions.Values)
                 {
-                    session.Dispose();
+                    await session.DisposeAsync().ConfigureAwait(false);
                 }
                 s_allSessions.Clear();
             }
+            finally
+            {
+                s_semaphore.Release();
+            }
         }
 
-        private JsonSerializerOptions _jsonOptions;
+        private string _key;
         private Stream _stream;
         private Pipe _log;
         private SemaphoreSlim _semaphore;
         private TypeLoader _typeLoader;
 
-        public Session(Stream stream, string projectFileName, Pipe log)
+        public Session(Stream stream, SessionData data, Pipe log)
         {
-            _jsonOptions = new JsonSerializerOptions();
+            _key = GetSessionKey(data);
             _stream = stream;
             _log = log;
             _semaphore = new SemaphoreSlim(1);
-            _typeLoader = new TypeLoader(projectFileName, log);
-            _typeLoader.AssemblyDirectoryChanged += () =>
+            _typeLoader = new TypeLoader(data, log);
+            _typeLoader.AssemblyDirectoryChanged += async () =>
             {
-                Dispose();
+                await DisposeAsync().ConfigureAwait(false);
             };
         }
 
@@ -75,7 +89,7 @@ namespace devsko.LayoutAnalyzer.Host
                 if (layout is not null)
                 {
                     layout.AssemblyPath = _typeLoader.GetOriginalPath(layout.AssemblyPath);
-                    await JsonSerializer.SerializeAsync(_stream, layout, _jsonOptions, cancellationToken).ConfigureAwait(false);
+                    await JsonSerializer.SerializeAsync(_stream, layout, cancellationToken: cancellationToken).ConfigureAwait(false);
                 }
             }
             finally
@@ -84,16 +98,21 @@ namespace devsko.LayoutAnalyzer.Host
             }
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            _jsonOptions = null!;
-            _typeLoader.Dispose();
-            lock (s_sync)
+            await _typeLoader.DisposeAsync().ConfigureAwait(false);
+
+            await s_semaphore.WaitAsync().ConfigureAwait(false);
+            try
             {
-                s_allSessions.Remove(_typeLoader.AssemblyPath);
+                s_allSessions.Remove(_key);
+            }
+            finally
+            {
+                s_semaphore.Release();
             }
 
-            //_log.WriteLine("Session disposed");
+            await _log.WriteLineAsync($"Session {Path.GetFileName(_key)} disposed").ConfigureAwait(false);
         }
     }
 }

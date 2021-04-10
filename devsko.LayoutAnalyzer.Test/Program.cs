@@ -75,7 +75,7 @@ namespace devsko.LayoutAnalyzer.Test
                 {
                     try
                     {
-                        Layout? layout = await runner.AnalyzeAsync(projectFilePath, typeName).ConfigureAwait(false);
+                        Layout? layout = await runner.AnalyzeAsync(projectFilePath, debug: true, Platform.Any, "net5.0", exe: false, typeName).ConfigureAwait(false);
                         if (layout is not null)
                         {
                             using (await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
