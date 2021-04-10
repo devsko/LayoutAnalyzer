@@ -18,6 +18,7 @@ namespace devsko.LayoutAnalyzer
 
     public enum Platform
     {
+        Any,
         x64,
         x86,
     }
@@ -74,10 +75,10 @@ namespace devsko.LayoutAnalyzer
                 TargetFramework.Net => ("net5.0", "exe"),
                 _ => throw new ArgumentException("", nameof(framework))
             };
-            string platformDirectory = platform switch
+            (string platformDirectory, string programFilesDirectory) = platform switch
             {
-                Platform.x64 => "x64",
-                Platform.x86 => "x86",
+                Platform.x64 => ("x64", "ProgramW6432"),
+                Platform.x86 => ("x86", "ProgramFiles(x86)"),
                 _ => throw new ArgumentException("", nameof(platform))
             };
 
@@ -97,13 +98,14 @@ namespace devsko.LayoutAnalyzer
             }
             else
             {
-                exePath = Path.Combine(Environment.GetEnvironmentVariable("ProgramFiles")!, "dotnet", "dotnet.exe");
+                exePath = Path.Combine(Environment.GetEnvironmentVariable(programFilesDirectory)!, "dotnet", "dotnet.exe");
                 if (!File.Exists(exePath))
                 {
                     throw new InvalidOperationException($"Install .NET ('{exePath}' not found.)");
                 }
                 arguments = hostAssemblyPath;
             }
+
             arguments += $" -id:{Id}";
 #if DEBUG
             if (waitForDebugger)
