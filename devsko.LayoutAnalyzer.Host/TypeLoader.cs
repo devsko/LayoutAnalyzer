@@ -14,7 +14,7 @@ namespace devsko.LayoutAnalyzer.Host
 
         public event Action? AssemblyDirectoryChanged;
 
-        public TypeLoader(SessionData data, Pipe log)
+        public TypeLoader(ProjectData data, Pipe log)
         {
             // TODO get from MSBuild
 

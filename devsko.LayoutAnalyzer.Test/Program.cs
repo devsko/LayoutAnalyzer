@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Locator;
 
 namespace devsko.LayoutAnalyzer.Test
 {
@@ -24,26 +27,55 @@ namespace devsko.LayoutAnalyzer.Test
 
         public static async Task Main()
         {
+            MSBuildLocator.RegisterDefaults();
+
+            string csprojPath = Path.GetFullPath(Path.Combine(
+                Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+                "..", "..", "..", "..", "TestProject", "TestProject.csproj"));
+
+            //MSBuild.ProjectItem result = await MSBuild.GenerateWatchListAsync(csproj, default).ConfigureAwait(false);
+
+            CancellationToken token = default;
+
+            var hotReload = await HotReload.InitializeAsync(csprojPath, token).ConfigureAwait(false);
+
+            var x = hotReload.GetAllSourceFilePaths(hotReload.Flavors.First()).ToArray();
+            var watcher = new FileWatcher(x);
+
+            while (true)
+            {
+                var changed = await watcher.GetChangedFileAsync(token).ConfigureAwait(false);
+                if (changed is null)
+                    break;
+
+                bool handled = await hotReload.HandleFileChangeAsync(changed, token).ConfigureAwait(false);
+
+
+                await Task.Delay(100).ConfigureAwait(false);
+            }
+
             try
             {
                 string hostBasePath = Path.GetFullPath(Path.Combine(
                     Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
                     "..", "..", "..", "..", "devsko.LayoutAnalyzer.Host", "bin"));
 
-                HostRunner runner = HostRunner.GetHostRunner(hostBasePath, TargetFramework.Net5Plus, Platform.x64,
+                HostRunner runner = HostRunner.GetHostRunner(hostBasePath, TargetFramework.Net5, Platform.x64,
 #if DEBUG
                     debug: true, waitForDebugger: false
 #else
                     debug: false, waitForDebugger: false
 #endif
                     );
-                runner.MessageReceived += async message =>
-                {
-                    using (await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
-                    {
-                        Console.WriteLine(message);
-                    }
-                };
+                runner.MessageReceived += message =>
+                    Task.Run(
+                        async () =>
+                        {
+                            using (await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
+                            {
+                                Console.WriteLine(message);
+                            }
+                        });
 
                 // Find TestProject.csproj
 
@@ -60,6 +92,7 @@ namespace devsko.LayoutAnalyzer.Test
                 //await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.TestClass, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.S1, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
                 await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
 
                 //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.NoLayoutStruct, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);

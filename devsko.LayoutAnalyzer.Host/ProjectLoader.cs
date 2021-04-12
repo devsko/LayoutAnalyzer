@@ -8,25 +8,23 @@ using System.Threading.Tasks;
 
 namespace devsko.LayoutAnalyzer.Host
 {
-    public sealed class Session : IAsyncDisposable
+    public sealed class ProjectLoader : IAsyncDisposable
     {
-        private static readonly Dictionary<string, Session> s_allSessions = new(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, ProjectLoader> s_all = new(StringComparer.OrdinalIgnoreCase);
         private static readonly SemaphoreSlim s_semaphore = new(1);
 
-        private static string GetSessionKey(SessionData data)
+        private static string GetKey(ProjectData data)
             => data.ProjectFilePath;
 
-        public static async ValueTask<Session> GetOrCreateAsync(Stream stream, SessionData data, Pipe log)
+        public static async ValueTask<ProjectLoader> GetOrCreateAsync(Stream stream, ProjectData data, Pipe log)
         {
-            MSBuild.ProjectItem result = await MSBuild.GenerateWatchListAsync(data.ProjectFilePath, default).ConfigureAwait(false);
-
-            Session? session;
+            ProjectLoader? project;
             await s_semaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                if (!s_allSessions.TryGetValue(GetSessionKey(data), out session))
+                if (!s_all.TryGetValue(GetKey(data), out project))
                 {
-                    s_allSessions.Add(GetSessionKey(data), session = new Session(stream, data, log));
+                    s_all.Add(GetKey(data), project = new ProjectLoader(stream, data, log));
                 }
             }
             finally
@@ -34,7 +32,7 @@ namespace devsko.LayoutAnalyzer.Host
                 s_semaphore.Release();
             }
 
-            return session;
+            return project;
         }
 
         public static async ValueTask DisposeAllAsync()
@@ -42,11 +40,11 @@ namespace devsko.LayoutAnalyzer.Host
             await s_semaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                foreach (Session session in s_allSessions.Values)
+                foreach (ProjectLoader project in s_all.Values)
                 {
-                    await session.DisposeAsync().ConfigureAwait(false);
+                    await project.DisposeAsync().ConfigureAwait(false);
                 }
-                s_allSessions.Clear();
+                s_all.Clear();
             }
             finally
             {
@@ -60,9 +58,9 @@ namespace devsko.LayoutAnalyzer.Host
         private SemaphoreSlim _semaphore;
         private TypeLoader _typeLoader;
 
-        public Session(Stream stream, SessionData data, Pipe log)
+        public ProjectLoader(Stream stream, ProjectData data, Pipe log)
         {
-            _key = GetSessionKey(data);
+            _key = GetKey(data);
             _stream = stream;
             _log = log;
             _semaphore = new SemaphoreSlim(1);
@@ -107,14 +105,14 @@ namespace devsko.LayoutAnalyzer.Host
             await s_semaphore.WaitAsync().ConfigureAwait(false);
             try
             {
-                s_allSessions.Remove(_key);
+                s_all.Remove(_key);
             }
             finally
             {
                 s_semaphore.Release();
             }
 
-            await _log.WriteLineAsync($"Session {Path.GetFileName(_key)} disposed").ConfigureAwait(false);
+            await _log.WriteLineAsync($"Project loader {Path.GetFileName(_key)} disposed").ConfigureAwait(false);
         }
     }
 }

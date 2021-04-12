@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System;   
+using System.Collections.Generic;   
 using System.Runtime.InteropServices;
 
 namespace devsko.LayoutAnalyzer.TestProject
@@ -10,13 +10,21 @@ namespace devsko.LayoutAnalyzer.TestProject
 
     public unsafe class TestClass
     {
+        public RefererncedTestProject.Class2 x = null!;
         public void**[,,,][][,]? Ptr;
         public Dictionary<IEnumerable<Dictionary<nint, IntPtr[]>>, nuint?*[]>? XXX;
         public nuint NI;
         public IntPtr P;
         public nint[]? NTA;
-        public long L;
-    }
+        public long L1;
+        public void M()
+        {
+            var loc = new Random().Next(1000).ToString();
+#if !NETFRAMEWORK
+            x.C1.ToString();
+#endif
+            }
+        }
 
     public struct Comp
     {

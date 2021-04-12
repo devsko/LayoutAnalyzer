@@ -15,7 +15,7 @@ namespace devsko.LayoutAnalyzer.Host
             private readonly AssemblyDependencyResolver _resolver;
 
             public LoadContext(string basePath)
-                : base("LayoutAnalyzer.Session", isCollectible: true)
+                : base("LayoutAnalyzer", isCollectible: true)
             {
                 _resolver = new(basePath);
             }

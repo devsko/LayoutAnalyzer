@@ -6,7 +6,6 @@
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using devsko.LayoutAnalyzer.Host;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -33,12 +32,9 @@ namespace LayoutAnalyzerTasks
                             {
                                 FilePath = group.Key,
                                 TargetFrameworks =
-                                    group.Count() == tfwCount
+                                    /*group.Count() == tfwCount
                                     ? ""
-                                    : string.Join(";",
-                                        group
-                                            .Select(group => group.GetMetadata("TFW"))
-                                            /*.OrderBy(tfw => tfw, StringComparer.OrdinalIgnoreCase)*/) + ";"
+                                    :*/ string.Join(";", group.Select(group => group.GetMetadata("TFW")))
                             })
                             .ToList()),
                 TargetFrameworks = TargetFrameworks

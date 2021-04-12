@@ -1,16 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1;net472</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
+  </ItemGroup>
 
-    <!-- ensure unreferenced LayoutAnalyzer.TestProject is up to date -->
-    <ProjectReference Include="..\devsko.LayoutAnalyzer.TestProject\devsko.LayoutAnalyzer.TestProject.csproj"
-                      ReferenceOutputAssembly="false" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Locator" Version="1.4.1" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="4.0.*-*" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.0.*-*" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.0.*-*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LayoutAnalyzerTasks\LayoutAnalyzerTasks.csproj" />
+    <None Include="..\LayoutAnalyzerTasks\LayoutAnalyzer.targets" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,7 +26,7 @@
     <UpToDateCheckInput Include="..\devsko.LayoutAnalyzer.Host.net4\*.cs*" />
   </ItemGroup>
   
-  <Target Name="BuildHost" BeforeTargets="BeforeBuild">
+  <Target Name="BuildHost" BeforeTargets="BeforeBuild" Condition="'$(TargetFramework)' == 'net6.0'">
 
     <ItemGroup>
       <BatchProjects Include="..\devsko.LayoutAnalyzer.Host\devsko.LayoutAnalyzer.Host.csproj" />
@@ -36,9 +44,7 @@
       </BatchToBuild>
     </ItemGroup>
 
-    <MSBuild Projects="@(BatchToBuild)"
-             Condition="'$(TargetFramework)' != ''"
-             BuildInParallel="true" />
+    <MSBuild Projects="@(BatchToBuild)" Condition="'$(TargetFramework)' != ''" BuildInParallel="true" />
 
   </Target>
 

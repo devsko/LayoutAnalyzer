@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -15,29 +14,32 @@ namespace devsko.LayoutAnalyzer.Host
 
         public static async Task Main(string[] args)
         {
-            using Pipe inOut = await Pipe.StartServerAsync(Pipe.InOutName, bidirectional: true).ConfigureAwait(false);
+            bool waitForDebugger = false;
+            Guid id = default;
+
+            ProcessArgs();
+
+            using Pipe inOut = await Pipe.StartServerAsync(Pipe.InOutName, id, bidirectional: true).ConfigureAwait(false);
             using BinaryReader pipeReader = new(inOut.Stream, Encoding.UTF8, leaveOpen: true);
-            using Pipe log = await Pipe.StartServerAsync(Pipe.LogName, bidirectional: false).ConfigureAwait(false);
+            using Pipe log = await Pipe.StartServerAsync(Pipe.LogName, id, bidirectional: false).ConfigureAwait(false);
 
             await log.WriteLineAsync($"{RuntimeInformation.FrameworkDescription} ({RuntimeInformation.ProcessArchitecture})").ConfigureAwait(false);
 
-            bool waitForDebugger = false;
-            int? id = null;
-
-            ProcessArgs();
 #if DEBUG
             await WaitForDebuggerAsync().ConfigureAwait(false);
 #else
             waitForDebugger.ToString();
 #endif
 
+            StartHotReloadReceiver();
+
             while (true)
             {
-                SessionData data;
+                ProjectData data;
                 string typeName;
                 using (ShutdownTimer.Start(s_shutdownTimerInterval, log))
                 {
-                    data = new SessionData
+                    data = new ProjectData
                     (
                         ProjectFilePath: pipeReader.ReadString(),
                         Debug: pipeReader.ReadBoolean(),
@@ -52,16 +54,16 @@ namespace devsko.LayoutAnalyzer.Host
 
                 try
                 {
-                    Session session = await Session.GetOrCreateAsync(inOut.Stream, data, log).ConfigureAwait(false);
-                    await session.AnalyzeAsync(typeName).ConfigureAwait(false);
+                    ProjectLoader project = await ProjectLoader.GetOrCreateAsync(inOut.Stream, data, log).ConfigureAwait(false);
+                    await project.AnalyzeAsync(typeName).ConfigureAwait(false);
                 }
                 catch (EndOfStreamException)
                 {
                     break;
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    await log.WriteLineAsync(e.ToStringDemystified()).ConfigureAwait(false);
+                    await log.WriteLineAsync(ex.ToStringDemystified()).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -69,7 +71,22 @@ namespace devsko.LayoutAnalyzer.Host
                 }
             }
 
-            await Session.DisposeAllAsync().ConfigureAwait(false);
+            await ProjectLoader.DisposeAllAsync().ConfigureAwait(false);
+
+            void StartHotReloadReceiver()
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await ReceiveHotReloadDeltasAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        await log.WriteLineAsync("Hot reload error: " + ex.ToStringDemystified()).ConfigureAwait(false);
+                    }
+                });
+            }
 
             void ProcessArgs()
             {
@@ -81,11 +98,15 @@ namespace devsko.LayoutAnalyzer.Host
                     }
                     else if (arg.StartsWith("-id:", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (int.TryParse(arg.Substring(4).Trim(), out int i))
+                        if (Guid.TryParse(arg.Substring(4).Trim(), out Guid guid))
                         {
-                            id = i;
+                            id = guid;
                         }
                     }
+                }
+                if (id == default)
+                {
+                    throw new InvalidOperationException("Parameter -id not found");
                 }
             }
 
@@ -112,6 +133,14 @@ namespace devsko.LayoutAnalyzer.Host
                 }
             }
 #endif
+
+            async Task ReceiveHotReloadDeltasAsync()
+            {
+                using Pipe pipe = await Pipe.ConnectAsync(Pipe.HotReloadName, id, true, TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+
+
+            }
+
         }
     }
 }

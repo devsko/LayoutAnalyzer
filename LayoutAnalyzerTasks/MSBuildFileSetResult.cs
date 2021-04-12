@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace devsko.LayoutAnalyzer.Host
+namespace LayoutAnalyzerTasks
 {
     public class MSBuildFileSetResult
     {

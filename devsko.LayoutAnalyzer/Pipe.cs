@@ -11,52 +11,51 @@ namespace devsko.LayoutAnalyzer
     {
         public const string InOutName = "layoutanalyzer-inout";
         public const string LogName = "layoutanalyzer-log";
+        public const string HotReloadName = "layoutanalyzer-hotreload";
 
         private readonly PipeStream _stream;
         private TextWriter? _writer;
         private TextReader? _reader;
 
-        private Pipe(string name, bool isServer, bool bidirectional)
+        private Pipe(PipeStream stream)
         {
-            if (isServer)
-            {
-                _stream = new NamedPipeServerStream(name, bidirectional ?  PipeDirection.InOut : PipeDirection.Out, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous
+            _stream = stream;
+        }
+
+        public static async Task<Pipe> StartServerAsync(string name, Guid id, bool bidirectional)
+        {
+            NamedPipeServerStream stream = new(GetName(name, id), bidirectional ? PipeDirection.InOut : PipeDirection.Out, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous
 #if NETCOREAPP3_1_OR_GREATER
                 | PipeOptions.CurrentUserOnly
 #endif
                 );
-            }
-            else
-            {
-                _stream = new NamedPipeClientStream(".", name, bidirectional ? PipeDirection.InOut : PipeDirection.In, PipeOptions.Asynchronous
+            var pipe = new Pipe(stream);
+            await stream.WaitForConnectionAsync().ConfigureAwait(false);
+
+            return pipe;
+        }
+
+        public static async Task<Pipe> ConnectAsync(string name, Guid id, bool bidirectional, TimeSpan? timeout = null)
+        {
+            NamedPipeClientStream stream = new(".", GetName(name, id), bidirectional ? PipeDirection.InOut : PipeDirection.In, PipeOptions.Asynchronous
 #if NETCOREAPP3_1_OR_GREATER
                 | PipeOptions.CurrentUserOnly
 #endif
                 );
-            }
-        }
-
-        public static async Task<Pipe> StartServerAsync(string name, bool bidirectional)
-        {
-            var pipe = new Pipe(name, true, bidirectional);
-            await ((NamedPipeServerStream)pipe._stream).WaitForConnectionAsync().ConfigureAwait(false);
+            var pipe = new Pipe(stream);
+            await stream.ConnectAsync((int?)timeout?.TotalMilliseconds ?? -1).ConfigureAwait(false);
 
             return pipe;
         }
 
-        public static async Task<Pipe> ConnectAsync(string name, bool bidirectional)
-        {
-            var pipe = new Pipe(name, false, bidirectional);
-            await ((NamedPipeClientStream)pipe._stream).ConnectAsync().ConfigureAwait(false);
-
-            return pipe;
-        }
+        private static string GetName(string name, Guid id)
+            => $"{name}-{id}";
 
         public PipeStream Stream
             => _stream;
 
         private TextWriter Writer
-            => _writer ??= new StreamWriter(_stream, Encoding.UTF8, -1, leaveOpen: true);
+            => _writer ??= new StreamWriter(_stream, Encoding.UTF8, 1024, leaveOpen: true);
 
         private TextReader Reader
             => _reader ??= new StreamReader(_stream, Encoding.UTF8, detectEncodingFromByteOrderMarks:false, -1, leaveOpen: true);

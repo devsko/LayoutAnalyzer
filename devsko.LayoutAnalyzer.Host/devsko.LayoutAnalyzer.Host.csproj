@@ -1,11 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net5.0;netcoreapp3.1;net472</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <Platforms>x64;x86;AnyCPU</Platforms>
     <RuntimeIdentifiers>win10-x64;win10-x86;win7-x64;win7-x86</RuntimeIdentifiers>
-    <NoWarn>$(NoWarn);CS0436</NoWarn>
   </PropertyGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
@@ -17,12 +16,6 @@
     <ProjectReference Include="..\LayoutAnalyzerTasks\LayoutAnalyzerTasks.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="LayoutAnalyzer.targets">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
- 
   <Target Name="_IsValid" BeforeTargets="Build">
     <Error Condition="'$(Platform)' == 'AnyCPU'"
            Text="Build LayoutAnalyzer.Test instead" />

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace devsko.LayoutAnalyzer
 {
-    public record SessionData
+    public record ProjectData
     (
         string ProjectFilePath,
         bool Debug,

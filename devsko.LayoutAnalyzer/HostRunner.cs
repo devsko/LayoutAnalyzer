@@ -13,7 +13,8 @@ namespace devsko.LayoutAnalyzer
     {
         NetFramework,
         NetCore,
-        Net5Plus,
+        Net5,
+        Net6,
         NetStandard,
     }
 
@@ -48,6 +49,7 @@ namespace devsko.LayoutAnalyzer
         public Platform Platform { get; private init; }
         public bool IsDebug { get; private init; }
         public int Id { get; private init; }
+        public Guid HostId { get; private init; }
 
         private JsonSerializerOptions _jsonOptions;
         private SemaphoreSlim _semaphore;
@@ -65,6 +67,7 @@ namespace devsko.LayoutAnalyzer
             Platform = platform;
             IsDebug = debug;
             Id = Interlocked.Increment(ref s_currentId);
+            HostId = Guid.NewGuid();
 
             _jsonOptions = new JsonSerializerOptions();
             _semaphore = new SemaphoreSlim(1);
@@ -73,7 +76,7 @@ namespace devsko.LayoutAnalyzer
             {
                 TargetFramework.NetFramework => ("net472", "exe"),
                 TargetFramework.NetCore => ("netcoreapp3.1", "dll"),
-                TargetFramework.Net5Plus => ("net5.0", "exe"),
+                TargetFramework.Net5 => ("net5.0", "exe"),
                 _ => throw new ArgumentException("", nameof(framework))
             };
             (string platformDirectory, string programFilesDirectory) = platform switch
@@ -107,7 +110,8 @@ namespace devsko.LayoutAnalyzer
                 arguments = hostAssemblyPath;
             }
 
-            arguments += $" -id:{Id}";
+            arguments += $" -id:{HostId}";
+
 #if DEBUG
             if (waitForDebugger)
             {
@@ -120,7 +124,6 @@ namespace devsko.LayoutAnalyzer
                 FileName = exePath,
                 Arguments = arguments,
                 CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
                 UseShellExecute = false,
                 WorkingDirectory = Path.GetDirectoryName(hostAssemblyPath)!,
             };
@@ -203,11 +206,13 @@ namespace devsko.LayoutAnalyzer
 
             _process = process;
 
-            Pipe inOutPipe = await Pipe.ConnectAsync(Pipe.InOutName, true).ConfigureAwait(false);
+            Pipe hotReloadPipe = await Pipe.StartServerAsync(Pipe.HotReloadName, HostId, true).ConfigureAwait(false);
+
+            Pipe inOutPipe = await Pipe.ConnectAsync(Pipe.InOutName, HostId, true).ConfigureAwait(false);
             _responseStream = new EofDetectingStream(inOutPipe.Stream);
             _pipeWriter = new BinaryWriter(inOutPipe.Stream);
 
-            _logPipe = await Pipe.ConnectAsync(Pipe.LogName, false).ConfigureAwait(false);
+            _logPipe = await Pipe.ConnectAsync(Pipe.LogName, HostId, false).ConfigureAwait(false);
 
             _ = ReadLogAsync();
 

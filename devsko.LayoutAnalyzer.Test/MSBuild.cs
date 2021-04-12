@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using LayoutAnalyzerTasks;
 
-namespace devsko.LayoutAnalyzer.Host
+namespace devsko.LayoutAnalyzer.Test
 {
     public class MSBuild
     {
@@ -43,7 +42,7 @@ namespace devsko.LayoutAnalyzer.Host
                                 Target = tfw.Identifier switch
                                 {
                                     ".NETFramework" => TargetFramework.NetFramework,
-                                    ".NETCoreApp" when new Version(tfw.Version ?? "") >= new Version(5, 0) => TargetFramework.Net5Plus,
+                                    ".NETCoreApp" when new Version(tfw.Version ?? "") >= new Version(5, 0) => TargetFramework.Net5,
                                     ".NETCoreApp" => TargetFramework.NetCore,
                                     ".NETStandard" => TargetFramework.NetStandard,
                                     _ => (TargetFramework)0

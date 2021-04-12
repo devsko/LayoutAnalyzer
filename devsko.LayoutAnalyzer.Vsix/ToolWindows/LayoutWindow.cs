@@ -25,7 +25,7 @@ namespace devsko.LayoutAnalyzer
             {
                 TargetFramework.NetFramework => "net472",
                 TargetFramework.NetCore => "netcoreapp3.1",
-                TargetFramework.Net => "net5.0",
+                TargetFramework.Net5Plus => "net5.0",
                 _ => throw new ArgumentException("")
             };
             string projectAssemblyPath = $@"C:\Users\stefa\source\repos\LayoutAnalyzer\devsko.LayoutAnalyzer.TestProject\bin\{(package.HostRunner.IsDebug ? "Debug" : "Release")}\{frameworkDirectory}\devsko.LayoutAnalyzer.TestProject.dll";

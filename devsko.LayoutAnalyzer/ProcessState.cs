@@ -23,6 +23,7 @@ namespace devsko.LayoutAnalyzer
                     Arguments = arguments,
                     WorkingDirectory = workingDirectory,
                     UseShellExecute = false,
+                    CreateNoWindow = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                 }
