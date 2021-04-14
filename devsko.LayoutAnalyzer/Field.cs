@@ -45,19 +45,15 @@ namespace devsko.LayoutAnalyzer
 #endif
         }
 
-        internal Field(FieldInfo info, Analyzer analyzer)
+        public Field(FieldInfo info, TokenizedString typeName, int size, int offset, Field[]? children)
         {
             IsPublic = info.IsPublic;
             Type type = info.FieldType;
-            Kind = Analyzer.GetKind(type);
-            TokenizedString typeName;
-            (typeName, Size) = analyzer.GetNameAndSize(type, GetNativeIntegerData(info));
+            Kind = Layout.GetKind(type);
             TypeAndName = typeName.Append(new TokenizedString(' ' + info.Name, Token.Identifier));
-            Offset = GetOffset(info);
-            if (type.IsValueType && !type.IsPrimitive)
-            {
-                Children = analyzer.GetFields(type);
-            }
+            Size = size;
+            Offset = offset;
+            Children = children;
         }
 
         [JsonConstructor]
@@ -77,45 +73,5 @@ namespace devsko.LayoutAnalyzer
                 .EnumerateWithPaddings(Children, Size, 0, 0, false)
                 .Select(tuple => tuple.Field);
 
-        private static readonly bool[] s_defaultNativeIntegerFlags = new[] { true };
-
-        private unsafe static int GetOffset(FieldInfo info)
-        {
-            // FieldHandle points to a FieldDesc structure defined in (https://github.com/dotnet/runtime/blob/102d1e856c7e0e553abeec937783da5debed73ad/src/coreclr/vm/field.h#L34)
-            // The offset of the field is found in m_dwOffset (https://github.com/dotnet/runtime/blob/102d1e856c7e0e553abeec937783da5debed73ad/src/coreclr/vm/field.h#L74)
-
-            int dword =
-                Unsafe.Add(
-                    ref Unsafe.As<IntPtr, int>(
-                        ref Unsafe.Add(
-                            ref Unsafe.AsRef<IntPtr>(
-                                info.FieldHandle.Value.ToPointer()),
-                            1)
-                        ),
-                    1);
-
-            return dword & ((1 << 27) - 1);
-        }
-
-        private static bool[]? GetNativeIntegerData(FieldInfo info)
-        {
-            CustomAttributeData? data = info
-                .GetCustomAttributesData()
-                .Where(static data => data.AttributeType.FullName == "System.Runtime.CompilerServices.NativeIntegerAttribute")
-                .FirstOrDefault();
-
-            if (data is null)
-            {
-                return null;
-            }
-            if (data.ConstructorArguments.Count < 1 || data.ConstructorArguments[0].Value is null)
-            {
-                return s_defaultNativeIntegerFlags;
-            }
-
-            return ((IReadOnlyCollection<CustomAttributeTypedArgument>)data.ConstructorArguments[0].Value!)
-                .Select(arg => (bool)arg.Value!)
-                .ToArray();
-        }
     }
 }

@@ -3,28 +3,13 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace devsko.LayoutAnalyzer
+namespace devsko.LayoutAnalyzer.Runner
 {
-    public enum TargetFramework
-    {
-        NetFramework,
-        NetCore,
-        Net5,
-        Net6,
-        NetStandard,
-    }
-
-    public enum Platform
-    {
-        Any,
-        x64,
-        x86,
-    }
-
     public sealed class HostRunner : IDisposable
     {
         private static readonly ConcurrentDictionary<(TargetFramework, Platform), HostRunner> s_cache = new();
@@ -51,11 +36,11 @@ namespace devsko.LayoutAnalyzer
         public int Id { get; private init; }
         public Guid HostId { get; private init; }
 
-        private JsonSerializerOptions _jsonOptions;
         private SemaphoreSlim _semaphore;
         private ProcessStartInfo _startInfo;
         private Process? _process;
         private Pipe? _logPipe;
+        private Pipe? _hotReloadPipe;
         private BinaryWriter? _pipeWriter;
         private EofDetectingStream? _responseStream;
 
@@ -69,14 +54,13 @@ namespace devsko.LayoutAnalyzer
             Id = Interlocked.Increment(ref s_currentId);
             HostId = Guid.NewGuid();
 
-            _jsonOptions = new JsonSerializerOptions();
             _semaphore = new SemaphoreSlim(1);
 
             (string frameworkDirectory, string fileExtension) = framework switch
             {
                 TargetFramework.NetFramework => ("net472", "exe"),
                 TargetFramework.NetCore => ("netcoreapp3.1", "dll"),
-                TargetFramework.Net5 => ("net5.0", "exe"),
+                TargetFramework.Net5 => ("net6.0", "exe"),
                 _ => throw new ArgumentException("", nameof(framework))
             };
             (string platformDirectory, string programFilesDirectory) = platform switch
@@ -112,6 +96,9 @@ namespace devsko.LayoutAnalyzer
 
             arguments += $" -id:{HostId}";
 
+            // TODO only .net6
+            arguments += " -hotreload";
+
 #if DEBUG
             if (waitForDebugger)
             {
@@ -127,6 +114,7 @@ namespace devsko.LayoutAnalyzer
                 UseShellExecute = false,
                 WorkingDirectory = Path.GetDirectoryName(hostAssemblyPath)!,
             };
+            _startInfo.Environment["DOTNET_MODIFIABLE_ASSEMBLIES"] = "debug";
         }
 
         public async Task<Layout?> AnalyzeAsync(string projectFilePath, bool debug, Platform platform, string targetFramework,bool exe, string typeName, CancellationToken cancellationToken = default)
@@ -135,6 +123,19 @@ namespace devsko.LayoutAnalyzer
             try
             {
                 await EnsureRunningProcessAsync().ConfigureAwait(false);
+
+
+                // TODO only .net6
+
+                Debug.Assert(_logPipe is not null);
+                Debug.Assert(_hotReloadPipe is not null);
+                HotReload hotReload = new(_hotReloadPipe, projectFilePath, targetFramework);
+
+                _ = hotReload.LoopAsync(cancellationToken).ConfigureAwait(false);
+
+
+
+
                 long start = Stopwatch.GetTimestamp();
 
                 _pipeWriter!.Write(projectFilePath);
@@ -147,7 +148,7 @@ namespace devsko.LayoutAnalyzer
 
                 try
                 {
-                    Layout? layout = await JsonSerializer.DeserializeAsync<Layout>(_responseStream!, _jsonOptions, cancellationToken).ConfigureAwait(false);
+                    Layout? layout = await JsonSerializer.DeserializeAsync<Layout>(_responseStream!, cancellationToken: cancellationToken).ConfigureAwait(false);
                     if (layout is not null)
                     {
                         layout.ElapsedTime = TimeSpan.FromTicks(Stopwatch.GetTimestamp() - start);
@@ -172,6 +173,7 @@ namespace devsko.LayoutAnalyzer
             _pipeWriter?.Dispose();
             _responseStream?.Dispose();
             _logPipe?.Dispose();
+            _hotReloadPipe?.Dispose();
 
             if (_process?.HasExited == false)
             {
@@ -198,31 +200,33 @@ namespace devsko.LayoutAnalyzer
         [MemberNotNull(nameof(_process))]
         private async Task StartProcessAsync()
         {
-            Process? process = Process.Start(_startInfo);
-            if (process is null)
+            Task<Pipe> startPipeTask = Pipe.StartServerAsync(Pipe.HotReloadName, HostId, bidirectional: true, cancellationToken: default);
+
+            if ((_process = Process.Start(_startInfo)) is null)
             {
                 throw new InvalidOperationException("Could not start new host");
             }
 
-            _process = process;
-
-            Pipe hotReloadPipe = await Pipe.StartServerAsync(Pipe.HotReloadName, HostId, true).ConfigureAwait(false);
-
             Pipe inOutPipe = await Pipe.ConnectAsync(Pipe.InOutName, HostId, true).ConfigureAwait(false);
             _responseStream = new EofDetectingStream(inOutPipe.Stream);
-            _pipeWriter = new BinaryWriter(inOutPipe.Stream);
+            _pipeWriter = new BinaryWriter(inOutPipe.Stream, Encoding.UTF8, leaveOpen: true);
 
             _logPipe = await Pipe.ConnectAsync(Pipe.LogName, HostId, false).ConfigureAwait(false);
 
             _ = ReadLogAsync();
 
-            Console.WriteLine($"Host process started PID={process.Id}");
+            // TODO only .net6
+
+            _hotReloadPipe = await startPipeTask.ConfigureAwait(false);
+
+            Console.WriteLine($"Host process started PID={_process.Id}");
 
             async Task ReadLogAsync()
             {
+                using StreamReader reader = new(_logPipe.Stream, Encoding.UTF8, detectEncodingFromByteOrderMarks:false, -1, leaveOpen: true);
                 while (true)
                 {
-                    string? line = await _logPipe.ReadLineAsync().ConfigureAwait(false);
+                    string? line = await reader.ReadLineAsync().ConfigureAwait(false);
                     if (line is null)
                     {
                         break;

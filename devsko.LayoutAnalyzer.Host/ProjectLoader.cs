@@ -16,7 +16,10 @@ namespace devsko.LayoutAnalyzer.Host
         private static string GetKey(ProjectData data)
             => data.ProjectFilePath;
 
-        public static async ValueTask<ProjectLoader> GetOrCreateAsync(Stream stream, ProjectData data, Pipe log)
+        public static ProjectLoader? Get(string projectFilePath)
+            => s_all.TryGetValue(projectFilePath, out ProjectLoader? loader) ? loader : null;
+
+        public static async ValueTask<ProjectLoader> GetOrCreateAsync(Stream stream, ProjectData data)
         {
             ProjectLoader? project;
             await s_semaphore.WaitAsync().ConfigureAwait(false);
@@ -24,7 +27,7 @@ namespace devsko.LayoutAnalyzer.Host
             {
                 if (!s_all.TryGetValue(GetKey(data), out project))
                 {
-                    s_all.Add(GetKey(data), project = new ProjectLoader(stream, data, log));
+                    s_all.Add(GetKey(data), project = new ProjectLoader(stream, data));
                 }
             }
             finally
@@ -54,17 +57,15 @@ namespace devsko.LayoutAnalyzer.Host
 
         private string _key;
         private Stream _stream;
-        private Pipe _log;
         private SemaphoreSlim _semaphore;
         private TypeLoader _typeLoader;
 
-        public ProjectLoader(Stream stream, ProjectData data, Pipe log)
+        public ProjectLoader(Stream stream, ProjectData data)
         {
             _key = GetKey(data);
             _stream = stream;
-            _log = log;
             _semaphore = new SemaphoreSlim(1);
-            _typeLoader = new TypeLoader(data, log);
+            _typeLoader = new TypeLoader(data);
             _typeLoader.AssemblyDirectoryChanged += async () =>
             {
                 await DisposeAsync().ConfigureAwait(false);
@@ -112,7 +113,7 @@ namespace devsko.LayoutAnalyzer.Host
                 s_semaphore.Release();
             }
 
-            await _log.WriteLineAsync($"Project loader {Path.GetFileName(_key)} disposed").ConfigureAwait(false);
+            await Log.WriteLineAsync($"Project loader {Path.GetFileName(_key)} disposed").ConfigureAwait(false);
         }
     }
 }

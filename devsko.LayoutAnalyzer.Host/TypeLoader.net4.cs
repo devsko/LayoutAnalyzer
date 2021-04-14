@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using devsko.LayoutAnalyzer.Host.net4;
 
 namespace devsko.LayoutAnalyzer.Host
 {
@@ -18,7 +17,7 @@ namespace devsko.LayoutAnalyzer.Host
         {
             string hostAssemblyDirectoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             CopyFiles(hostAssemblyDirectoryPath, "devsko.LayoutAnalyzer.???");
-            CopyFiles(hostAssemblyDirectoryPath, "devsko.LayoutAnalyzer.Host.net4.???");
+            CopyFiles(hostAssemblyDirectoryPath, "devsko.LayoutAnalyzer.Host.???");
             CopyFiles(hostAssemblyDirectoryPath, "System.Runtime.CompilerServices.Unsafe.???");
             CopyFiles(hostAssemblyDirectoryPath, "System.Memory.???");
             CopyFiles(hostAssemblyDirectoryPath, "System.Buffers.???");

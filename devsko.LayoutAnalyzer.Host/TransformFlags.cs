@@ -1,4 +1,4 @@
-﻿namespace devsko.LayoutAnalyzer
+﻿namespace devsko.LayoutAnalyzer.Host
 {
     public sealed class TransformFlags
     {

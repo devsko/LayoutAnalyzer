@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace devsko.LayoutAnalyzer
+namespace devsko.LayoutAnalyzer.Host
 {
     public readonly struct FieldType
     {

@@ -6,19 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\devsko.LayoutAnalyzer\devsko.LayoutAnalyzer.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Build.Locator" Version="1.4.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Features" Version="4.0.*-*" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.0.*-*" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.0.*-*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\LayoutAnalyzerTasks\LayoutAnalyzerTasks.csproj" />
-    <None Include="..\LayoutAnalyzerTasks\LayoutAnalyzer.targets" CopyToOutputDirectory="PreserveNewest" />
+    <ProjectReference Include="..\devsko.LayoutAnalyzer.Runner\devsko.LayoutAnalyzer.Runner.csproj" />
   </ItemGroup>
 
   <ItemGroup>

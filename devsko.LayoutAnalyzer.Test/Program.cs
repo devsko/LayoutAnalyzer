@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using devsko.LayoutAnalyzer.Runner;
 using Microsoft.Build.Locator;
 
 namespace devsko.LayoutAnalyzer.Test
@@ -32,27 +33,6 @@ namespace devsko.LayoutAnalyzer.Test
             string csprojPath = Path.GetFullPath(Path.Combine(
                 Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
                 "..", "..", "..", "..", "TestProject", "TestProject.csproj"));
-
-            //MSBuild.ProjectItem result = await MSBuild.GenerateWatchListAsync(csproj, default).ConfigureAwait(false);
-
-            CancellationToken token = default;
-
-            var hotReload = await HotReload.InitializeAsync(csprojPath, token).ConfigureAwait(false);
-
-            var x = hotReload.GetAllSourceFilePaths(hotReload.Flavors.First()).ToArray();
-            var watcher = new FileWatcher(x);
-
-            while (true)
-            {
-                var changed = await watcher.GetChangedFileAsync(token).ConfigureAwait(false);
-                if (changed is null)
-                    break;
-
-                bool handled = await hotReload.HandleFileChangeAsync(changed, token).ConfigureAwait(false);
-
-
-                await Task.Delay(100).ConfigureAwait(false);
-            }
 
             try
             {
@@ -82,27 +62,29 @@ namespace devsko.LayoutAnalyzer.Test
                 string projectFilePath = Path.GetFullPath(Path.Combine(
                     Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
                     "..", "..", "..", "..",
-                    "devsko.LayoutAnalyzer.TestProject",
-                    "devsko.LayoutAnalyzer.TestProject.csproj"));
+                    "TestProject",
+                    "TestProject.csproj"));
 
                 //await AnalyzeAndPrintAsync("").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc,").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc,def").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("abc, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.TestClass, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.S1, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("abc, TestProject").ConfigureAwait(false);
+                await AnalyzeAndPrintAsync("TestProject.TestClass, TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("TestProject.S1, TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
 
-                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.NoLayoutStruct, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.NoLayoutStructEmpty, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.AutoStruct, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.AutoStructSize0, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.AutoStructSize1, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
-                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.AutoStructSize10, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("TestProject.NoLayoutStruct, TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("TestProject.NoLayoutStructEmpty, TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("TestProject.AutoStruct, TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("TestProject.AutoStructSize0, TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("TestProject.AutoStructSize1, TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("TestProject.AutoStructSize10, TestProject").ConfigureAwait(false);
 
-                //await AnalyzeAndPrintAsync("devsko.LayoutAnalyzer.TestProject.Explicit, devsko.LayoutAnalyzer.TestProject").ConfigureAwait(false);
+                //await AnalyzeAndPrintAsync("TestProject.Explicit, TestProject").ConfigureAwait(false);
+
+                Console.WriteLine("waiting...");
+                Console.ReadLine();
 
                 async Task AnalyzeAndPrintAsync(string typeName)
                 {

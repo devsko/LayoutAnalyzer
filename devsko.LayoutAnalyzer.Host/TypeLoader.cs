@@ -10,11 +10,10 @@ namespace devsko.LayoutAnalyzer.Host
 
         private AppDirectory _appDirectory;
         private readonly FileSystemWatcher _watcher;
-        private readonly Pipe _log;
 
         public event Action? AssemblyDirectoryChanged;
 
-        public TypeLoader(ProjectData data, Pipe log)
+        public TypeLoader(ProjectData data)
         {
             // TODO get from MSBuild
 
@@ -26,7 +25,6 @@ namespace devsko.LayoutAnalyzer.Host
                 data.TargetFramework,
                 Path.ChangeExtension(Path.GetFileName(data.ProjectFilePath), data.Exe ? ".exe" : ".dll"));
 
-            _log = log;
             AssemblyPath = assemblyPath;
             _appDirectory = new AppDirectory();
             CopyFiles(Path.GetDirectoryName(assemblyPath)!);
@@ -34,7 +32,7 @@ namespace devsko.LayoutAnalyzer.Host
             _watcher = new FileSystemWatcher(Path.GetDirectoryName(assemblyPath)!);
             _watcher.Changed += async (sender, e) =>
             {
-                await log.WriteLineAsync($"{DateTime.Now:mm:ss,fffffff} {e.ChangeType}").ConfigureAwait(false);
+                await Log.WriteLineAsync($"{DateTime.Now:mm:ss,fffffff} {e.ChangeType}").ConfigureAwait(false);
 
                 _watcher.EnableRaisingEvents = false;
                 AssemblyDirectoryChanged?.Invoke();
@@ -65,7 +63,7 @@ namespace devsko.LayoutAnalyzer.Host
             _watcher.Dispose();
             _appDirectory.Dispose();
 
-            await _log.WriteLineAsync("TypeLoader disposed").ConfigureAwait(false);
+            await Log.WriteLineAsync("TypeLoader disposed").ConfigureAwait(false);
         }
 
         private void CopyFiles(string directory, string searchPattern = "*.*")

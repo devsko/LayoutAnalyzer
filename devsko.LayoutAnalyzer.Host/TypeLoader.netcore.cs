@@ -71,10 +71,10 @@ namespace devsko.LayoutAnalyzer.Host
 
                 if (!weakRef.IsAlive)
                 {
-                    await _log.WriteLineAsync("LoadContext collected").ConfigureAwait(false);
+                    await Log.WriteLineAsync("LoadContext collected").ConfigureAwait(false);
                     break;
                 }
-                await _log.WriteLineAsync("Waiting for GC " + i).ConfigureAwait(false);
+                await Log.WriteLineAsync("Waiting for GC " + i).ConfigureAwait(false);
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]

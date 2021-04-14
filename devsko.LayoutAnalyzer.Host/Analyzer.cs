@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace devsko.LayoutAnalyzer
+namespace devsko.LayoutAnalyzer.Host
 {
     public sealed class Analyzer
     {
@@ -26,8 +26,10 @@ namespace devsko.LayoutAnalyzer
             {
                 return null;
             }
+            Field[] fields = GetFields(type);
+            (TokenizedString typeName, int size) = GetNameAndSize(type);
 
-            return new Layout(type, this);
+            return new Layout(type, typeName, size, fields, GetUnpaddedSize(fields));
         }
 
         public unsafe (TokenizedString Name, int Size) GetNameAndSize(Type type)
@@ -102,7 +104,13 @@ namespace devsko.LayoutAnalyzer
         internal Field[] GetFields(Type type)
             => type
                 .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                .Select(info => new Field(info, this))
+                .Select(info =>
+                {
+                    Type type = info.FieldType;
+                    Field[]? children = type.IsValueType && !type.IsPrimitive ? GetFields(type) : null;
+                    (TokenizedString typeName, int size) = GetNameAndSize(type, GetNativeIntegerData(info));
+                    return new Field(info, typeName, size, GetOffset(info), children);
+                })
                 .OrderBy(t => t.Offset)
                 .ToArray();
 
@@ -112,16 +120,46 @@ namespace devsko.LayoutAnalyzer
                     ? field.Size
                     : Math.Min(field.Size, GetUnpaddedSize(field.Children)));
 
-        internal static Token GetKind(Type type)
-            => type switch
+        private unsafe static int GetOffset(FieldInfo info)
+        {
+            // FieldHandle points to a FieldDesc structure defined in (https://github.com/dotnet/runtime/blob/102d1e856c7e0e553abeec937783da5debed73ad/src/coreclr/vm/field.h#L34)
+            // The offset of the field is found in m_dwOffset (https://github.com/dotnet/runtime/blob/102d1e856c7e0e553abeec937783da5debed73ad/src/coreclr/vm/field.h#L74)
+
+            int dword =
+                Unsafe.Add(
+                    ref Unsafe.As<IntPtr, int>(
+                        ref Unsafe.Add(
+                            ref Unsafe.AsRef<IntPtr>(
+                                info.FieldHandle.Value.ToPointer()),
+                            1)
+                        ),
+                    1);
+
+            return dword & ((1 << 27) - 1);
+        }
+
+        private static readonly bool[] s_defaultNativeIntegerFlags = new[] { true };
+
+        private static bool[]? GetNativeIntegerData(FieldInfo info)
+        {
+            CustomAttributeData? data = info
+                .GetCustomAttributesData()
+                .Where(static data => data.AttributeType.FullName == "System.Runtime.CompilerServices.NativeIntegerAttribute")
+                .FirstOrDefault();
+
+            if (data is null)
             {
-                { IsClass: true } when type.BaseType == typeof(MulticastDelegate) => Token.Delegate,
-                { IsClass: true } => Token.Class,
-                { IsEnum: true } => Token.Enum,
-                { IsValueType: true } => Token.Struct,
-                { IsInterface: true } => Token.Interface,
-                _ => throw new InvalidOperationException("unknown field kind.")
-            };
+                return null;
+            }
+            if (data.ConstructorArguments.Count < 1 || data.ConstructorArguments[0].Value is null)
+            {
+                return s_defaultNativeIntegerFlags;
+            }
+
+            return ((IReadOnlyCollection<CustomAttributeTypedArgument>)data.ConstructorArguments[0].Value!)
+                .Select(arg => (bool)arg.Value!)
+                .ToArray();
+        }
 
         private static IEnumerable<(Type Type, string Name, Token Token, int Size)> EnumeratePrimitiveTypes()
         {

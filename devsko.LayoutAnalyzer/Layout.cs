@@ -88,12 +88,13 @@ namespace devsko.LayoutAnalyzer
         public string AssemblyPath { get; set; }
         public TimeSpan ElapsedTime { get; set; }
 
-        internal Layout(Type type, Analyzer analyzer)
+        public Layout(Type type, TokenizedString typeName, int size, Field[] fields, int unpaddedSizeOfFields)
         {
-            Fields = analyzer.GetFields(type);
-            (Name, TotalSize) = analyzer.GetNameAndSize(type);
-            TotalPadding = Math.Max(TotalSize - Analyzer.GetUnpaddedSize(Fields), 0);
-            Kind = Analyzer.GetKind(type);
+            Fields = fields;
+            Name = typeName;
+            TotalSize = size;
+            TotalPadding = Math.Max(TotalSize - unpaddedSizeOfFields, 0);
+            Kind = GetKind(type);
             StructLayoutAttribute? layoutAttr = type.StructLayoutAttribute!;
             AttributeKind = layoutAttr.Value;
             AttributeSize = layoutAttr.Size;
@@ -132,5 +133,16 @@ namespace devsko.LayoutAnalyzer
         [JsonIgnore]
         public IEnumerable<(FieldBase Field, int TotalOffset, int Level)> AllFieldsAndPaddings
             => Padding.EnumerateWithPaddings(Fields, TotalSize, 0, 1, true);
+
+        public static Token GetKind(Type type)
+            => type switch
+            {
+                { IsClass: true } when type.BaseType == typeof(MulticastDelegate) => Token.Delegate,
+                { IsClass: true } => Token.Class,
+                { IsEnum: true } => Token.Enum,
+                { IsValueType: true } => Token.Struct,
+                { IsInterface: true } => Token.Interface,
+                _ => throw new InvalidOperationException("unknown kind.")
+            };
     }
 }

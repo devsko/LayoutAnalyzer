@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace devsko.LayoutAnalyzer
+namespace devsko.LayoutAnalyzer.Runner
 {
     public class EofDetectingStream : Stream
     {

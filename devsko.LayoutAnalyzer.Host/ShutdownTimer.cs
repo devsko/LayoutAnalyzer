@@ -17,33 +17,27 @@ namespace devsko.LayoutAnalyzer.Host
 
         private static CancellationTokenSource? _cts;
 
-        public static ShutdownTimerToken Start(TimeSpan interval, Pipe log)
+        public static ShutdownTimerToken Start(TimeSpan interval)
         {
             _cts = new CancellationTokenSource();
-            _ = RunAsync();
-
-            return default;
-
-            async Task RunAsync()
-            {
-                try
+            _ = Task.Run(
+                async () =>
                 {
-                    await Task.Run(async () =>
+                    while (true)
                     {
                         if (_cts is not null)
                         {
                             await Task.Delay(interval, _cts.Token).ConfigureAwait(false);
                             if (!Debugger.IsAttached)
                             {
-                                await log.WriteLineAsync("Shutdown idle host").ConfigureAwait(false);
+                                await Log.WriteLineAsync("Shutdown idle host").ConfigureAwait(false);
                                 Environment.Exit(0);
                             }
                         }
-                    }).ConfigureAwait(false);
-                }
-                catch
-                { }
-            }
+                    }
+                });
+
+            return default;
         }
 
         public static void Stop()

@@ -5,9 +5,10 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using devsko.LayoutAnalyzer.Runner;
 using LayoutAnalyzerTasks;
 
-namespace devsko.LayoutAnalyzer.Test
+namespace devsko.LayoutAnalyzer.Runner
 {
     public class MSBuild
     {

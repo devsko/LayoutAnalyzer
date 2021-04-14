@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace devsko.LayoutAnalyzer.Host.net4
+namespace devsko.LayoutAnalyzer.Host
 {
     public class MarshaledTypeLoader : MarshalByRefObject
     {

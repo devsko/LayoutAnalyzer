@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace devsko.LayoutAnalyzer
+namespace devsko.LayoutAnalyzer.Host
 {
     public ref struct TokenizedStringBuilder
     {
@@ -92,7 +92,7 @@ namespace devsko.LayoutAnalyzer
             }
 
             ReadOnlySpan<char> name = field.Type.Name.AsSpan();
-            Token token = Analyzer.GetKind(field.Type);
+            Token token = Layout.GetKind(field.Type);
             if (sliceApostrophe)
             {
                 Append(name.Slice(0, name.IndexOf('`')), token);

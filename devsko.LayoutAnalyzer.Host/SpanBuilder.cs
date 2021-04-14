@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace devsko.LayoutAnalyzer
+namespace devsko.LayoutAnalyzer.Host
 {
     public ref struct SpanBuilder<T>
     {

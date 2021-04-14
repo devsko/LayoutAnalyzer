@@ -2,7 +2,7 @@
 using System.Collections.Generic;   
 using System.Runtime.InteropServices;
 
-namespace devsko.LayoutAnalyzer.TestProject
+namespace TestProject
 {
 #if NET5_0_OR_GREATER
 #pragma warning disable CA2211 // Non-constant fields should not be visible
@@ -17,6 +17,7 @@ namespace devsko.LayoutAnalyzer.TestProject
         public IntPtr P;
         public nint[]? NTA;
         public long L1;
+        public long IXX;
         public void M()
         {
             var loc = new Random().Next(1000).ToString();
