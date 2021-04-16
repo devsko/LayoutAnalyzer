@@ -44,7 +44,7 @@ namespace devsko.LayoutAnalyzer.Runner
 
                 projectFilePath = Helper.GetCaseSensitivePath(projectFilePath);
 
-                Console.WriteLine($"HOT RELOAD Starting initialization for project {projectFilePath}");
+                Log.WriteLine($"HOT RELOAD Starting initialization for project {projectFilePath}");
 
                 Workspace = MSBuildWorkspace.Create();
                 Project root = await Workspace.OpenProjectAsync(Path.GetFullPath(projectFilePath), cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -61,7 +61,7 @@ namespace devsko.LayoutAnalyzer.Runner
                     _projectFilesWatcher = new FileWatcher(GetAllSourceFilePaths(project));
                 }
 
-                Console.WriteLine($"HOT RELOAD Completed initialization for project {projectFilePath}");
+                Log.WriteLine($"HOT RELOAD Completed initialization for project {projectFilePath}");
 
                 void CreateProjectsMap()
                 {
@@ -128,12 +128,12 @@ namespace devsko.LayoutAnalyzer.Runner
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"HOT RELOAD Initialization failed {ex.ToStringDemystified()}");
+                Log.WriteLine($"HOT RELOAD Initialization failed {ex.ToStringDemystified()}");
             }
 
             try
             {
-                Console.WriteLine("HOT RELOAD Entering loop");
+                Log.WriteLine("HOT RELOAD Entering loop");
 
                 Debug.Assert(_projectFilesWatcher is not null);
                 while (true)
@@ -141,18 +141,18 @@ namespace devsko.LayoutAnalyzer.Runner
                     var changed = await _projectFilesWatcher.GetChangedFileAsync(cancellationToken).ConfigureAwait(false);
                     if (changed is null)
                     {
-                        Console.WriteLine("HOT RELOAD Leaving loop");
+                        Log.WriteLine("HOT RELOAD Leaving loop");
                         break;
                     }
 
-                    Console.WriteLine($"HOT RELOAD File changed {changed}");
+                    Log.WriteLine($"HOT RELOAD File changed {changed}");
 
                     bool handled = await HandleFileChangeAsync(changed, cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"HOT RELOAD Loop failed {ex.ToStringDemystified()}");
+                Log.WriteLine($"HOT RELOAD Loop failed {ex.ToStringDemystified()}");
             }
         }
 
@@ -200,7 +200,7 @@ namespace devsko.LayoutAnalyzer.Runner
                 {
                     foreach (string diagnostic in compileDiagnostics)
                     {
-                        Console.WriteLine($"HOT RELOAD {diagnostic}");
+                        Log.WriteLine($"HOT RELOAD {diagnostic}");
                     }
                 }
 
@@ -213,7 +213,7 @@ namespace devsko.LayoutAnalyzer.Runner
                 // Rude edit.
                 foreach (var diagnostic in diagnostics)
                 {
-                    Console.WriteLine($"HOT RELOAD rude edit {CSharpDiagnosticFormatter.Instance.Format(diagnostic)}");
+                    Log.WriteLine($"HOT RELOAD rude edit {CSharpDiagnosticFormatter.Instance.Format(diagnostic)}");
                 }
 
                 return false;

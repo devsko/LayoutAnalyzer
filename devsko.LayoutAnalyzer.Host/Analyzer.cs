@@ -29,6 +29,8 @@ namespace devsko.LayoutAnalyzer.Host
             Field[] fields = GetFields(type);
             (TokenizedString typeName, int size) = GetNameAndSize(type);
 
+            Log.WriteLineAsync($"{type.Name}: size = {size}, fields = {fields.Length}");
+
             return new Layout(type, typeName, size, fields, GetUnpaddedSize(fields));
         }
 
@@ -66,7 +68,8 @@ namespace devsko.LayoutAnalyzer.Host
 
             if (!_cache.TryGetValue(type, out (TokenizedString Name, int Size) entry))
             {
-                _cache.Add(type, entry = (GetName(), GetSize()));
+                entry = (GetName(), GetSize());
+                //_cache.Add(type, entry);
             }
 
             return entry;
@@ -81,12 +84,11 @@ namespace devsko.LayoutAnalyzer.Host
 
             int GetSize()
             {
-                if (type.IsClass || type.IsPointer || type.IsArray)
-                {
-                    return sizeof(IntPtr);
-                }
+                int size = type.IsClass || type.IsPointer || type.IsArray
+                    ? sizeof(IntPtr)
+                    : (int)s_unsafeSizeOfT.MakeGenericMethod(type).Invoke(null, null)!;
 
-                return (int)s_unsafeSizeOfT.MakeGenericMethod(type).Invoke(null, null)!;
+                return size;
             }
         }
 

@@ -10,19 +10,19 @@ namespace TestProject
 
     public unsafe class TestClass
     {
-        public RefererncedTestProject.Class2 x = null!;
+        public RefererncedTestProject.Class2? x;
         public void**[,,,][][,]? Ptr;
         public Dictionary<IEnumerable<Dictionary<nint, IntPtr[]>>, nuint?*[]>? XXX;
         public nuint NI;
         public IntPtr P;
         public nint[]? NTA;
         public long L1;
-        public long IXX;
+        //public long IXX;
         public void M()
         {
             var loc = new Random().Next(1000).ToString();
 #if !NETFRAMEWORK
-            x.C1.ToString();
+            x?.C1.ToString();
 #endif
             }
         }

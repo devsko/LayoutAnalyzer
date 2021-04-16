@@ -24,7 +24,10 @@ namespace devsko.LayoutAnalyzer.Host
                 throw new InvalidOperationException();
             }
 
-            return _instance = new Log(await Pipe.StartServerAsync(Pipe.LogName, id, bidirectional: false, cancellationToken: default).ConfigureAwait(false));
+            _instance = new Log(await Pipe.StartServerAsync(Pipe.LogName, id, bidirectional: false, cancellationToken: default).ConfigureAwait(false));
+            await _instance._WriteLineAsync("").ConfigureAwait(false);
+
+            return _instance;
         }
 
         public static Task WriteLineAsync(string line)
@@ -38,7 +41,12 @@ namespace devsko.LayoutAnalyzer.Host
 
         public void Dispose()
         {
-            _writer?.Dispose();
+            try
+            {
+                _writer?.Dispose();
+            }
+            catch (IOException)
+            { }
             _pipe.Dispose();
         }
 

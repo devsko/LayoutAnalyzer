@@ -47,15 +47,20 @@ namespace devsko.LayoutAnalyzer.Test
                     debug: false, waitForDebugger: false
 #endif
                     );
-                runner.MessageReceived += message =>
-                    Task.Run(
+                runner.MessageReceived += message => ConsoleOut(message, ConsoleColor.White);
+                Log.MessageReceived += message => ConsoleOut(message, ConsoleColor.Yellow);
+                void ConsoleOut(string text, ConsoleColor color)
+                {
+                    _ = Task.Run(
                         async () =>
                         {
                             using (await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
                             {
-                                Console.WriteLine(message);
+                                Console.ForegroundColor = color;
+                                Console.WriteLine(text);
                             }
                         });
+                }
 
                 // Find TestProject.csproj
 
@@ -70,7 +75,12 @@ namespace devsko.LayoutAnalyzer.Test
                 //await AnalyzeAndPrintAsync("abc,").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc,def").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("abc, TestProject").ConfigureAwait(false);
-                await AnalyzeAndPrintAsync("TestProject.TestClass, TestProject").ConfigureAwait(false);
+                while (true)
+                {
+                    await AnalyzeAndPrintAsync("TestProject.TestClass, TestProject").ConfigureAwait(false);
+                    Log.WriteLine("Press enter...");
+                    Console.ReadLine();
+                }
                 //await AnalyzeAndPrintAsync("TestProject.S1, TestProject").ConfigureAwait(false);
                 //await AnalyzeAndPrintAsync("System.IO.Pipelines.Pipe, System.IO.Pipelines").ConfigureAwait(false);
 
@@ -83,29 +93,17 @@ namespace devsko.LayoutAnalyzer.Test
 
                 //await AnalyzeAndPrintAsync("TestProject.Explicit, TestProject").ConfigureAwait(false);
 
-                Console.WriteLine("waiting...");
-                Console.ReadLine();
 
                 async Task AnalyzeAndPrintAsync(string typeName)
                 {
                     try
                     {
                         Layout? layout = await runner.AnalyzeAsync(projectFilePath, debug: true, Platform.Any, "net5.0", exe: false, typeName).ConfigureAwait(false);
-                        if (layout is not null)
-                        {
-                            using (await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
-                            {
-                                Print(layout);
-                            }
-                        }
+                        await PrintAsync(layout).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
-                        using (await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
-                        {
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.WriteLine(ex.Message);
-                        }
+                        Log.WriteLine(ex.Message);
                     }
                 }
             }
@@ -115,66 +113,76 @@ namespace devsko.LayoutAnalyzer.Test
             }
         }
 
-        private static void Print(Layout layout)
+        private static async Task PrintAsync(Layout? layout)
         {
-            Console.BackgroundColor = ConsoleColor.DarkGray;
-
-            Console.WriteLine($"Elapsed time:  {layout.ElapsedTime}");
-            Console.WriteLine($"Total size:    {layout.TotalSize} bytes");
-            Console.WriteLine($"Total padding: {layout.TotalPadding} bytes");
-            if (layout.AttributeKind != (layout.IsValueType ? LayoutKind.Sequential : LayoutKind.Auto) || layout.AttributeSize != 0)
+            using (await ConsoleAccessor.WaitAsync().ConfigureAwait(false))
             {
-                Console.Write($"Layout:        {layout.AttributeKind}");
-                if (layout.AttributeSize != 0)
+                Console.BackgroundColor = ConsoleColor.DarkGray;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                if (layout is null)
                 {
-                    Console.Write($", Size = {layout.AttributeSize}");
-                }
-                if (layout.AttributePack != 0)
-                {
-                    Console.Write($", Pack = {layout.AttributePack}");
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-
-            WriteHeader(0, layout.TotalSize, 0);
-            WriteName(layout.Name);
-            Console.WriteLine();
-
-            foreach (var fieldOrPadding in layout.AllFieldsAndPaddings)
-            {
-                WriteHeader(fieldOrPadding.Field.Offset, fieldOrPadding.Field.Size, fieldOrPadding.Level);
-
-                if (fieldOrPadding.Field is Field field)
-                {
-                    WriteName(field.TypeAndName);
-                    Console.WriteLine();
+                    Console.WriteLine("No layout");
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"=== PADDING ({fieldOrPadding.Field.Size} bytes) ===");
+                    Console.WriteLine($"Elapsed time:  {layout.ElapsedTime}\r\n" +
+                        $"Total size:    {layout.TotalSize} bytes\r\n" +
+                        $"Total padding: {layout.TotalPadding} bytes");
+                    if (layout.AttributeKind != (layout.IsValueType ? LayoutKind.Sequential : LayoutKind.Auto) || layout.AttributeSize != 0)
+                    {
+                        Console.Write($"Layout:        {layout.AttributeKind}");
+                        if (layout.AttributeSize != 0)
+                        {
+                            Console.Write($", Size = {layout.AttributeSize}");
+                        }
+                        if (layout.AttributePack != 0)
+                        {
+                            Console.Write($", Pack = {layout.AttributePack}");
+                        }
+                        Console.WriteLine();
+                    }
+                    Console.WriteLine();
+
+                    WriteHeader(0, layout.TotalSize, 0);
+                    WriteName(layout.Name);
+                    Console.WriteLine();
+
+                    foreach (var fieldOrPadding in layout.AllFieldsAndPaddings)
+                    {
+                        WriteHeader(fieldOrPadding.Field.Offset, fieldOrPadding.Field.Size, fieldOrPadding.Level);
+
+                        if (fieldOrPadding.Field is Field field)
+                        {
+                            WriteName(field.TypeAndName);
+                            Console.WriteLine();
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine($"=== PADDING ({fieldOrPadding.Field.Size} bytes) ===");
+                        }
+                    }
+
+                    Console.WriteLine();
+
+                    static void WriteHeader(int offset, int size, int level)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                        Console.Write($"{new string(' ', level * 12)}0x{offset:X3} : {size,-3} ");
+                    }
+
+                    static void WriteName(TokenizedString value)
+                    {
+                        ReadOnlySpan<char> chars = value.Value.AsSpan();
+                        foreach (TokenSpan span in value.Tokens)
+                        {
+                            Console.ForegroundColor = s_colorMap[span.Token];
+                            Console.Write(chars.Slice(0, span.Length).ToString());
+                            chars = chars[span.Length..];
+                        }
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
                 }
-            }
-
-            Console.WriteLine();
-
-            static void WriteHeader(int offset, int size, int level)
-            {
-                Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                Console.Write($"{new string(' ', level * 12)}0x{offset:X3} : {size,-3} ");
-            }
-
-            static void WriteName(TokenizedString value)
-            {
-                ReadOnlySpan<char> chars = value.Value.AsSpan();
-                foreach (TokenSpan span in value.Tokens)
-                {
-                    Console.ForegroundColor = s_colorMap[span.Token];
-                    Console.Write(chars.Slice(0, span.Length).ToString());
-                    chars = chars[span.Length..];
-                }
-                Console.ForegroundColor = ConsoleColor.White;
             }
         }
     }

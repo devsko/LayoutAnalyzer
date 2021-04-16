@@ -117,6 +117,9 @@ namespace devsko.LayoutAnalyzer.Runner
             _startInfo.Environment["DOTNET_MODIFIABLE_ASSEMBLIES"] = "debug";
         }
 
+        // TODO 1 per project
+        private static HotReload? s_hotReload;
+
         public async Task<Layout?> AnalyzeAsync(string projectFilePath, bool debug, Platform platform, string targetFramework,bool exe, string typeName, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -125,14 +128,17 @@ namespace devsko.LayoutAnalyzer.Runner
                 await EnsureRunningProcessAsync().ConfigureAwait(false);
 
 
-                // TODO only .net6
 
-                Debug.Assert(_logPipe is not null);
-                Debug.Assert(_hotReloadPipe is not null);
-                HotReload hotReload = new(_hotReloadPipe, projectFilePath, targetFramework);
+                if (s_hotReload is null)
+                {
+                    // TODO only .net6
 
-                _ = hotReload.LoopAsync(cancellationToken).ConfigureAwait(false);
+                    Debug.Assert(_logPipe is not null);
+                    Debug.Assert(_hotReloadPipe is not null);
+                    s_hotReload = new(_hotReloadPipe, projectFilePath, targetFramework);
 
+                    _ = s_hotReload.LoopAsync(cancellationToken).ConfigureAwait(false);
+                }
 
 
 
@@ -219,19 +225,26 @@ namespace devsko.LayoutAnalyzer.Runner
 
             _hotReloadPipe = await startPipeTask.ConfigureAwait(false);
 
-            Console.WriteLine($"Host process started PID={_process.Id}");
+            Log.WriteLine($"Host process started PID={_process.Id}");
 
             async Task ReadLogAsync()
             {
-                using StreamReader reader = new(_logPipe.Stream, Encoding.UTF8, detectEncodingFromByteOrderMarks:false, -1, leaveOpen: true);
-                while (true)
+                try
                 {
-                    string? line = await reader.ReadLineAsync().ConfigureAwait(false);
-                    if (line is null)
+                    using StreamReader reader = new(_logPipe.Stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, -1, leaveOpen: true);
+                    while (true)
                     {
-                        break;
+                        string? line = await reader.ReadLineAsync().ConfigureAwait(false);
+                        if (line is null)
+                        {
+                            break;
+                        }
+                        MessageReceived?.Invoke(line);
                     }
-                    MessageReceived?.Invoke(line);
+                }
+                catch (Exception ex)
+                {
+                    Log.WriteLine($"Error in message loop {ex}");
                 }
             }
         }

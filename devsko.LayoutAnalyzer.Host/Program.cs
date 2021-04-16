@@ -28,7 +28,7 @@ namespace devsko.LayoutAnalyzer.Host
 
             using (await Log.InitializeAsync(id).ConfigureAwait(false))
             {
-                await Log.WriteLineAsync($"{RuntimeInformation.FrameworkDescription} ({RuntimeInformation.ProcessArchitecture})").ConfigureAwait(false);
+                await Log.WriteLineAsync($"Host started {RuntimeInformation.FrameworkDescription} ({RuntimeInformation.ProcessArchitecture})").ConfigureAwait(false);
 
 #if DEBUG
                 await WaitForDebuggerAsync().ConfigureAwait(false);
@@ -48,6 +48,8 @@ namespace devsko.LayoutAnalyzer.Host
                 {
                     try
                     {
+                        await Log.WriteLineAsync("Waiting for next command").ConfigureAwait(false);
+
                         ProjectData data;
                         string typeName;
                         using (ShutdownTimer.Start(s_shutdownTimerInterval))
@@ -148,6 +150,8 @@ namespace devsko.LayoutAnalyzer.Host
             {
                 try
                 {
+                    Type updateHandler = typeof(object).Assembly.GetType("System.Reflection.Metadata.RuntimeTypeMetadataUpdateHandler")!;
+
                     using Pipe pipe = await Pipe.ConnectAsync(Pipe.HotReloadName, id, bidirectional: true, cancellationToken).ConfigureAwait(false);
                     using BinaryReader reader = new(pipe.Stream, Encoding.UTF8, leaveOpen: true);
 
@@ -161,6 +165,7 @@ namespace devsko.LayoutAnalyzer.Host
                             string projectFilePath = reader.ReadString();
                             string path = reader.ReadString();
                             int count = reader.ReadInt32();
+
                             var updates = new (Guid ModuleId, byte[] MetadataDelta, byte[] ILDelta)[count];
                             for (int i = 0; i < updates.Length; i++)
                             {
@@ -193,6 +198,9 @@ namespace devsko.LayoutAnalyzer.Host
                                     else
                                     {
                                         System.Reflection.Metadata.AssemblyExtensions.ApplyUpdate(assembly, update.MetadataDelta, update.ILDelta, ReadOnlySpan<byte>.Empty);
+                                        await Log.WriteLineAsync($"{count} updates applied successfully").ConfigureAwait(false);
+                                        updateHandler.InvokeMember("BeforeUpdate", BindingFlags.InvokeMethod | BindingFlags.Static | BindingFlags.Public, null, null, new[] { default(object) });
+                                        await Log.WriteLineAsync("UpdateHandler.BeforeUpdate(null) called").ConfigureAwait(false);
                                     }
                                 }
                             }
