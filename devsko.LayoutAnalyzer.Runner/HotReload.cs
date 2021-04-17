@@ -229,7 +229,7 @@ namespace devsko.LayoutAnalyzer.Runner
                 {
                     try
                     {
-                        using FileStream stream = new(path, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, useAsync: true);
+                        using FileStream stream = new(path, FileMode.Open, FileAccess.Read, FileShare.Read, 1, FileOptions.Asynchronous | FileOptions.SequentialScan);
                         return SourceText.From(stream, Encoding.UTF8);
                     }
                     catch (IOException) when (attemptIndex < 5)

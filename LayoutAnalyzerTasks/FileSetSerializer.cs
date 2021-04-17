@@ -48,7 +48,7 @@ namespace LayoutAnalyzerTasks
                     .ToList(),
             };
 
-            using FileStream fileStream = File.Create(OutputPath.ItemSpec);
+            using FileStream fileStream = new(OutputPath.ItemSpec, FileMode.Create, FileAccess.Write, FileShare.None, 1, true);
             byte[] json = JsonSerializer.SerializeToUtf8Bytes(fileSetResult);
             fileStream.Write(json, 0, json.Length);
 
