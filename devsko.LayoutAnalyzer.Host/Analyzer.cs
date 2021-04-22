@@ -29,8 +29,6 @@ namespace devsko.LayoutAnalyzer.Host
             Field[] fields = GetFields(type);
             (TokenizedString typeName, int size) = GetNameAndSize(type);
 
-            Log.WriteLineAsync($"{type.Name}: size = {size}, fields = {fields.Length}");
-
             return new Layout(type, typeName, size, fields, GetUnpaddedSize(fields));
         }
 
@@ -124,6 +122,10 @@ namespace devsko.LayoutAnalyzer.Host
 
         private unsafe static int GetOffset(FieldInfo info)
         {
+            const int MaxOffset = (1 << 27) - 1;
+            const int OffsetNewEnC = MaxOffset - 4;
+            const int LastRealOffset = MaxOffset - 6;
+
             // FieldHandle points to a FieldDesc structure defined in (https://github.com/dotnet/runtime/blob/102d1e856c7e0e553abeec937783da5debed73ad/src/coreclr/vm/field.h#L34)
             // The offset of the field is found in m_dwOffset (https://github.com/dotnet/runtime/blob/102d1e856c7e0e553abeec937783da5debed73ad/src/coreclr/vm/field.h#L74)
 
@@ -136,8 +138,18 @@ namespace devsko.LayoutAnalyzer.Host
                             1)
                         ),
                     1);
+            int offset = dword & MaxOffset;
 
-            return dword & ((1 << 27) - 1);
+            if (offset < LastRealOffset)
+            {
+                return offset;
+            }
+            if (offset == OffsetNewEnC)
+            {
+                throw new InvalidOperationException("EnC");
+            }
+
+            throw new InvalidOperationException($"Unsupported field offset {offset:X4}");
         }
 
         private static readonly bool[] s_defaultNativeIntegerFlags = new[] { true };

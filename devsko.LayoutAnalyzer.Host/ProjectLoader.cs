@@ -45,7 +45,7 @@ namespace devsko.LayoutAnalyzer.Host
             {
                 foreach (ProjectLoader project in s_all.Values)
                 {
-                    await project.DisposeAsync().ConfigureAwait(false);
+                    await project.DisposeCoreAsync(false).ConfigureAwait(false);
                 }
                 s_all.Clear();
             }
@@ -89,6 +89,11 @@ namespace devsko.LayoutAnalyzer.Host
 
                 if (layout is not null)
                 {
+
+                    await Log.WriteLineAsync($"{typeName}: size = {layout.TotalSize}, fields = {layout.Fields.Length}").ConfigureAwait(false);
+                    foreach (var field in layout.Fields)
+                        await Log.WriteLineAsync($"{field.Handle} {field.TypeAndName.Value}").ConfigureAwait(false);
+
                     layout.AssemblyPath = _typeLoader.GetOriginalPath(layout.AssemblyPath);
                     await JsonSerializer.SerializeAsync(_stream, layout, cancellationToken: cancellationToken).ConfigureAwait(false);
                 }
@@ -99,18 +104,24 @@ namespace devsko.LayoutAnalyzer.Host
             }
         }
 
-        public async ValueTask DisposeAsync()
+        public ValueTask DisposeAsync()
+            => DisposeCoreAsync(true);
+
+        private async ValueTask DisposeCoreAsync(bool remove)
         {
             await _typeLoader.DisposeAsync().ConfigureAwait(false);
 
-            await s_semaphore.WaitAsync().ConfigureAwait(false);
-            try
+            if (remove)
             {
-                s_all.Remove(_key);
-            }
-            finally
-            {
-                s_semaphore.Release();
+                await s_semaphore.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    s_all.Remove(_key);
+                }
+                finally
+                {
+                    s_semaphore.Release();
+                }
             }
 
             await Log.WriteLineAsync($"Project loader {Path.GetFileName(_key)} disposed").ConfigureAwait(false);

@@ -79,15 +79,12 @@ namespace devsko.LayoutAnalyzer.Host
                     }
                     catch (EndOfStreamException)
                     {
+                        await Log.WriteLineAsync("End of stream").ConfigureAwait(false);
                         break;
                     }
                     catch (Exception ex)
                     {
-                        try
-                        {
-                            await Log.WriteLineAsync(ex.ToStringDemystified()).ConfigureAwait(false);
-                        }
-                        catch { }
+                        await Log.WriteLineAsync(ex.ToStringDemystified()).ConfigureAwait(false);
                     }
                 }
 

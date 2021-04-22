@@ -51,15 +51,18 @@ namespace devsko.LayoutAnalyzer.Host
         }
 
         private async Task _WriteLineAsync(string line)
-        { 
-            _writer ??= new StreamWriter(_pipe.Stream, Encoding.UTF8, 1024, leaveOpen: true);
-            try
+        {
+            if (_pipe.Stream.IsConnected)
             {
-                await _writer.WriteLineAsync(line).ConfigureAwait(false);
-                await _writer.FlushAsync().ConfigureAwait(false);
+                _writer ??= new StreamWriter(_pipe.Stream, Encoding.UTF8, 1024, leaveOpen: true);
+                try
+                {
+                    await _writer.WriteLineAsync(line).ConfigureAwait(false);
+                    await _writer.FlushAsync().ConfigureAwait(false);
+                }
+                catch (IOException)
+                { }
             }
-            catch (IOException)
-            { }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
@@ -257,22 +258,19 @@ namespace devsko.LayoutAnalyzer.Runner
                 await WriteArrayAsync(_writer, update.MetadataDelta.ToArray(), cancellationToken).ConfigureAwait(false);
                 await WriteArrayAsync(_writer, update.ILDelta.ToArray(), cancellationToken).ConfigureAwait(false);
             }
-            await _pipe.Stream.FlushAsync(cancellationToken).ConfigureAwait(false);
 
-            byte[] response = new byte[1];
+            byte[] responseArray = ArrayPool<byte>.Shared.Rent(1);
 #if DEBUG
             TimeSpan timeout = Timeout.InfiniteTimeSpan;
 #else
             TimeSpan timeout = TimeSpan.FromSeconds(5);
 #endif
             CancellationTokenSource cts = new(timeout);
-            int length = await _pipe.Stream.ReadAsync(response, cancellationToken).ConfigureAwait(false);
-            if (length == 1)
-            {
-                return response[0] == 0;
-            }
+            int length = await _pipe.Stream.ReadAsync(responseArray, cancellationToken).ConfigureAwait(false);
+            byte response = responseArray[0];
+            ArrayPool<byte>.Shared.Return(responseArray);
 
-            return false;
+            return length == 1 && response == 0;
 
             static ValueTask WriteArrayAsync(BinaryWriter writer, byte[] bytes, CancellationToken cancellationToken)
             {

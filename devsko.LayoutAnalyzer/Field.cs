@@ -12,6 +12,15 @@ namespace devsko.LayoutAnalyzer
 #endif
     public sealed class Field : FieldBase
     {
+        public ulong Handle
+        {
+            get; private
+#if NETCOREAPP3_1_OR_GREATER
+                init;
+#else
+                set;
+#endif
+        }
         public TokenizedString TypeAndName
         {
             get; private
@@ -47,6 +56,7 @@ namespace devsko.LayoutAnalyzer
 
         public Field(FieldInfo info, TokenizedString typeName, int size, int offset, Field[]? children)
         {
+            Handle = (ulong)info.FieldHandle.Value;
             IsPublic = info.IsPublic;
             Type type = info.FieldType;
             Kind = Layout.GetKind(type);
